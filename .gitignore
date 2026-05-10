@@ -1,0 +1,15 @@
+# IDE
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Temporary
+*.log
+tmp/
+scratch/
+
+# Local data (if you want to exclude localStorage seeds or other temporary files)
+# For now we keep everything as it is a demo project

@@ -1,0 +1,123 @@
+/* ==========================================================================
+   SMATREE SOLAR INVENTORY — Dashboard Styles
+   ========================================================================== */
+
+/* ── Stats Grid ── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-5);
+  margin-bottom: var(--space-6);
+}
+
+.stat-card .stat-icon.blue   { background: var(--color-info-bg); color: var(--color-info); }
+.stat-card .stat-icon.green  { background: var(--color-success-bg); color: var(--color-success); }
+.stat-card .stat-icon.amber  { background: var(--color-warning-bg); color: var(--color-warning); }
+.stat-card .stat-icon.red    { background: var(--color-danger-bg); color: var(--color-danger); }
+.stat-card .stat-icon.purple { background: rgba(168,85,247,0.12); color: var(--color-purple-500); }
+
+/* ── Charts Row ── */
+.charts-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: var(--space-6);
+  margin-bottom: var(--space-6);
+}
+.chart-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5);
+}
+.chart-card canvas {
+  max-height: 320px;
+}
+
+/* ── Activity & Alerts Row ── */
+.bottom-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-6);
+}
+
+/* ── Recent Activity ── */
+.activity-list {
+  max-height: 380px;
+  overflow-y: auto;
+}
+.activity-item {
+  display: flex; align-items: flex-start; gap: var(--space-3);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--border-light);
+  animation: fadeInLeft 0.3s ease-out;
+}
+.activity-item:last-child { border-bottom: none; }
+.activity-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  margin-top: 6px;
+  flex-shrink: 0;
+}
+.activity-dot.create { background: var(--color-success); }
+.activity-dot.update { background: var(--color-info); }
+.activity-dot.delete { background: var(--color-danger); }
+.activity-content { flex: 1; }
+.activity-text {
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+.activity-time {
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* ── Low Stock Alerts ── */
+.alert-list {
+  max-height: 380px;
+  overflow-y: auto;
+}
+.alert-item {
+  display: flex; align-items: center; gap: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-2);
+  background: var(--color-danger-bg);
+  border-left: 3px solid var(--color-danger);
+  font-size: var(--fs-sm);
+  animation: fadeInRight 0.3s ease-out;
+}
+.alert-item.warning {
+  background: var(--color-warning-bg);
+  border-left-color: var(--color-warning);
+}
+.alert-item-info {
+  flex: 1;
+}
+.alert-item-name {
+  font-weight: var(--fw-semibold);
+  color: var(--text-primary);
+}
+.alert-item-qty {
+  font-size: var(--fs-xs);
+  color: var(--text-tertiary);
+}
+
+/* ── Responsive ── */
+@media (min-width: 1600px) {
+  .stats-grid { grid-template-columns: repeat(4, 1fr); }
+}
+@media (max-width: 1400px) {
+  .stats-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 1024px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .charts-row { grid-template-columns: 1fr; }
+  .bottom-row { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .stats-grid { grid-template-columns: 1fr; }
+  .chart-card { padding: var(--space-4); }
+}

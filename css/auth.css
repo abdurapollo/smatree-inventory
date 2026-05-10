@@ -1,0 +1,225 @@
+/* ==========================================================================
+   SMATREE SOLAR INVENTORY — Auth Page Styles
+   Login page design
+   ========================================================================== */
+
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ── Background ── */
+.auth-bg {
+  position: fixed; inset: 0; z-index: 0;
+  background: var(--bg-body);
+}
+.auth-bg::before {
+  content: '';
+  position: absolute;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(14,165,233,0.15) 0%, transparent 70%);
+  top: -200px; right: -100px;
+  border-radius: 50%;
+  animation: float 8s ease-in-out infinite;
+}
+.auth-bg::after {
+  content: '';
+  position: absolute;
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(245,158,11,0.12) 0%, transparent 70%);
+  bottom: -150px; left: -100px;
+  border-radius: 50%;
+  animation: float 10s ease-in-out infinite reverse;
+}
+
+/* ── Layout ── */
+.auth-container {
+  display: flex; width: 100%;
+  position: relative; z-index: 1;
+}
+
+/* ── Left Panel (Hero) ── */
+.auth-hero {
+  flex: 1;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: var(--space-12);
+  background: linear-gradient(135deg, rgba(14,165,233,0.08), rgba(245,158,11,0.05));
+  position: relative;
+}
+.auth-hero-content {
+  max-width: 480px; text-align: center;
+}
+.auth-hero-icon {
+  font-size: 5rem;
+  margin-bottom: var(--space-6);
+  animation: float 4s ease-in-out infinite;
+}
+.auth-hero h2 {
+  font-size: var(--fs-4xl);
+  font-weight: var(--fw-extrabold);
+  margin-bottom: var(--space-4);
+  background: linear-gradient(135deg, var(--color-primary-400), var(--color-solar-500));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.auth-hero p {
+  font-size: var(--fs-md);
+  color: var(--text-secondary);
+  line-height: var(--lh-relaxed);
+}
+.auth-hero-features {
+  margin-top: var(--space-8);
+  text-align: left;
+}
+.auth-hero-features .feature {
+  display: flex; align-items: center; gap: var(--space-3);
+  padding: var(--space-3) 0;
+  color: var(--text-secondary);
+  font-size: var(--fs-sm);
+}
+.auth-hero-features .feature-icon {
+  width: 36px; height: 36px;
+  border-radius: var(--radius-lg);
+  background: var(--color-info-bg);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+/* ── Right Panel (Form) ── */
+.auth-form-panel {
+  width: 520px; min-width: 420px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: var(--space-10);
+}
+
+.auth-form-container {
+  width: 100%; max-width: 400px;
+}
+
+.auth-form-header {
+  text-align: center;
+  margin-bottom: var(--space-8);
+}
+.auth-form-logo {
+  width: 56px; height: 56px;
+  border-radius: var(--radius-xl);
+  background: linear-gradient(135deg, var(--color-solar-500), var(--color-primary-400));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.75rem;
+  margin: 0 auto var(--space-4);
+  box-shadow: 0 4px 16px rgba(245,158,11,0.3);
+}
+.auth-form-header h1 {
+  font-size: var(--fs-2xl);
+  font-weight: var(--fw-bold);
+  margin-bottom: var(--space-1);
+}
+.auth-form-header p {
+  font-size: var(--fs-sm);
+  color: var(--text-tertiary);
+}
+
+/* ── Login Error ── */
+.login-error {
+  display: none;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+  border-radius: var(--radius-lg);
+  font-size: var(--fs-sm);
+  margin-bottom: var(--space-4);
+  text-align: center;
+  border: 1px solid var(--color-danger);
+}
+
+/* ── Password Toggle ── */
+.password-wrapper {
+  position: relative;
+}
+.password-wrapper .form-control {
+  padding-right: 3rem;
+}
+.password-toggle {
+  position: absolute; right: 8px; top: 50%;
+  transform: translateY(-50%);
+  background: none; border: none;
+  cursor: pointer; font-size: 1.1rem;
+  padding: 4px;
+  color: var(--text-muted);
+}
+
+/* ── Form Actions ── */
+.auth-form-actions {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: var(--space-6);
+  font-size: var(--fs-sm);
+}
+.auth-form-actions a {
+  color: var(--color-primary-400);
+  font-weight: var(--fw-medium);
+}
+
+.auth-submit {
+  width: 100%;
+  padding: 0.875rem;
+  font-size: var(--fs-md);
+  font-weight: var(--fw-semibold);
+}
+
+/* ── Demo Accounts ── */
+.demo-accounts {
+  margin-top: var(--space-8);
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--border-color);
+}
+.demo-accounts h4 {
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--space-3);
+  text-align: center;
+}
+.demo-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2);
+}
+.demo-btn {
+  display: flex; align-items: center; gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  font-size: var(--fs-xs);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  background: var(--bg-card);
+}
+.demo-btn:hover {
+  border-color: var(--color-primary-400);
+  color: var(--color-primary-400);
+  background: var(--color-info-bg);
+}
+
+/* ── Theme Toggle (login page) ── */
+.auth-theme-toggle {
+  position: fixed; top: var(--space-4); right: var(--space-4);
+  z-index: 10;
+}
+
+/* ── Responsive ── */
+@media (max-width: 1024px) {
+  .auth-hero { display: none; }
+  .auth-form-panel {
+    width: 100%; min-width: unset;
+    padding: var(--space-6);
+  }
+}
+@media (max-width: 480px) {
+  .auth-form-panel { padding: var(--space-4); }
+  .demo-grid { grid-template-columns: 1fr; }
+}

@@ -1,0 +1,264 @@
+/* ==========================================================================
+   SMATREE SOLAR INVENTORY — Design Tokens
+   Complete CSS Custom Property system for light/dark themes
+   ========================================================================== */
+
+/* ── Google Fonts ── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+:root {
+  /* ── Brand / Solar Palette ── */
+  --color-primary-50:  #e0f2fe;
+  --color-primary-100: #bae6fd;
+  --color-primary-200: #7dd3fc;
+  --color-primary-300: #38bdf8;
+  --color-primary-400: #0ea5e9;
+  --color-primary-500: #0284c7;
+  --color-primary-600: #0369a1;
+  --color-primary-700: #075985;
+  --color-primary-800: #0c4a6e;
+  --color-primary-900: #082f49;
+
+  --color-solar-50:  #fffbeb;
+  --color-solar-100: #fef3c7;
+  --color-solar-200: #fde68a;
+  --color-solar-300: #fcd34d;
+  --color-solar-400: #fbbf24;
+  --color-solar-500: #f59e0b;
+  --color-solar-600: #d97706;
+  --color-solar-700: #b45309;
+  --color-solar-800: #92400e;
+  --color-solar-900: #78350f;
+
+  --color-emerald-50:  #ecfdf5;
+  --color-emerald-100: #d1fae5;
+  --color-emerald-200: #a7f3d0;
+  --color-emerald-300: #6ee7b7;
+  --color-emerald-400: #34d399;
+  --color-emerald-500: #10b981;
+  --color-emerald-600: #059669;
+  --color-emerald-700: #047857;
+  --color-emerald-800: #065f46;
+  --color-emerald-900: #064e3b;
+
+  --color-red-50:  #fef2f2;
+  --color-red-100: #fee2e2;
+  --color-red-200: #fecaca;
+  --color-red-300: #fca5a5;
+  --color-red-400: #f87171;
+  --color-red-500: #ef4444;
+  --color-red-600: #dc2626;
+  --color-red-700: #b91c1c;
+
+  --color-purple-50:  #faf5ff;
+  --color-purple-100: #f3e8ff;
+  --color-purple-200: #e9d5ff;
+  --color-purple-300: #d8b4fe;
+  --color-purple-400: #c084fc;
+  --color-purple-500: #a855f7;
+  --color-purple-600: #9333ea;
+
+  /* ── Neutrals ── */
+  --color-slate-50:  #f8fafc;
+  --color-slate-100: #f1f5f9;
+  --color-slate-200: #e2e8f0;
+  --color-slate-300: #cbd5e1;
+  --color-slate-400: #94a3b8;
+  --color-slate-500: #64748b;
+  --color-slate-600: #475569;
+  --color-slate-700: #334155;
+  --color-slate-800: #1e293b;
+  --color-slate-900: #0f172a;
+  --color-slate-950: #020617;
+
+  /* ── Typography ── */
+  --font-family:    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono:      'JetBrains Mono', 'Fira Code', monospace;
+
+  --fs-xs:   0.75rem;    /* 12px */
+  --fs-sm:   0.8125rem;  /* 13px */
+  --fs-base: 0.875rem;   /* 14px */
+  --fs-md:   1rem;       /* 16px */
+  --fs-lg:   1.125rem;   /* 18px */
+  --fs-xl:   1.25rem;    /* 20px */
+  --fs-2xl:  1.5rem;     /* 24px */
+  --fs-3xl:  1.875rem;   /* 30px */
+  --fs-4xl:  2.25rem;    /* 36px */
+  --fs-5xl:  3rem;       /* 48px */
+
+  --fw-light:    300;
+  --fw-regular:  400;
+  --fw-medium:   500;
+  --fw-semibold: 600;
+  --fw-bold:     700;
+  --fw-extrabold:800;
+
+  --lh-tight:  1.25;
+  --lh-normal: 1.5;
+  --lh-relaxed:1.625;
+
+  /* ── Spacing ── */
+  --space-1:  0.25rem;
+  --space-2:  0.5rem;
+  --space-3:  0.75rem;
+  --space-4:  1rem;
+  --space-5:  1.25rem;
+  --space-6:  1.5rem;
+  --space-8:  2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+
+  /* ── Border Radius ── */
+  --radius-sm:   0.375rem;
+  --radius-md:   0.5rem;
+  --radius-lg:   0.75rem;
+  --radius-xl:   1rem;
+  --radius-2xl:  1.5rem;
+  --radius-full: 9999px;
+
+  /* ── Transitions ── */
+  --transition-fast:   150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base:   250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow:   350ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-spring: 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ── Z-Index Scale ── */
+  --z-dropdown: 100;
+  --z-sticky:   200;
+  --z-overlay:  300;
+  --z-modal:    400;
+  --z-toast:    500;
+  --z-tooltip:  600;
+
+  /* ── Sidebar ── */
+  --sidebar-width:     260px;
+  --sidebar-collapsed:  72px;
+  --navbar-height:      64px;
+}
+
+/* ==========================================================================
+   LIGHT THEME (default)
+   ========================================================================== */
+[data-theme="light"], :root {
+  --bg-body:        #f0f4f8;
+  --bg-surface:     rgba(255, 255, 255, 0.85);
+  --bg-surface-solid:#ffffff;
+  --bg-sidebar:     rgba(255, 255, 255, 0.92);
+  --bg-navbar:      rgba(255, 255, 255, 0.88);
+  --bg-card:        rgba(255, 255, 255, 0.8);
+  --bg-card-hover:  rgba(255, 255, 255, 0.95);
+  --bg-input:       #f8fafc;
+  --bg-input-focus: #ffffff;
+  --bg-modal:       rgba(255, 255, 255, 0.95);
+  --bg-overlay:     rgba(15, 23, 42, 0.5);
+  --bg-tooltip:     #1e293b;
+  --bg-dropdown:    rgba(255, 255, 255, 0.98);
+  --bg-badge:       #f1f5f9;
+  --bg-skeleton:    linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+  --bg-table-row:   #ffffff;
+  --bg-table-stripe:#f8fafc;
+  --bg-table-hover: #f1f5f9;
+
+  --text-primary:    #0f172a;
+  --text-secondary:  #475569;
+  --text-tertiary:   #64748b;
+  --text-muted:      #94a3b8;
+  --text-inverse:    #f8fafc;
+  --text-link:       #0284c7;
+  --text-tooltip:    #f8fafc;
+
+  --border-color:    rgba(226, 232, 240, 0.8);
+  --border-light:    rgba(241, 245, 249, 0.6);
+  --border-input:    #cbd5e1;
+  --border-focus:    #0ea5e9;
+
+  --shadow-sm:   0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md:   0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+  --shadow-lg:   0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+  --shadow-xl:   0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+  --shadow-2xl:  0 25px 50px -12px rgba(0, 0, 0, 0.15);
+  --shadow-glow: 0 0 20px rgba(14, 165, 233, 0.15);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
+
+  --glass-bg:       rgba(255, 255, 255, 0.65);
+  --glass-border:   rgba(255, 255, 255, 0.3);
+  --glass-blur:     12px;
+
+  /* ── Semantic ── */
+  --color-success:    #10b981;
+  --color-success-bg: #ecfdf5;
+  --color-warning:    #f59e0b;
+  --color-warning-bg: #fffbeb;
+  --color-danger:     #ef4444;
+  --color-danger-bg:  #fef2f2;
+  --color-info:       #0ea5e9;
+  --color-info-bg:    #e0f2fe;
+
+  --scrollbar-track:  #f1f5f9;
+  --scrollbar-thumb:  #cbd5e1;
+  --scrollbar-hover:  #94a3b8;
+}
+
+/* ==========================================================================
+   DARK THEME
+   ========================================================================== */
+[data-theme="dark"] {
+  --bg-body:        #0b1121;
+  --bg-surface:     rgba(15, 23, 42, 0.85);
+  --bg-surface-solid:#0f172a;
+  --bg-sidebar:     rgba(15, 23, 42, 0.95);
+  --bg-navbar:      rgba(15, 23, 42, 0.92);
+  --bg-card:        rgba(30, 41, 59, 0.7);
+  --bg-card-hover:  rgba(30, 41, 59, 0.9);
+  --bg-input:       #1e293b;
+  --bg-input-focus: #334155;
+  --bg-modal:       rgba(15, 23, 42, 0.98);
+  --bg-overlay:     rgba(0, 0, 0, 0.6);
+  --bg-tooltip:     #334155;
+  --bg-dropdown:    rgba(30, 41, 59, 0.98);
+  --bg-badge:       #1e293b;
+  --bg-skeleton:    linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
+  --bg-table-row:   rgba(30, 41, 59, 0.5);
+  --bg-table-stripe:rgba(15, 23, 42, 0.5);
+  --bg-table-hover: rgba(51, 65, 85, 0.5);
+
+  --text-primary:    #e2e8f0;
+  --text-secondary:  #94a3b8;
+  --text-tertiary:   #64748b;
+  --text-muted:      #475569;
+  --text-inverse:    #0f172a;
+  --text-link:       #38bdf8;
+  --text-tooltip:    #e2e8f0;
+
+  --border-color:    rgba(51, 65, 85, 0.6);
+  --border-light:    rgba(30, 41, 59, 0.4);
+  --border-input:    #334155;
+  --border-focus:    #38bdf8;
+
+  --shadow-sm:   0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-md:   0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.2);
+  --shadow-lg:   0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.2);
+  --shadow-xl:   0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
+  --shadow-2xl:  0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 0 20px rgba(56, 189, 248, 0.2);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.3);
+
+  --glass-bg:       rgba(15, 23, 42, 0.6);
+  --glass-border:   rgba(51, 65, 85, 0.3);
+  --glass-blur:     16px;
+
+  --color-success:    #34d399;
+  --color-success-bg: rgba(6, 78, 59, 0.3);
+  --color-warning:    #fbbf24;
+  --color-warning-bg: rgba(120, 53, 15, 0.3);
+  --color-danger:     #f87171;
+  --color-danger-bg:  rgba(127, 29, 29, 0.3);
+  --color-info:       #38bdf8;
+  --color-info-bg:    rgba(8, 47, 73, 0.3);
+
+  --scrollbar-track:  #1e293b;
+  --scrollbar-thumb:  #334155;
+  --scrollbar-hover:  #475569;
+}

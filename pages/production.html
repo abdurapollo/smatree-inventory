@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Track solar panel production batches and manufacturing progress.">
+  <title>Production — Smatree Solar Inventory</title>
+  <link rel="stylesheet" href="../css/variables.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/layout.css">
+  <link rel="stylesheet" href="../css/production.css">
+</head>
+<body>
+  <div id="app" class="app-layout">
+    <div class="main-content">
+      <div class="page-content">
+        <div class="production-stats" id="production-stats"></div>
+        <div class="toolbar" id="production-toolbar"></div>
+        <div id="production-table"></div>
+      </div>
+    </div>
+  </div>
+  <script src="../js/utils.js"></script>
+  <script src="../js/store.js"></script>
+  <script src="../js/seed.js"></script>
+  <script src="../js/components.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="../js/production.js"></script>
+  <script>document.addEventListener('DOMContentLoaded', () => Production.init());</script>
+</body>
+</html>

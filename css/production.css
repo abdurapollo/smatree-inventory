@@ -1,0 +1,52 @@
+/* ==========================================================================
+   SMATREE SOLAR INVENTORY — Production Page Styles
+   ========================================================================== */
+.production-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.batch-progress { margin-top: var(--space-2); }
+.batch-progress .progress { height: 6px; }
+
+.timeline {
+  position: relative;
+  padding-left: var(--space-8);
+}
+.timeline::before {
+  content: '';
+  position: absolute; left: 12px; top: 0; bottom: 0;
+  width: 2px;
+  background: var(--border-color);
+}
+.timeline-item {
+  position: relative;
+  padding-bottom: var(--space-5);
+}
+.timeline-item:last-child { padding-bottom: 0; }
+.timeline-dot {
+  position: absolute; left: -26px; top: 4px;
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--color-primary-400);
+  background: var(--bg-surface-solid);
+}
+.timeline-dot.completed { background: var(--color-success); border-color: var(--color-success); }
+.timeline-dot.active { background: var(--color-primary-400); border-color: var(--color-primary-400); animation: glow 2s infinite; }
+.timeline-title { font-weight: var(--fw-semibold); font-size: var(--fs-sm); }
+.timeline-date { font-size: var(--fs-xs); color: var(--text-muted); }
+
+@media (max-width: 1200px) {
+  .production-stats { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 900px) {
+  .production-stats { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
+  .production-stats { grid-template-columns: 1fr; }
+  .timeline { padding-left: var(--space-6); }
+  .timeline::before { left: 8px; }
+  .timeline-dot { left: -22px; width: 10px; height: 10px; }
+}
