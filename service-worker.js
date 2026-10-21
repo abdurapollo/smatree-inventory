@@ -3,7 +3,7 @@
    PWA offline support and caching
    ========================================================================== */
 
-const CACHE_NAME = 'smatree-solar-v1';
+const CACHE_NAME = 'smatree-solar-v2';
 const ASSETS = [
   '/smatree-inventory/pages/login.html',
   '/smatree-inventory/pages/dashboard.html',
