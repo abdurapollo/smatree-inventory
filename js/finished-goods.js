@@ -36,7 +36,9 @@ const FinishedGoods = {
     container.innerHTML = `
       <div class="search-box" style="flex:1;max-width:320px"><span class="search-icon">🔍</span>
         <input type="text" id="fg-search" placeholder="Search products..."></div>
-      <button class="btn btn-primary btn-sm" id="fg-add-btn">+ Add Product</button>`;
+      <div class="toolbar-actions">
+        <button class="btn btn-primary btn-sm" id="fg-add-btn">+ Add Product</button>
+      </div>`;
   },
 
   renderCards() {
@@ -51,7 +53,7 @@ const FinishedGoods = {
       return;
     }
     container.innerHTML = `<div class="grid-cols-3">${items.map((p, i) => `
-      <div class="card animate-fadeInUp delay-${(i % 4) + 1}">
+      <div class="card animate-fadeInUp delay-${(i % 4) + 1}" style="display:flex;flex-direction:column;height:100%">
         <div class="d-flex justify-between align-center mb-4">
           <span class="badge badge-primary">${p.id}</span>
           <div class="actions">
@@ -60,16 +62,16 @@ const FinishedGoods = {
           </div>
         </div>
         <div style="text-align:center;margin-bottom:var(--space-4)">
-          <div style="font-size:3rem;margin-bottom:var(--space-2)">☀️</div>
+          <div style="font-size:3rem;margin-bottom:var(--space-2);line-height:1">☀️</div>
           <h4 class="fs-md fw-semibold">${Utils.escapeHtml(p.name)}</h4>
           <p class="fs-xs text-muted">${p.wattCapacity}W Panel</p>
         </div>
-        <div class="d-flex justify-between py-2" style="border-top:1px solid var(--border-light)">
-          <div class="text-center"><div class="fs-lg fw-bold text-primary">${p.quantity}</div><div class="fs-xs text-muted">Total</div></div>
-          <div class="text-center"><div class="fs-lg fw-bold text-success">${p.readyToSell}</div><div class="fs-xs text-muted">Ready</div></div>
-          <div class="text-center"><div class="fs-xs text-muted mt-1">Warranty</div><div class="fs-xs fw-medium">${p.warranty}</div></div>
+        <div class="d-flex justify-between py-2" style="border-top:1px solid var(--border-light);margin-top:auto">
+          <div class="text-center flex-1"><div class="fs-lg fw-bold text-primary">${p.quantity}</div><div class="fs-xs text-muted">Total</div></div>
+          <div class="text-center flex-1" style="border-left:1px solid var(--border-light);border-right:1px solid var(--border-light)"><div class="fs-lg fw-bold text-success">${p.readyToSell}</div><div class="fs-xs text-muted">Ready</div></div>
+          <div class="text-center flex-1"><div class="fs-lg fw-bold text-solar">${p.warranty}</div><div class="fs-xs text-muted">Warranty</div></div>
         </div>
-        <div class="fs-xs text-muted mt-3">Produced: ${Utils.formatDate(p.productionDate)} • Batch: ${p.batchId || '—'}</div>
+        <div class="fs-xs text-muted mt-3" style="border-top:1px solid var(--border-light);padding-top:var(--space-2)">Produced: ${Utils.formatDate(p.productionDate)} • Batch: ${p.batchId || '—'}</div>
       </div>`).join('')}</div>`;
   },
 
@@ -116,7 +118,7 @@ const FinishedGoods = {
     </form>`;
 
     const modal = Components.showModal({ id: 'fg-modal', title: isEdit ? 'Edit Product' : 'Add Product', content,
-      footer: `<button class="btn btn-secondary" data-close-modal>Cancel</button><button class="btn btn-primary" id="fg-save">${isEdit ? 'Update' : 'Save'}</button>` });
+      footer: `<button type="button" class="btn btn-secondary" data-close-modal>Cancel</button><button type="button" class="btn btn-primary" id="fg-save">${isEdit ? 'Update' : 'Save'}</button>` });
 
     document.getElementById('fg-save')?.addEventListener('click', () => {
       const data = {

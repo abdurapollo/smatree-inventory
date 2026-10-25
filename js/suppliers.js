@@ -19,7 +19,9 @@ const Suppliers = {
     container.innerHTML = `
       <div class="search-box" style="flex:1;max-width:320px"><span class="search-icon">🔍</span>
         <input type="text" id="sup-search" placeholder="Search suppliers..."></div>
-      <button class="btn btn-primary btn-sm" id="sup-add-btn">+ Add Supplier</button>`;
+      <div class="toolbar-actions">
+        <button class="btn btn-primary btn-sm" id="sup-add-btn">+ Add Supplier</button>
+      </div>`;
   },
 
   renderCards() {
@@ -35,27 +37,27 @@ const Suppliers = {
     }
 
     container.innerHTML = `<div class="grid-cols-3">${items.map((s, i) => `
-      <div class="card animate-fadeInUp delay-${(i % 4) + 1}">
+      <div class="card animate-fadeInUp delay-${(i % 4) + 1}" style="display:flex;flex-direction:column;height:100%">
         <div class="d-flex justify-between align-center mb-4">
-          <div class="d-flex align-center gap-3">
-            <div style="width:44px;height:44px;border-radius:var(--radius-lg);background:linear-gradient(135deg,var(--color-primary-400),var(--color-purple-500));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:var(--fs-md)">${Utils.getInitials(s.company)}</div>
-            <div>
-              <div class="fw-semibold text-primary">${Utils.escapeHtml(s.company)}</div>
-              <div class="fs-xs text-muted">${Utils.escapeHtml(s.name)}</div>
+          <div class="d-flex align-center gap-3" style="min-width:0">
+            <div style="width:44px;height:44px;border-radius:var(--radius-lg);background:linear-gradient(135deg,var(--color-primary-400),var(--color-purple-500));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:var(--fs-md);flex-shrink:0;line-height:1">${Utils.getInitials(s.company)}</div>
+            <div style="min-width:0">
+              <div class="fw-semibold text-primary text-truncate">${Utils.escapeHtml(s.company)}</div>
+              <div class="fs-xs text-muted text-truncate">${Utils.escapeHtml(s.name)}</div>
             </div>
           </div>
-          <div class="actions">
+          <div class="actions" style="flex-shrink:0">
             <button class="btn btn-ghost btn-sm btn-icon" data-edit-sup="${s.id}">✏️</button>
             <button class="btn btn-ghost btn-sm btn-icon" data-delete-sup="${s.id}">🗑️</button>
           </div>
         </div>
-        <div style="display:flex;flex-direction:column;gap:var(--space-2);font-size:var(--fs-sm);color:var(--text-secondary)">
-          <div class="d-flex align-center gap-2">📞 ${Utils.escapeHtml(s.phone)}</div>
-          <div class="d-flex align-center gap-2">📧 ${Utils.escapeHtml(s.email)}</div>
+        <div style="display:flex;flex-direction:column;gap:var(--space-2);font-size:var(--fs-sm);color:var(--text-secondary);flex:1">
+          <div class="d-flex align-center gap-2">📞 <span>${Utils.escapeHtml(s.phone)}</span></div>
+          <div class="d-flex align-center gap-2">📧 <span class="text-truncate">${Utils.escapeHtml(s.email)}</span></div>
           <div class="d-flex align-center gap-2">📍 <span class="text-truncate" style="max-width:200px">${Utils.escapeHtml(s.address)}</span></div>
-          ${s.gst ? `<div class="d-flex align-center gap-2">🏢 GST: ${Utils.escapeHtml(s.gst)}</div>` : ''}
+          ${s.gst ? `<div class="d-flex align-center gap-2">🏢 <span class="text-truncate">GST: ${Utils.escapeHtml(s.gst)}</span></div>` : ''}
         </div>
-        <div style="margin-top:var(--space-4);padding-top:var(--space-3);border-top:1px solid var(--border-light)">
+        <div style="margin-top:auto;padding-top:var(--space-3);border-top:1px solid var(--border-light)">
           <div class="fs-xs text-muted mb-1">Materials Supplied</div>
           <div class="d-flex flex-wrap gap-1">${(s.materials || '').split(',').map(m => `<span class="badge badge-primary" style="font-size:10px">${m.trim()}</span>`).join('')}</div>
         </div>
@@ -105,7 +107,7 @@ const Suppliers = {
     </form>`;
 
     const modal = Components.showModal({ id: 'sup-modal', title: isEdit ? 'Edit Supplier' : 'Add Supplier', content,
-      footer: `<button class="btn btn-secondary" data-close-modal>Cancel</button><button class="btn btn-primary" id="sup-save">${isEdit ? 'Update' : 'Save'}</button>` });
+      footer: `<button type="button" class="btn btn-secondary" data-close-modal>Cancel</button><button type="button" class="btn btn-primary" id="sup-save">${isEdit ? 'Update' : 'Save'}</button>` });
 
     document.getElementById('sup-save')?.addEventListener('click', () => {
       const data = {

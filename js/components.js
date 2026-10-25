@@ -51,12 +51,16 @@ const Components = {
     const overlay = document.createElement('div');
     overlay.id = id;
     overlay.className = 'modal-overlay';
+    const headerHtml = title ? `
+      <div class="modal-header">
+        <h3 class="modal-title">${title}</h3>
+        <button class="modal-close" data-close-modal>✕</button>
+      </div>` : `
+      <button class="modal-close" data-close-modal style="position:absolute;top:1rem;right:1rem;z-index:10">✕</button>`;
+
     overlay.innerHTML = `
       <div class="modal ${size ? 'modal-' + size : ''}">
-        <div class="modal-header">
-          <h3 class="modal-title">${title}</h3>
-          <button class="modal-close" data-close-modal>✕</button>
-        </div>
+        ${headerHtml}
         <div class="modal-body">${content}</div>
         ${footer ? `<div class="modal-footer">${footer}</div>` : ''}
       </div>
@@ -66,14 +70,29 @@ const Components = {
     requestAnimationFrame(() => overlay.classList.add('active'));
 
     // Close handlers
+    let isClosing = false;
     const closeModal = () => {
+      if (isClosing) return;
+      isClosing = true;
       overlay.classList.remove('active');
-      setTimeout(() => { overlay.remove(); if (onClose) onClose(); }, 300);
+      setTimeout(() => {
+        overlay.remove();
+        if (onClose) onClose();
+      }, 300);
     };
 
-    overlay.querySelector('[data-close-modal]').addEventListener('click', closeModal);
+    overlay.querySelectorAll('[data-close-modal]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        closeModal();
+      });
+    });
+
     overlay.addEventListener('click', (e) => {
-      if (e.target === overlay) closeModal();
+      if (e.target === overlay || e.target.closest('[data-close-modal]')) {
+        e.preventDefault();
+        closeModal();
+      }
     });
 
     return { overlay, close: closeModal };

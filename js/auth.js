@@ -261,7 +261,7 @@ const Auth = {
     }
   },
 
-  handleLogin() {
+  async handleLogin() {
     const email = this.emailInput ? this.emailInput.value.trim() : '';
     const password = this.passwordInput ? this.passwordInput.value : '';
 
@@ -281,18 +281,80 @@ const Auth = {
       return this.showFieldError(this.passwordInput, 'Password is too short');
     }
 
-    // Verify against Store users
-    let users = [];
-    if (typeof Store !== 'undefined') {
-      users = Store.getAll('users');
+    // Cache original submit button state
+    const originalBtnHtml = this.submitBtn
+      ? this.submitBtn.innerHTML
+      : 'Sign In to Dashboard <span class="arrow-icon">→</span>';
+
+    // Show loading state
+    if (this.submitBtn) {
+      this.submitBtn.innerHTML = `
+        <span class="spinner spinner-sm" style="display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.6s linear infinite;margin-right:8px;vertical-align:middle;"></span>
+        <span>Authenticating...</span>
+      `;
+      this.submitBtn.disabled = true;
     }
 
-    const user = users.find(u => 
-      u.email.toLowerCase() === email.toLowerCase() && u.password === password
-    );
+    let user = null;
+    let loginSuccess = false;
+    let errorMsg = 'Invalid email or password. Select a demo role below to try immediately.';
 
-    if (!user) {
-      this.showError('Invalid email or password. Select a demo role below to try immediately.');
+    // 1. Primary: Database Authentication via PHP API
+    try {
+      const response = await fetch('../api/auth/login.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success && data.user) {
+        loginSuccess = true;
+        user = {
+          id: data.user.user_code || data.user.id,
+          db_id: data.user.db_id,
+          name: data.user.name,
+          display_name: data.user.display_name || data.user.name,
+          email: data.user.email,
+          role: data.user.role,
+          role_label: data.user.role_label,
+          token: data.token || null
+        };
+      } else {
+        errorMsg = data.message || errorMsg;
+      }
+    } catch (apiErr) {
+      console.warn('Backend database API error/offline, checking local fallback:', apiErr);
+    }
+
+    // 2. Fallback: If database is unreachable, check local store
+    if (!loginSuccess && typeof Store !== 'undefined') {
+      const localUsers = Store.getAll('users');
+      const localUser = localUsers.find(u => 
+        u.email.toLowerCase() === email.toLowerCase() && u.password === password
+      );
+      if (localUser) {
+        loginSuccess = true;
+        user = {
+          id: localUser.id,
+          name: localUser.name,
+          email: localUser.email,
+          role: localUser.role
+        };
+      }
+    }
+
+    // Failed authentication
+    if (!loginSuccess || !user) {
+      if (this.submitBtn) {
+        this.submitBtn.innerHTML = originalBtnHtml;
+        this.submitBtn.disabled = false;
+      }
+      this.showError(errorMsg);
       if (this.passwordInput) {
         this.passwordInput.focus();
         this.passwordInput.select();
@@ -309,27 +371,23 @@ const Auth = {
 
     // Set User Session
     if (typeof Store !== 'undefined') {
-      Store.setSession({
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-      });
+      Store.setSession(user);
     }
 
-    // Loading State Feedback
+    // Success State
     if (this.submitBtn) {
       this.submitBtn.innerHTML = `
-        <span class="spinner spinner-sm" style="display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.6s linear infinite;margin-right:8px;"></span>
-        <span>Authenticating...</span>
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline-block;margin-right:8px;vertical-align:middle;">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+        <span>Redirecting...</span>
       `;
-      this.submitBtn.disabled = true;
     }
 
     // Seamless redirect to dashboard
     setTimeout(() => {
       window.location.href = 'dashboard.html';
-    }, 600);
+    }, 450);
   },
 
   isValidEmail(email) {

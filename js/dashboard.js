@@ -47,8 +47,8 @@ const Dashboard = {
     container.innerHTML = cards.map((card, i) => `
       <div class="stat-card animate-fadeInUp delay-${i % 6 + 1}" style="--card-accent: var(--color-${card.iconClass === 'blue' ? 'primary' : card.iconClass === 'green' ? 'emerald' : card.iconClass === 'amber' ? 'solar' : card.iconClass === 'red' ? 'red' : 'purple'}-400)">
         <div class="stat-icon ${card.iconClass}">${card.icon}</div>
-        <div class="stat-value" data-counter="${card.isCurrency ? card.value : card.value}">
-          ${card.isCurrency ? Utils.formatCurrency(card.value) : (card.suffix ? card.value + card.suffix : '0')}
+        <div class="stat-value" data-counter="${card.value}">
+          ${card.isCurrency ? Utils.formatCurrency(card.value) : (card.suffix ? card.value + card.suffix : Utils.formatNumber(card.value))}
         </div>
         <div class="stat-label">${card.label}</div>
         ${card.trend ? `<div class="stat-trend ${card.trend.up ? 'up' : 'down'}">${card.trend.up ? '↑' : '↓'} ${card.trend.value}</div>` : ''}

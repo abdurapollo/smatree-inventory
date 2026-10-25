@@ -38,16 +38,23 @@ const Sales = {
     const container = document.getElementById('sales-toolbar');
     if (!container) return;
     container.innerHTML = `
+      <div class="search-box" style="flex:1;max-width:320px">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="sales-search" placeholder="Search sales..." value="${this.state.searchQuery || ''}">
+      </div>
       <select class="form-control" id="sales-status-filter" style="width:auto;min-width:150px;border-radius:999px;padding:0.5rem 2rem 0.5rem 0.75rem;font-size:var(--fs-xs)">
-        <option value="">All</option><option value="Reserved">Reserved</option><option value="Sold">Sold</option>
+        <option value="">All Status</option><option value="Reserved">Reserved</option><option value="Sold">Sold</option>
       </select>
-      <button class="btn btn-primary btn-sm" id="sales-add-btn">+ Add Sale Record</button>`;
+      <div class="toolbar-actions">
+        <button class="btn btn-primary btn-sm" id="sales-add-btn">+ Add Sale Record</button>
+      </div>`;
   },
 
   renderTable() {
     const container = document.getElementById('sales-table');
     if (!container) return;
     let items = Store.getAll('sales');
+    if (this.state.searchQuery) items = Utils.searchFilter(items, this.state.searchQuery, ['id', 'customerName', 'productName']);
     if (this.state.statusFilter) items = items.filter(s => s.status === this.state.statusFilter);
     const paginated = Utils.paginate(items, this.state.currentPage, this.state.perPage);
 
@@ -84,6 +91,13 @@ const Sales = {
         });
       }
     });
+    document.addEventListener('input', Utils.debounce((e) => {
+      if (e.target.id === 'sales-search') {
+        this.state.searchQuery = e.target.value;
+        this.state.currentPage = 1;
+        this.renderTable();
+      }
+    }, 250));
     document.addEventListener('change', (e) => {
       if (e.target.id === 'sales-status-filter') { this.state.statusFilter = e.target.value; this.state.currentPage = 1; this.renderTable(); }
     });
@@ -111,7 +125,7 @@ const Sales = {
       </div></form>`;
 
     const modal = Components.showModal({ id: 'sales-modal', title: 'Add Sale Record', content,
-      footer: `<button class="btn btn-secondary" data-close-modal>Cancel</button><button class="btn btn-primary" id="sale-save">Save</button>` });
+      footer: `<button type="button" class="btn btn-secondary" data-close-modal>Cancel</button><button type="button" class="btn btn-primary" id="sale-save">Save</button>` });
 
     document.getElementById('sale-save')?.addEventListener('click', () => {
       const productEl = document.getElementById('sale-product');

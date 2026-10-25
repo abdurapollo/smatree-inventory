@@ -55,10 +55,17 @@ a:hover {
   color: var(--color-primary-400);
 }
 
-/* ── Images ── */
-img, svg {
+/* ── Images & SVGs ── */
+img {
   display: block;
   max-width: 100%;
+}
+
+svg {
+  display: inline-block;
+  vertical-align: middle;
+  max-width: 100%;
+  flex-shrink: 0;
 }
 
 /* ── Lists ── */

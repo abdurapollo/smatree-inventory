@@ -5,10 +5,19 @@
 
 const ApiConfig = {
   // Toggle between localStorage and backend API
-  useBackend: false,
+  useBackend: true,
 
   // Base URL for the PHP backend
-  baseUrl: '/smatree-inventory/api',
+  baseUrl: (function() {
+    if (typeof window !== 'undefined' && window.location) {
+      const pathname = window.location.pathname;
+      const appIdx = pathname.indexOf('/smatree-inventory');
+      if (appIdx !== -1) {
+        return pathname.substring(0, appIdx + '/smatree-inventory'.length) + '/api';
+      }
+    }
+    return '/smatree-inventory/api';
+  })(),
 
   // API endpoints mapping
   endpoints: {

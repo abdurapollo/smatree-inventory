@@ -253,10 +253,19 @@
   flex: 1;
   margin-left: var(--sidebar-width);
   min-height: 100vh;
-  transition: margin-left var(--transition-base);
+  min-width: 0;
+  width: calc(100% - var(--sidebar-width));
+  max-width: calc(100% - var(--sidebar-width));
+  transition: margin-left var(--transition-base), width var(--transition-base);
+  display: flex;
+  flex-direction: column;
 }
 .page-content {
+  flex: 1;
   padding: var(--space-6);
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* ── Page Header ── */
@@ -285,19 +294,53 @@
 
 /* ── Toolbar (filter bar) ── */
 .toolbar {
-  display: flex; align-items: center; gap: var(--space-3);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
   margin-bottom: var(--space-5);
   flex-wrap: wrap;
 }
-.toolbar .search-box { min-width: 240px; }
+.toolbar .search-box {
+  min-width: 240px;
+  height: 38px;
+}
+.toolbar .search-box input {
+  height: 38px;
+  box-sizing: border-box;
+}
 .toolbar .filter-group {
-  display: flex; align-items: center; gap: var(--space-2);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
 }
 .toolbar select.form-control {
-  width: auto; min-width: 140px;
-  padding: 0.5rem 2rem 0.5rem 0.75rem;
+  width: auto;
+  min-width: 140px;
+  height: 38px;
+  padding: 0.5rem 2rem 0.5rem 0.875rem;
   border-radius: var(--radius-full);
   font-size: var(--fs-xs);
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+}
+.toolbar .btn {
+  height: 38px;
+  box-sizing: border-box;
+}
+.toolbar .btn-sm {
+  height: 38px;
+  padding: 0 1rem;
+  font-size: var(--fs-xs);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-left: auto;
 }
 
 /* ==========================================================================
@@ -397,9 +440,8 @@
   .stat-card .stat-value { font-size: var(--fs-2xl); }
 
   .modal {
-    margin: var(--space-3);
+    margin: 0;
     max-height: calc(100vh - 2rem);
-    border-radius: var(--radius-xl);
   }
 
   .form-row { grid-template-columns: 1fr; }

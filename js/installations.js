@@ -42,7 +42,9 @@ const Installations = {
       <select class="form-control" id="inst-status-filter" style="width:auto;min-width:150px;border-radius:999px;padding:0.5rem 2rem 0.5rem 0.75rem;font-size:var(--fs-xs)">
         <option value="">All Status</option><option value="Completed">Completed</option><option value="In Progress">In Progress</option>
       </select>
-      <button class="btn btn-primary btn-sm" id="inst-add-btn">+ Add Installation</button>`;
+      <div class="toolbar-actions">
+        <button class="btn btn-primary btn-sm" id="inst-add-btn">+ Add Installation</button>
+      </div>`;
   },
 
   renderTable() {
@@ -138,7 +140,7 @@ const Installations = {
       </div></form>`;
 
     const modal = Components.showModal({ id: 'inst-modal', title: isEdit ? 'Edit Installation' : 'Add Installation', size: 'lg', content,
-      footer: `<button class="btn btn-secondary" data-close-modal>Cancel</button><button class="btn btn-primary" id="inst-save">${isEdit ? 'Update' : 'Save'}</button>` });
+      footer: `<button type="button" class="btn btn-secondary" data-close-modal>Cancel</button><button type="button" class="btn btn-primary" id="inst-save">${isEdit ? 'Update' : 'Save'}</button>` });
 
     document.getElementById('inst-save')?.addEventListener('click', () => {
       const data = {

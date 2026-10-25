@@ -80,8 +80,10 @@ const Inventory = {
         <option value="">All Categories</option>
         ${this.categories.map(c => `<option value="${c}" ${this.state.categoryFilter === c ? 'selected' : ''}>${c}</option>`).join('')}
       </select>
-      <button class="btn btn-secondary btn-sm" id="inv-export-btn">📥 Export CSV</button>
-      <button class="btn btn-primary btn-sm" id="inv-add-btn">+ Add Material</button>
+      <div class="toolbar-actions">
+        <button class="btn btn-secondary btn-sm" id="inv-export-btn">📥 Export CSV</button>
+        <button class="btn btn-primary btn-sm" id="inv-add-btn">+ Add Material</button>
+      </div>
     `;
   },
 
@@ -274,8 +276,8 @@ const Inventory = {
       size: 'lg',
       content: content,
       footer: `
-        <button class="btn btn-secondary" data-close-modal>Cancel</button>
-        <button class="btn btn-primary" id="material-save-btn">${isEdit ? 'Update' : 'Save'} Material</button>
+        <button type="button" class="btn btn-secondary" data-close-modal>Cancel</button>
+        <button type="button" class="btn btn-primary" id="material-save-btn">${isEdit ? 'Update' : 'Save'} Material</button>
       `,
     });
 

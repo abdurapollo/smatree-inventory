@@ -57,7 +57,9 @@ const Production = {
         <option value="">All Statuses</option>
         ${this.statuses.map(s => `<option value="${s}">${s}</option>`).join('')}
       </select>
-      <button class="btn btn-primary btn-sm" id="prod-add-btn">+ New Batch</button>`;
+      <div class="toolbar-actions">
+        <button class="btn btn-primary btn-sm" id="prod-add-btn">+ New Batch</button>
+      </div>`;
   },
 
   renderTable() {
@@ -173,8 +175,8 @@ const Production = {
 
     const modal = Components.showModal({
       id: 'production-modal', title: isEdit ? 'Edit Batch' : 'New Production Batch', size: 'lg', content,
-      footer: `<button class="btn btn-secondary" data-close-modal>Cancel</button>
-               <button class="btn btn-primary" id="prod-save-btn">${isEdit ? 'Update' : 'Create'} Batch</button>`
+      footer: `<button type="button" class="btn btn-secondary" data-close-modal>Cancel</button>
+               <button type="button" class="btn btn-primary" id="prod-save-btn">${isEdit ? 'Update' : 'Create'} Batch</button>`
     });
 
     document.getElementById('prod-save-btn')?.addEventListener('click', () => {
