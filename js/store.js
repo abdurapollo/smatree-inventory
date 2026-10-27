@@ -35,6 +35,9 @@ class DataStore {
   _set(key, data) {
     try {
       localStorage.setItem(key, JSON.stringify(data));
+      if (key === this.keys.inventory && typeof window !== 'undefined' && window.Components?.updateNavBadges) {
+        window.Components.updateNavBadges();
+      }
       return true;
     } catch (e) {
       console.error(`Store write error [${key}]:`, e);
@@ -143,10 +146,17 @@ class DataStore {
     const inventory = this.getAll('inventory');
     const totalMaterials = inventory.length;
     const lowStockCount = inventory.filter(m => {
-      const status = Utils.getStockStatus(m.quantity, m.reorderLevel);
+      const r = m.reorderLevel !== undefined && m.reorderLevel !== null 
+        ? m.reorderLevel 
+        : (m.reorder_level !== undefined && m.reorder_level !== null ? m.reorder_level : 50);
+      const status = Utils.getStockStatus(m.quantity, r);
       return status.level === 'low' || status.level === 'critical';
     }).length;
-    const totalValue = inventory.reduce((sum, m) => sum + (parseFloat(m.costPerUnit) * parseFloat(m.quantity) || 0), 0);
+    const totalValue = inventory.reduce((sum, m) => {
+      const cost = parseFloat(m.costPerUnit || m.cost_per_unit || 0) || 0;
+      const qty = parseFloat(m.quantity || 0) || 0;
+      return sum + (cost * qty);
+    }, 0);
     return { totalMaterials, lowStockCount, totalValue };
   }
 

@@ -150,6 +150,10 @@ const App = {
     if (mainContent) {
       appEl.insertAdjacentHTML('afterbegin', sidebarHtml);
       mainContent.insertAdjacentHTML('afterbegin', navbarHtml);
+      if (typeof Components !== 'undefined') {
+        Components.updateNavBadges();
+        Components.syncNavBadgesWithBackend();
+      }
     }
 
     return true;

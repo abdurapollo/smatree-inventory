@@ -282,10 +282,10 @@ const Components = {
       section.items.forEach(item => {
         const isActive = item.page === activePage;
         html += `
-          <a href="${item.href}" class="nav-item ${isActive ? 'active' : ''}">
+          <a href="${item.href}" class="nav-item ${isActive ? 'active' : ''}" data-nav-page="${item.page}">
             <span class="nav-icon">${item.icon}</span>
             <span>${item.label}</span>
-            ${item.badge ? `<span class="nav-badge">${item.badge}</span>` : ''}
+            <span class="nav-badge" id="nav-badge-${item.page}" data-badge-page="${item.page}" style="${item.badge ? 'display:flex' : 'display:none'}">${item.badge || ''}</span>
           </a>`;
       });
       html += `</div>`;
@@ -305,6 +305,53 @@ const Components = {
     <div class="sidebar-overlay" id="sidebar-overlay"></div>`;
 
     return html;
+  },
+
+  /**
+   * Real-time sidebar navigation badges synchronization
+   * Immediately updates badge counts to match live inventory
+   */
+  updateNavBadges(overrideCount = null) {
+    let lowStockCount;
+    if (overrideCount !== null && overrideCount !== undefined) {
+      lowStockCount = parseInt(overrideCount, 10) || 0;
+    } else {
+      const invStats = Store.getInventoryStats();
+      lowStockCount = invStats.lowStockCount;
+    }
+
+    const badges = document.querySelectorAll('#nav-badge-inventory, [data-badge-page="inventory"]');
+    badges.forEach(invBadge => {
+      if (lowStockCount > 0) {
+        invBadge.textContent = lowStockCount;
+        invBadge.style.display = 'flex';
+      } else {
+        invBadge.textContent = '';
+        invBadge.style.display = 'none';
+      }
+    });
+  },
+
+  /**
+   * Directly syncs sidebar badges with MySQL database telemetry
+   */
+  async syncNavBadgesWithBackend() {
+    this.updateNavBadges();
+    try {
+      const isPagesDir = window.location.pathname.includes('/pages/');
+      const statsEndpoint = isPagesDir ? '../api/dashboard/stats.php' : 'api/dashboard/stats.php';
+      const resp = await fetch(statsEndpoint);
+      if (resp.ok) {
+        const json = await resp.json();
+        const lowStock = json?.data?.inventory?.lowStockCount;
+        if (lowStock !== undefined && lowStock !== null) {
+          this.updateNavBadges(lowStock);
+        }
+      }
+    } catch (e) {
+      // Non-blocking fallback
+      this.updateNavBadges();
+    }
   },
 
   /* ══════════════════════════════════════════════════════════════════════

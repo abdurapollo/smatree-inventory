@@ -55,9 +55,18 @@ const ApiConfig = {
     suppliersEdit: '/suppliers/update.php',
     suppliersDel:  '/suppliers/delete.php',
 
+    // Products (Solar Panels)
+    products:        '/products/index.php',
+    productsAdd:     '/products/create.php',
+    productsEdit:    '/products/update.php',
+    productsDel:     '/products/delete.php',
+    productsRestore: '/products/restore.php',
+
     // Sales
     sales:     '/sales/index.php',
     salesAdd:  '/sales/create.php',
+    salesEdit: '/sales/update.php',
+    salesDel:  '/sales/delete.php',
 
     // Reports
     reports:       '/reports/index.php',

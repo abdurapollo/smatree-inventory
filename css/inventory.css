@@ -35,6 +35,37 @@
   font-weight: var(--fw-medium);
 }
 
+/* ── Product Thumb & View Toggle ── */
+.product-thumb {
+  width: 40px; height: 40px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(59, 130, 246, 0.15));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.3rem;
+  flex-shrink: 0;
+  border: 1px solid var(--border-light);
+  overflow: hidden;
+}
+.product-thumb img {
+  width: 100%; height: 100%; object-fit: cover;
+}
+
+.view-toggle {
+  display: inline-flex;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--bg-surface);
+}
+.view-toggle .btn {
+  border-radius: 0 !important;
+  padding: 6px 12px;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  border: none !important;
+  box-shadow: none !important;
+}
+
 @media (max-width: 1200px) {
   .inventory-stats { grid-template-columns: repeat(3, 1fr); }
 }
@@ -43,4 +74,50 @@
 }
 @media (max-width: 600px) {
   .inventory-stats { grid-template-columns: 1fr; }
+}
+
+/* ── Finished Goods & Sales Table Enhancements ── */
+#fg-table-container .table-container,
+#sales-table .table-container {
+  box-shadow: var(--shadow-sm);
+  background: var(--bg-card);
+  border-radius: var(--radius-xl);
+}
+#fg-table-container .data-table,
+#sales-table .data-table {
+  min-width: 960px;
+}
+#fg-table-container .data-table th,
+#fg-table-container .data-table td,
+#sales-table .data-table th,
+#sales-table .data-table td {
+  padding: 0.7rem 0.85rem;
+}
+#fg-table-container .data-table td:last-child,
+#sales-table .data-table td:last-child {
+  position: sticky;
+  right: 0;
+  background: var(--bg-card);
+  box-shadow: -4px 0 8px rgba(0,0,0,0.03);
+}
+#fg-table-container .data-table tbody tr:nth-child(even) td:last-child,
+#sales-table .data-table tbody tr:nth-child(even) td:last-child {
+  background: var(--bg-table-stripe);
+}
+#fg-table-container .data-table tbody tr:hover td:last-child,
+#sales-table .data-table tbody tr:hover td:last-child {
+  background: var(--bg-table-hover);
+}
+#fg-table-container .data-table th:last-child,
+#sales-table .data-table th:last-child {
+  position: sticky;
+  right: 0;
+  background: var(--bg-surface);
+  box-shadow: -4px 0 8px rgba(0,0,0,0.03);
+}
+#fg-table-container .data-table .actions,
+#sales-table .data-table .actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }

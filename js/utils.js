@@ -168,7 +168,8 @@ const Utils = {
   /**
    * Animate counter from 0 to target
    */
-  animateCounter(element, target, duration = 1000) {
+  animateCounter(element, target, duration = 1000, options = {}) {
+    const { prefix = '', suffix = '', isCurrency = false } = options;
     const start = 0;
     const startTime = performance.now();
     const isFloat = target % 1 !== 0;
@@ -179,14 +180,21 @@ const Utils = {
       const eased = 1 - Math.pow(1 - progress, 3); // easeOutCubic
       const current = start + (target - start) * eased;
 
-      if (isFloat) {
-        element.textContent = current.toFixed(2);
+      let valStr = '';
+      if (isCurrency) {
+        valStr = (prefix || '₹') + Math.floor(current).toLocaleString('en-IN') + suffix;
+      } else if (isFloat) {
+        valStr = prefix + current.toFixed(1) + suffix;
       } else {
-        element.textContent = Math.floor(current).toLocaleString('en-IN');
+        valStr = prefix + Math.floor(current).toLocaleString('en-IN') + suffix;
       }
+
+      element.textContent = valStr;
 
       if (progress < 1) {
         requestAnimationFrame(update);
+      } else if (isCurrency) {
+        element.textContent = Utils.formatCurrency(target, prefix || '₹');
       }
     }
     requestAnimationFrame(update);
@@ -196,9 +204,13 @@ const Utils = {
    * Get stock status based on quantity and reorder level
    */
   getStockStatus(quantity, reorderLevel) {
-    if (quantity <= 0) return { label: 'Out of Stock', class: 'badge-danger', level: 'critical' };
-    if (quantity <= reorderLevel) return { label: 'Low Stock', class: 'badge-danger', level: 'low' };
-    if (quantity <= reorderLevel * 2) return { label: 'Medium', class: 'badge-warning', level: 'medium' };
+    const q = parseFloat(quantity);
+    const numQ = isNaN(q) ? 0 : q;
+    const r = parseFloat(reorderLevel);
+    const numR = isNaN(r) ? 50 : r;
+    if (numQ <= 0) return { label: 'Out of Stock', class: 'badge-danger', level: 'critical' };
+    if (numQ <= numR) return { label: 'Low Stock', class: 'badge-danger', level: 'low' };
+    if (numQ <= numR * 2) return { label: 'Medium', class: 'badge-warning', level: 'medium' };
     return { label: 'In Stock', class: 'badge-success', level: 'good' };
   },
 
@@ -255,8 +267,244 @@ const Utils = {
   getInitials(name) {
     if (!name) return '?';
     return name.split(' ').map(w => w[0]).join('').toUpperCase().substring(0, 2);
+  },
+
+  /**
+   * Sanitize string: remove HTML tags, script elements, and dangerous protocols
+   */
+  sanitize(str) {
+    if (typeof str !== 'string') return '';
+    return str
+      .replace(/<[^>]*>/g, '') // Strip HTML tags
+      .replace(/javascript:/gi, '') // Strip javascript: URIs
+      .replace(/on\w+\s*=/gi, '') // Strip event handlers like onload=
+      .trim();
+  },
+
+  /**
+   * Industry-Standard Form Validator Engine
+   */
+  Validator: {
+    // Regular Expression Patterns
+    patterns: {
+      name: /^[\p{L}\s.'-]+$/u,
+      company: /^[\p{L}\p{N}\s.,'\-&/()#]+$/u,
+      phone: /^\+?[0-9\s\-()]{7,25}$/,
+      email: /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/,
+      gstin: /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/,
+    },
+
+    /**
+     * Check if string is empty
+     */
+    isEmpty(val) {
+      return val === null || val === undefined || String(val).trim() === '';
+    },
+
+    /**
+     * Validate Contact Person Name
+     * Min 2, Max 100, letters/spaces/dots/hyphens/apostrophes only
+     */
+    validateName(val, fieldName = 'Contact Name') {
+      const trimmed = String(val || '').trim();
+      if (!trimmed) {
+        return `${fieldName} is required.`;
+      }
+      if (trimmed.length < 2) {
+        return `${fieldName} must be at least 2 characters.`;
+      }
+      if (trimmed.length > 100) {
+        return `${fieldName} cannot exceed 100 characters.`;
+      }
+      if (!this.patterns.name.test(trimmed)) {
+        return `${fieldName} can only contain letters, spaces, hyphens, and dots.`;
+      }
+      return null;
+    },
+
+    /**
+     * Validate Company / Business Name
+     * Min 2, Max 150, alphanumeric and business punctuation
+     */
+    validateCompany(val, fieldName = 'Company Name') {
+      const trimmed = String(val || '').trim();
+      if (!trimmed) {
+        return `${fieldName} is required.`;
+      }
+      if (trimmed.length < 2) {
+        return `${fieldName} must be at least 2 characters.`;
+      }
+      if (trimmed.length > 150) {
+        return `${fieldName} cannot exceed 150 characters.`;
+      }
+      if (!this.patterns.company.test(trimmed)) {
+        return `${fieldName} contains invalid characters.`;
+      }
+      return null;
+    },
+
+    /**
+     * Validate Phone Number (ITU E.164: 10-15 digits)
+     */
+    validatePhone(val, fieldName = 'Phone Number') {
+      const trimmed = String(val || '').trim();
+      if (!trimmed) {
+        return `${fieldName} is required.`;
+      }
+      const digits = trimmed.replace(/\D/g, '');
+      if (digits.length < 10 || digits.length > 15) {
+        return `${fieldName} must contain 10 to 15 digits (e.g. +91 98765 43210).`;
+      }
+      if (!this.patterns.phone.test(trimmed)) {
+        return `Please enter a valid ${fieldName.toLowerCase()} format.`;
+      }
+      return null;
+    },
+
+    /**
+     * Validate Email Address (RFC 5322 compliance)
+     */
+    validateEmail(val, fieldName = 'Email') {
+      const trimmed = String(val || '').trim();
+      if (!trimmed) {
+        return `${fieldName} is required.`;
+      }
+      if (trimmed.length > 150) {
+        return `${fieldName} cannot exceed 150 characters.`;
+      }
+      if (!this.patterns.email.test(trimmed)) {
+        return `Please enter a valid email address (e.g. contact@company.com).`;
+      }
+      // Check top-level domain extension length
+      const parts = trimmed.split('@');
+      if (parts.length === 2) {
+        const domainParts = parts[1].split('.');
+        const tld = domainParts[domainParts.length - 1];
+        if (!tld || tld.length < 2) {
+          return `Please enter an email address with a valid domain extension.`;
+        }
+      }
+      return null;
+    },
+
+    /**
+     * Validate GST Number (GSTIN)
+     * Optional if empty, but if entered must match 15-character statutory format
+     */
+    validateGSTIN(val, fieldName = 'GST Number') {
+      const trimmed = String(val || '').trim().toUpperCase();
+      if (!trimmed) return null; // Optional
+      if (trimmed.length !== 15) {
+        return `${fieldName} must be exactly 15 characters (e.g. 27AADCS1234F1ZP).`;
+      }
+      if (!this.patterns.gstin.test(trimmed)) {
+        return `Invalid GSTIN format. Follows 2-digit state code + 10-char PAN + 3-char registration pattern.`;
+      }
+      return null;
+    },
+
+    /**
+     * Validate Free Text / Address / Notes
+     */
+    validateText(val, options = {}) {
+      const { min = 0, max = 500, required = false, fieldName = 'Field' } = options;
+      const trimmed = String(val || '').trim();
+      if (required && !trimmed) {
+        return `${fieldName} is required.`;
+      }
+      if (trimmed && trimmed.length < min) {
+        return `${fieldName} must be at least ${min} characters if provided.`;
+      }
+      if (trimmed && trimmed.length > max) {
+        return `${fieldName} cannot exceed ${max} characters (currently ${trimmed.length}).`;
+      }
+      if (/<[^>]*script/i.test(trimmed) || /javascript:/i.test(trimmed)) {
+        return `${fieldName} contains disallowed script or HTML elements.`;
+      }
+      return null;
+    },
+
+    /**
+     * UI: Display inline field error
+     */
+    setError(input, message) {
+      if (!input) return;
+      input.classList.remove('is-valid');
+      input.classList.add('is-invalid');
+      input.setAttribute('aria-invalid', 'true');
+
+      const group = input.closest('.form-group') || input.parentElement;
+      if (!group) return;
+
+      const errorId = (input.id ? `${input.id}-error` : '') || 'form-field-error';
+      input.setAttribute('aria-describedby', errorId);
+
+      let errEl = group.querySelector('.form-error');
+      if (!errEl) {
+        errEl = document.createElement('div');
+        errEl.className = 'form-error';
+        errEl.id = errorId;
+        // Insert right after input or group's direct child
+        const insertAfter = input.nextElementSibling?.classList.contains('input-group-addon') 
+          ? input.nextElementSibling 
+          : input;
+        if (insertAfter && insertAfter.nextSibling) {
+          group.insertBefore(errEl, insertAfter.nextSibling);
+        } else {
+          group.appendChild(errEl);
+        }
+      }
+      errEl.style.display = 'flex';
+      errEl.innerHTML = `<span class="form-error-icon">⚠️</span><span>${Utils.escapeHtml(message)}</span>`;
+    },
+
+    /**
+     * UI: Mark field as valid and clear errors
+     */
+    setValid(input) {
+      if (!input) return;
+      input.classList.remove('is-invalid');
+      input.classList.add('is-valid');
+      input.setAttribute('aria-invalid', 'false');
+
+      const group = input.closest('.form-group') || input.parentElement;
+      if (group) {
+        const errEl = group.querySelector('.form-error');
+        if (errEl) errEl.remove();
+      }
+    },
+
+    /**
+     * UI: Reset a field's validation state
+     */
+    clearField(input) {
+      if (!input) return;
+      input.classList.remove('is-invalid', 'is-valid');
+      input.removeAttribute('aria-invalid');
+      input.removeAttribute('aria-describedby');
+
+      const group = input.closest('.form-group') || input.parentElement;
+      if (group) {
+        const errEl = group.querySelector('.form-error');
+        if (errEl) errEl.remove();
+      }
+    },
+
+    /**
+     * UI: Clear all errors across an entire form
+     */
+    clearForm(form) {
+      if (!form) return;
+      form.querySelectorAll('.is-invalid, .is-valid').forEach(el => {
+        el.classList.remove('is-invalid', 'is-valid');
+        el.removeAttribute('aria-invalid');
+        el.removeAttribute('aria-describedby');
+      });
+      form.querySelectorAll('.form-error').forEach(el => el.remove());
+    }
   }
 };
 
 // Make available globally
 window.Utils = Utils;
+window.Validator = Utils.Validator;

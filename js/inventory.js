@@ -21,16 +21,37 @@ const Inventory = {
 
   unitTypes: ['Pieces', 'Sheets', 'Rolls', 'Sets', 'Meters', 'Units', 'Kg', 'Liters'],
 
-  init() {
+  async init() {
     if (!App.initPage('inventory', 'Raw Materials', [
       { label: 'Home', href: 'dashboard.html' },
       { label: 'Raw Materials' }
     ])) return;
 
+    await this.loadFromDatabase();
+    if (typeof Components !== 'undefined') {
+      Components.updateNavBadges();
+      Components.syncNavBadgesWithBackend();
+    }
     this.renderStats();
     this.renderToolbar();
     this.renderTable();
     this.setupEvents();
+  },
+
+  /* ── Sync with MySQL Database ── */
+  async loadFromDatabase() {
+    try {
+      const resp = await fetch('../api/inventory/index.php');
+      const result = await resp.json();
+      if (result && result.success && Array.isArray(result.data) && result.data.length > 0) {
+        Store._set(Store.keys.inventory, result.data);
+        if (typeof Components !== 'undefined') {
+          Components.updateNavBadges();
+        }
+      }
+    } catch (err) {
+      console.warn('Backend database API load error, using local cached store:', err);
+    }
   },
 
   /* ── Stats Cards ── */
@@ -188,21 +209,28 @@ const Inventory = {
   },
 
   /* ── Form Modal ── */
-  showForm(editId = null) {
+  async showForm(editId = null) {
     this.state.editingId = editId;
     const item = editId ? Store.getById('inventory', editId) : null;
     const isEdit = !!item;
     const title = isEdit ? 'Edit Material' : 'Add Raw Material';
 
-    const suppliers = Store.getAll('suppliers');
+    // Dynamically fetch suppliers from database
+    let suppliers = Store.getAll('suppliers');
+    try {
+      const supResp = await fetch('../api/suppliers/index.php');
+      const supData = await supResp.json();
+      if (supData && supData.success && Array.isArray(supData.data) && supData.data.length > 0) {
+        suppliers = supData.data;
+        Store._set(Store.keys.suppliers, suppliers);
+      }
+    } catch (e) {
+      console.warn('Could not fetch dynamic suppliers from database:', e);
+    }
 
     const content = `
       <form id="material-form" novalidate>
         <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Material Name *</label>
-            <input type="text" class="form-control" id="mat-name" value="${item?.name || ''}" placeholder="e.g. Monocrystalline Solar Cell" required>
-          </div>
           <div class="form-group">
             <label class="form-label">Category *</label>
             <select class="form-control" id="mat-category" required>
@@ -210,18 +238,12 @@ const Inventory = {
               ${this.categories.map(c => `<option value="${c}" ${item?.category === c ? 'selected' : ''}>${c}</option>`).join('')}
             </select>
           </div>
-        </div>
-        <div class="form-row">
           <div class="form-group">
             <label class="form-label">Supplier</label>
             <select class="form-control" id="mat-supplier">
               <option value="">Select supplier</option>
               ${suppliers.map(s => `<option value="${s.company}" ${item?.supplier === s.company ? 'selected' : ''}>${s.company}</option>`).join('')}
             </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Warehouse Location</label>
-            <input type="text" class="form-control" id="mat-warehouse" value="${item?.warehouse || ''}" placeholder="e.g. Warehouse A - Rack 1">
           </div>
         </div>
         <div class="form-row">
@@ -242,18 +264,18 @@ const Inventory = {
             <input type="number" class="form-control" id="mat-cost" value="${item?.costPerUnit || ''}" min="0" step="0.01" required>
           </div>
           <div class="form-group">
-            <label class="form-label">Reorder Level *</label>
-            <input type="number" class="form-control" id="mat-reorder" value="${item?.reorderLevel || ''}" min="0" required>
+            <label class="form-label">Total Value</label>
+            <input type="text" class="form-control" id="mat-total" readonly value="${item ? Utils.formatCurrency(item.costPerUnit * item.quantity) : '₹0.00'}" style="background:var(--bg-badge)">
           </div>
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Purchase Date</label>
-            <input type="date" class="form-control" id="mat-date" value="${item?.purchaseDate || Utils.today()}">
+            <label class="form-label">Warehouse Location</label>
+            <input type="text" class="form-control" id="mat-warehouse" value="${item?.warehouse || ''}" placeholder="e.g. Warehouse A - Rack 1">
           </div>
           <div class="form-group">
-            <label class="form-label">Total Value</label>
-            <input type="text" class="form-control" id="mat-total" readonly value="${item ? Utils.formatCurrency(item.costPerUnit * item.quantity) : '₹0.00'}" style="background:var(--bg-badge)">
+            <label class="form-label">Purchase Date</label>
+            <input type="date" class="form-control" id="mat-date" value="${item?.purchaseDate || Utils.today()}">
           </div>
         </div>
         <div class="form-group">
@@ -288,8 +310,31 @@ const Inventory = {
       const totalEl = document.getElementById('mat-total');
       if (totalEl) totalEl.value = Utils.formatCurrency(qty * cost);
     };
-    document.getElementById('mat-quantity')?.addEventListener('input', calcTotal);
-    document.getElementById('mat-cost')?.addEventListener('input', calcTotal);
+    const qtyInput = document.getElementById('mat-quantity');
+    const costInput = document.getElementById('mat-cost');
+    const catInput = document.getElementById('mat-category');
+    const unitInput = document.getElementById('mat-unit');
+
+    qtyInput?.addEventListener('input', () => {
+      calcTotal();
+      if (qtyInput.classList.contains('is-invalid')) {
+        const q = parseInt(qtyInput.value);
+        if (!isNaN(q) && q >= 0) Validator.setValid(qtyInput);
+      }
+    });
+    costInput?.addEventListener('input', () => {
+      calcTotal();
+      if (costInput.classList.contains('is-invalid')) {
+        const c = parseFloat(costInput.value);
+        if (!isNaN(c) && c >= 0) Validator.setValid(costInput);
+      }
+    });
+    catInput?.addEventListener('change', () => {
+      if (catInput.value) Validator.setValid(catInput);
+    });
+    unitInput?.addEventListener('change', () => {
+      if (unitInput.value) Validator.setValid(unitInput);
+    });
 
     // Image upload
     const uploadArea = document.getElementById('mat-image-upload');
@@ -310,40 +355,153 @@ const Inventory = {
     });
   },
 
-  saveForm(modal, isEdit) {
-    const name = document.getElementById('mat-name').value.trim();
-    const category = document.getElementById('mat-category').value;
-    const supplier = document.getElementById('mat-supplier').value;
-    const quantity = parseInt(document.getElementById('mat-quantity').value);
-    const unit = document.getElementById('mat-unit').value;
-    const costPerUnit = parseFloat(document.getElementById('mat-cost').value);
-    const reorderLevel = parseInt(document.getElementById('mat-reorder').value);
-    const warehouse = document.getElementById('mat-warehouse').value.trim();
-    const purchaseDate = document.getElementById('mat-date').value;
-    const notes = document.getElementById('mat-notes').value.trim();
+  async saveForm(modal, isEdit) {
+    const existing = isEdit ? Store.getById('inventory', this.state.editingId) : null;
+    const catEl = document.getElementById('mat-category');
+    const supEl = document.getElementById('mat-supplier');
+    const qtyEl = document.getElementById('mat-quantity');
+    const unitEl = document.getElementById('mat-unit');
+    const costEl = document.getElementById('mat-cost');
+    const whEl = document.getElementById('mat-warehouse');
+    const dateEl = document.getElementById('mat-date');
+    const notesEl = document.getElementById('mat-notes');
+
+    const category = catEl ? catEl.value.trim() : '';
+    const supplier = supEl ? supEl.value.trim() : '';
+    const quantity = qtyEl ? parseInt(qtyEl.value) : NaN;
+    const unit = unitEl ? unitEl.value.trim() : '';
+    const costPerUnit = costEl ? parseFloat(costEl.value) : NaN;
+    const warehouse = whEl ? Utils.sanitize(whEl.value) : '';
+    const purchaseDate = dateEl ? dateEl.value : Utils.today();
+    const notes = notesEl ? Utils.sanitize(notesEl.value) : '';
     const imageUpload = document.getElementById('mat-image-upload');
-    const image = imageUpload?.dataset.image || (isEdit ? Store.getById('inventory', this.state.editingId)?.image : null);
+    const image = imageUpload?.dataset.image || (isEdit ? existing?.image : null);
 
-    // Validate
-    if (!name) return Components.toast('error', 'Validation Error', 'Material name is required');
-    if (!category) return Components.toast('error', 'Validation Error', 'Category is required');
-    if (isNaN(quantity) || quantity < 0) return Components.toast('error', 'Validation Error', 'Valid quantity is required');
-    if (isNaN(costPerUnit) || costPerUnit < 0) return Components.toast('error', 'Validation Error', 'Valid cost is required');
-    if (isNaN(reorderLevel) || reorderLevel < 0) return Components.toast('error', 'Validation Error', 'Reorder level is required');
+    // Validate fields with Validator engine
+    let hasError = false;
+    let firstInvalid = null;
 
-    const data = { name, category, supplier, quantity, unit, costPerUnit, reorderLevel, warehouse, purchaseDate, notes, image };
-
-    if (isEdit) {
-      Store.update('inventory', this.state.editingId, data);
-      Components.toast('success', 'Material Updated', `${name} has been updated successfully.`);
+    if (!category) {
+      Validator.setError(catEl, 'Please select a material category.');
+      hasError = true;
+      if (!firstInvalid) firstInvalid = catEl;
     } else {
-      data.id = Utils.generateId('MAT');
-      data.createdAt = new Date().toISOString();
-      Store.add('inventory', data);
-      Components.toast('success', 'Material Added', `${name} has been added to inventory.`);
+      Validator.setValid(catEl);
+    }
+
+    if (isNaN(quantity) || quantity < 0) {
+      Validator.setError(qtyEl, 'Please enter a valid non-negative quantity (0 or greater).');
+      hasError = true;
+      if (!firstInvalid) firstInvalid = qtyEl;
+    } else {
+      Validator.setValid(qtyEl);
+    }
+
+    if (!unit) {
+      Validator.setError(unitEl, 'Please select a unit type.');
+      hasError = true;
+      if (!firstInvalid) firstInvalid = unitEl;
+    } else {
+      Validator.setValid(unitEl);
+    }
+
+    if (isNaN(costPerUnit) || costPerUnit < 0) {
+      Validator.setError(costEl, 'Please enter a valid non-negative cost per unit.');
+      hasError = true;
+      if (!firstInvalid) firstInvalid = costEl;
+    } else {
+      Validator.setValid(costEl);
+    }
+
+    if (hasError) {
+      if (firstInvalid) firstInvalid.focus();
+      return Components.toast('error', 'Validation Error', 'Please correct the highlighted form errors before saving.');
+    }
+
+    // Derive name and reorderLevel
+    const name = existing?.name || (supplier ? `${category} (${supplier})` : category);
+    const reorderLevel = existing?.reorderLevel ?? Math.max(10, Math.round((quantity || 100) * 0.2));
+
+    const payload = {
+      id: isEdit ? this.state.editingId : undefined,
+      category,
+      supplier,
+      quantity,
+      unit,
+      costPerUnit,
+      warehouse,
+      purchaseDate,
+      notes,
+      image,
+      reorderLevel
+    };
+
+    const saveBtn = document.getElementById('material-save-btn');
+    if (saveBtn) {
+      saveBtn.disabled = true;
+      saveBtn.textContent = isEdit ? 'Updating Database...' : 'Saving to Database...';
+    }
+
+    let savedToDb = false;
+    try {
+      const endpoint = isEdit ? '../api/inventory/update.php' : '../api/inventory/create.php';
+      const resp = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const result = await resp.json();
+
+      if (resp.ok && result.success && result.data) {
+        savedToDb = true;
+        const dbItem = {
+          id: result.data.id || result.data.materialCode,
+          name: result.data.name || name,
+          category: result.data.category,
+          supplier: result.data.supplier,
+          quantity: result.data.quantity,
+          unit: result.data.unit,
+          costPerUnit: result.data.costPerUnit,
+          reorderLevel: result.data.reorderLevel,
+          warehouse: result.data.warehouse,
+          purchaseDate: result.data.purchaseDate,
+          notes: result.data.notes,
+          image: result.data.image,
+          createdAt: result.data.createdAt || new Date().toISOString()
+        };
+
+        if (isEdit) {
+          Store.update('inventory', this.state.editingId, dbItem);
+          Components.toast('success', 'Database Updated', `Purchased raw material ${dbItem.name} updated in MySQL.`);
+        } else {
+          Store.add('inventory', dbItem);
+          Components.toast('success', 'Added to Database', `Purchased raw material (${dbItem.id}) dynamically stored into MySQL.`);
+        }
+      }
+    } catch (apiErr) {
+      console.warn('Backend database API error, fallback to local store:', apiErr);
+    }
+
+    // Fallback to local store if server is unreachable
+    if (!savedToDb) {
+      const data = { name, category, supplier, quantity, unit, costPerUnit, reorderLevel, warehouse, purchaseDate, notes, image };
+      if (isEdit) {
+        Store.update('inventory', this.state.editingId, data);
+        Components.toast('success', 'Material Updated', `${name} updated locally.`);
+      } else {
+        data.id = Utils.generateId('MAT');
+        data.createdAt = new Date().toISOString();
+        Store.add('inventory', data);
+        Components.toast('success', 'Material Added', `${name} added to inventory.`);
+      }
     }
 
     modal.close();
+    await this.loadFromDatabase();
+    if (typeof Components !== 'undefined') {
+      Components.updateNavBadges();
+      Components.syncNavBadgesWithBackend();
+    }
     this.renderStats();
     this.renderTable();
   },
@@ -353,12 +511,26 @@ const Inventory = {
     if (!item) return;
     Components.confirm({
       title: 'Delete Material',
-      message: `Are you sure you want to delete "${item.name}"? This action cannot be undone.`,
+      message: `Are you sure you want to delete "${item.name}"? This action will remove it from the database.`,
       confirmText: 'Delete',
       type: 'danger',
-      onConfirm: () => {
+      onConfirm: async () => {
+        try {
+          await fetch('../api/inventory/delete.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id })
+          });
+        } catch (e) {
+          console.warn('Database delete request failed:', e);
+        }
         Store.delete('inventory', id);
-        Components.toast('success', 'Deleted', `${item.name} has been removed.`);
+        Components.toast('success', 'Deleted', `${item.name} removed from database.`);
+        await this.loadFromDatabase();
+        if (typeof Components !== 'undefined') {
+          Components.updateNavBadges();
+          Components.syncNavBadgesWithBackend();
+        }
         this.renderStats();
         this.renderTable();
       }

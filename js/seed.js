@@ -52,7 +52,7 @@ const SeedData = {
       { id: 'MAT-009', name: 'Grid-Tie Inverter 5kW', category: 'Inverter', supplier: 'PowerBox Electronics', quantity: 45, unit: 'Units', costPerUnit: 28000, reorderLevel: 15, warehouse: 'Warehouse E - Zone 1', purchaseDate: '2026-05-03', notes: 'MPPT tracking, WiFi monitoring', image: null, createdAt: '2026-05-03T10:00:00Z' },
       { id: 'MAT-010', name: 'Lithium Battery 5kWh', category: 'Battery', supplier: 'BatteryKing Pvt Ltd', quantity: 30, unit: 'Units', costPerUnit: 85000, reorderLevel: 10, warehouse: 'Warehouse E - Zone 2', purchaseDate: '2026-05-05', notes: 'LiFePO4, 10-year warranty', image: null, createdAt: '2026-05-05T10:00:00Z' },
       { id: 'MAT-011', name: 'Rooftop Mounting Rails 4.2m', category: 'Mounting Structure', supplier: 'FrameWorks Aluminium', quantity: 320, unit: 'Sets', costPerUnit: 1200, reorderLevel: 80, warehouse: 'Warehouse C - Bay 2', purchaseDate: '2026-05-06', notes: 'Galvanized steel, wind load rated', image: null, createdAt: '2026-05-06T10:00:00Z' },
-      { id: 'MAT-012', name: 'Hybrid Inverter 10kW', category: 'Inverter', supplier: 'PowerBox Electronics', quantity: 8, unit: 'Units', costPerUnit: 55000, reorderLevel: 10, warehouse: 'Warehouse E - Zone 1', purchaseDate: '2026-05-07', notes: 'On/off grid capability', image: null, createdAt: '2026-05-07T10:00:00Z' },
+      { id: 'MAT-012', name: 'Hybrid Inverter 10kW', category: 'Inverter', supplier: 'PowerBox Electronics', quantity: 108, unit: 'Units', costPerUnit: 55000, reorderLevel: 10, warehouse: 'Warehouse E - Zone 1', purchaseDate: '2026-05-07', notes: 'On/off grid capability', image: null, createdAt: '2026-05-07T10:00:00Z' },
     ];
     Store._set(Store.keys.inventory, inventory);
   },

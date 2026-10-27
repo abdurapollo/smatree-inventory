@@ -75,9 +75,52 @@ const ApiService = {
     return this.post('inventoryAdd', item);
   },
 
-  async getProduction() {
+  async getProduction(params = {}) {
     if (!ApiConfig.useBackend) return { success: true, data: Store.getAll('production') };
-    return this.get('production');
+    const query = new URLSearchParams(params).toString();
+    return this.get('production' + (query ? '?' + query : ''));
+  },
+
+  async addProduction(batchData) {
+    if (!ApiConfig.useBackend) { Store.add('production', batchData); return { success: true, data: batchData }; }
+    return this.post('productionAdd', batchData);
+  },
+
+  async updateProduction(batchData) {
+    if (!ApiConfig.useBackend) { Store.update('production', batchData.id, batchData); return { success: true, data: batchData }; }
+    return this.post('productionEdit', batchData);
+  },
+
+  async deleteProduction(id) {
+    if (!ApiConfig.useBackend) { Store.delete('production', id); return { success: true }; }
+    return this.post('productionDel', { id });
+  },
+
+  async getInstallations(params = {}) {
+    if (!ApiConfig.useBackend) return { success: true, data: Store.getAll('installations') };
+    const query = new URLSearchParams(params).toString();
+    return this.get('installations' + (query ? '?' + query : ''));
+  },
+
+  async addInstallation(instData) {
+    if (!ApiConfig.useBackend) { Store.add('installations', instData); return { success: true, data: instData }; }
+    return this.post('installationsAdd', instData);
+  },
+
+  async updateInstallation(instData) {
+    if (!ApiConfig.useBackend) { Store.update('installations', instData.id, instData); return { success: true, data: instData }; }
+    return this.post('installationsEdit', instData);
+  },
+
+  async deleteInstallation(id) {
+    if (!ApiConfig.useBackend) { Store.delete('installations', id); return { success: true }; }
+    return this.post('installationsDel', { id });
+  },
+
+  async getReports(type = 'inventory', from = '', to = '') {
+    if (!ApiConfig.useBackend) return { success: true, data: [] };
+    const query = `?type=${encodeURIComponent(type)}&from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`;
+    return this.get('reports' + query);
   },
 
   async getSuppliers() {
@@ -108,6 +151,72 @@ const ApiService = {
       return { success: true, data: user };
     }
     return this.post('login', { email, password });
+  },
+
+  async getProducts(filter = 'active') {
+    if (!ApiConfig.useBackend) return { success: true, data: Store.getAll('finishedGoods') };
+    const query = filter ? `?filter=${encodeURIComponent(filter)}` : '';
+    return this.get('products' + query);
+  },
+
+  async addProduct(productData) {
+    if (!ApiConfig.useBackend) {
+      Store.add('finishedGoods', productData);
+      return { success: true, data: productData };
+    }
+    return this.post('productsAdd', productData);
+  },
+
+  async updateProduct(productData) {
+    if (!ApiConfig.useBackend) {
+      Store.update('finishedGoods', productData.id, productData);
+      return { success: true, data: productData };
+    }
+    return this.post('productsEdit', productData);
+  },
+
+  async deleteProduct(id) {
+    if (!ApiConfig.useBackend) {
+      Store.delete('finishedGoods', id);
+      return { success: true };
+    }
+    return this.post('productsDel', { id });
+  },
+
+  async restoreProduct(id) {
+    if (!ApiConfig.useBackend) {
+      return { success: true };
+    }
+    return this.post('productsRestore', { id });
+  },
+
+  async getSales() {
+    if (!ApiConfig.useBackend) return { success: true, data: Store.getAll('sales') };
+    return this.get('sales');
+  },
+
+  async addSale(saleData) {
+    if (!ApiConfig.useBackend) {
+      Store.add('sales', saleData);
+      return { success: true, data: saleData };
+    }
+    return this.post('salesAdd', saleData);
+  },
+
+  async updateSaleStatus(id, status) {
+    if (!ApiConfig.useBackend) {
+      Store.update('sales', id, { status });
+      return { success: true };
+    }
+    return this.post('salesEdit', { id, status });
+  },
+
+  async deleteSale(id) {
+    if (!ApiConfig.useBackend) {
+      Store.delete('sales', id);
+      return { success: true };
+    }
+    return this.post('salesDel', { id });
   }
 };
 
