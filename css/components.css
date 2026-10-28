@@ -122,53 +122,67 @@
   -webkit-backdrop-filter: blur(var(--glass-blur));
   border: 1px solid var(--border-color);
   border-radius: var(--radius-xl);
-  padding: var(--space-5);
+  padding: 1.25rem 1.25rem;
   position: relative;
   overflow: hidden;
   transition: all var(--transition-base);
   display: flex;
   flex-direction: column;
+  box-shadow: var(--shadow-card);
+  text-decoration: none;
 }
 .stat-card::before {
   content: '';
   position: absolute; top: 0; left: 0; right: 0;
   height: 3px;
-  background: linear-gradient(90deg, var(--card-accent, var(--color-primary-400)), transparent);
+  background: linear-gradient(90deg, var(--card-accent, var(--color-primary-500)), transparent);
 }
 .stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 24px -4px rgba(15, 23, 42, 0.08), 0 4px 8px -2px rgba(15, 23, 42, 0.04);
+  border-color: rgba(37, 99, 235, 0.3);
 }
 .stat-card .stat-icon {
-  width: 48px; height: 48px;
-  border-radius: var(--radius-lg);
+  width: 44px; height: 44px;
+  border-radius: 11px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 1.25rem;
-  margin-bottom: var(--space-3);
+  font-size: 1.2rem;
+  margin-bottom: 0.875rem;
   line-height: 1;
   flex-shrink: 0;
+  transition: transform var(--transition-fast);
+}
+.stat-card:hover .stat-icon {
+  transform: scale(1.08);
+}
+.stat-card .stat-icon svg {
+  width: 22px; height: 22px;
+  stroke: currentColor;
 }
 .stat-card .stat-value {
-  font-size: var(--fs-3xl); font-weight: var(--fw-bold);
-  line-height: 1.1; margin-bottom: var(--space-1);
+  font-size: 1.75rem; font-weight: 700;
+  line-height: 1.15; margin-bottom: 0.25rem;
   color: var(--text-primary);
+  letter-spacing: -0.02em;
 }
 .stat-card .stat-label {
-  font-size: var(--fs-xs); color: var(--text-tertiary);
-  font-weight: var(--fw-medium); text-transform: uppercase;
-  letter-spacing: 0.05em;
+  font-size: var(--fs-sm); color: var(--text-tertiary);
+  font-weight: 500;
+  letter-spacing: normal;
   margin-top: auto;
 }
 .stat-card .stat-trend {
   display: inline-flex; align-items: center; gap: 4px;
-  font-size: var(--fs-xs); font-weight: var(--fw-medium);
-  margin-top: var(--space-2);
-  padding: 2px 8px; border-radius: var(--radius-full);
+  font-size: var(--fs-xs); font-weight: 600;
+  margin-top: 0.5rem;
+  padding: 3px 8px; border-radius: var(--radius-full);
   width: fit-content;
   line-height: 1.3;
 }
-.stat-trend.up { color: var(--color-success); background: var(--color-success-bg); }
-.stat-trend.down { color: var(--color-danger); background: var(--color-danger-bg); }
+.stat-trend.up { color: #059669; background: #ecfdf5; }
+.stat-trend.down { color: #dc2626; background: #fef2f2; }
+[data-theme="dark"] .stat-trend.up { color: #34d399; background: rgba(6, 78, 59, 0.35); }
+[data-theme="dark"] .stat-trend.down { color: #f87171; background: rgba(127, 29, 29, 0.35); }
 
 /* ── Badges ── */
 .badge {

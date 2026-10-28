@@ -76,45 +76,9 @@ const Dashboard = {
     }
   },
 
-  /* ── 1. Executive Banner & Live Clock ── */
+  /* ── 1. Live Header Clock (Common across all pages) ── */
   initBanner() {
-    const user = Store.getCurrentUser() || { name: 'Sneha Reddy', role: 'Sales Director', role_label: 'Sales Director' };
-    
-    const nameEl = document.getElementById('dash-user-name');
-    const roleEl = document.getElementById('dash-role-badge');
-    const avatarEl = document.getElementById('dash-user-avatar');
-
-    if (nameEl) nameEl.textContent = user.display_name || user.name || 'User';
-    if (roleEl) roleEl.textContent = user.role_label || user.role || 'Enterprise User';
-    if (avatarEl) avatarEl.textContent = Utils.getInitials(user.name);
-
-    // Live Clock updater
-    const clockEl = document.getElementById('dash-live-clock');
-    const dateEl = document.getElementById('dash-live-date');
-
-    const updateClock = () => {
-      const now = new Date();
-      if (clockEl) {
-        clockEl.textContent = now.toLocaleTimeString('en-IN', {
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit',
-          hour12: true
-        });
-      }
-      if (dateEl) {
-        dateEl.textContent = now.toLocaleDateString('en-IN', {
-          weekday: 'long',
-          day: 'numeric',
-          month: 'short',
-          year: 'numeric'
-        });
-      }
-    };
-
-    updateClock();
-    if (this._clockInterval) clearInterval(this._clockInterval);
-    this._clockInterval = setInterval(updateClock, 1000);
+    // Clock is unified and handled dynamically by App.initClock() in navbar
   },
 
   /* ── 2. Refresh Action with Smooth Feedback ── */
@@ -578,7 +542,7 @@ const Dashboard = {
     if (!lowStock.length) {
       container.innerHTML = `
         <div class="empty-state" style="padding:2.5rem 1rem; text-align:center;">
-          <div style="font-size:2.2rem; margin-bottom:8px;">✅</div>
+          <div style="color:var(--color-emerald-500); margin-bottom:12px;">${typeof Icons !== 'undefined' ? Icons.check(40) : ''}</div>
           <div class="empty-state-title" style="font-weight:600; color:var(--text-primary);">All Stock Levels Optimal</div>
           <p class="text-muted fs-sm">All raw materials and components are above reorder thresholds.</p>
         </div>`;

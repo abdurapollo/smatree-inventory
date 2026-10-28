@@ -63,23 +63,23 @@ const Reports = {
     const sales = tele?.sales || { totalRevenue: 0 };
 
     container.innerHTML = `
-      <div class="stat-card animate-fadeInUp delay-1" style="--card-accent:var(--color-primary-400)">
-        <div class="stat-icon blue">📦</div>
+      <div class="stat-card animate-fadeInUp delay-1" style="--card-accent:var(--color-primary-500)">
+        <div class="stat-icon blue">${Icons.package(20)}</div>
         <div class="stat-value">${inv.totalMaterials}</div>
         <div class="stat-label">Raw Materials</div>
       </div>
-      <div class="stat-card animate-fadeInUp delay-2" style="--card-accent:var(--color-emerald-400)">
-        <div class="stat-icon green">🏭</div>
+      <div class="stat-card animate-fadeInUp delay-2" style="--card-accent:var(--color-emerald-500)">
+        <div class="stat-icon green">${Icons.production(20)}</div>
         <div class="stat-value">${Utils.formatNumber(prod.totalPanels)}</div>
         <div class="stat-label">Panels Produced</div>
       </div>
-      <div class="stat-card animate-fadeInUp delay-3" style="--card-accent:var(--color-solar-400)">
-        <div class="stat-icon amber">🔧</div>
+      <div class="stat-card animate-fadeInUp delay-3" style="--card-accent:var(--color-solar-500)">
+        <div class="stat-icon amber">${Icons.installations(20)}</div>
         <div class="stat-value">${inst.totalInstallations}</div>
         <div class="stat-label">Installations</div>
       </div>
-      <div class="stat-card animate-fadeInUp delay-4" style="--card-accent:var(--color-purple-400)">
-        <div class="stat-icon purple">💰</div>
+      <div class="stat-card animate-fadeInUp delay-4" style="--card-accent:var(--color-purple-500)">
+        <div class="stat-icon purple">${Icons.coins(20)}</div>
         <div class="stat-value">${Utils.formatCurrency(inv.totalValue)}</div>
         <div class="stat-label">Total Inventory Value</div>
       </div>
@@ -94,24 +94,24 @@ const Reports = {
     container.innerHTML = `
       <div class="d-flex align-center gap-2 flex-wrap" style="width:100%">
         <select class="form-control" id="report-type" style="width:auto;min-width:180px;border-radius:999px;padding:0.5rem 2rem 0.5rem 0.75rem;font-size:var(--fs-xs)">
-          <option value="inventory">📦 Inventory Raw Materials</option>
-          <option value="production">🏭 Production Batches</option>
-          <option value="installations">🔧 Solar Installations</option>
-          <option value="sales">💰 Solar Sales Orders</option>
+          <option value="inventory">Inventory Raw Materials</option>
+          <option value="production">Production Batches</option>
+          <option value="installations">Solar Installations</option>
+          <option value="sales">Solar Sales Orders</option>
         </select>
         <span class="fs-xs text-muted">From:</span>
         <input type="date" class="form-control" id="report-from" style="width:auto;border-radius:999px;padding:0.5rem 0.75rem;font-size:var(--fs-xs)" value="2025-01-01">
         <span class="fs-xs text-muted">To:</span>
         <input type="date" class="form-control" id="report-to" style="width:auto;border-radius:999px;padding:0.5rem 0.75rem;font-size:var(--fs-xs)" value="${Utils.today()}">
         
-        <button class="btn btn-primary btn-sm ml-auto" id="report-generate">
-          ⚡ Generate Report
+        <button class="btn btn-primary btn-sm ml-auto" id="report-generate" style="display:inline-flex;align-items:center;gap:5px">
+          ${Icons.zap(14)} Generate Report
         </button>
-        <button class="btn btn-secondary btn-sm" id="report-csv">
-          📥 Export CSV
+        <button class="btn btn-secondary btn-sm" id="report-csv" style="display:inline-flex;align-items:center;gap:5px">
+          ${Icons.download(14)} Export CSV
         </button>
-        <button class="btn btn-secondary btn-sm" id="report-print" onclick="window.print()">
-          🖨️ Print
+        <button class="btn btn-secondary btn-sm" id="report-print" onclick="window.print()" style="display:inline-flex;align-items:center;gap:5px">
+          ${Icons.printer(14)} Print
         </button>
       </div>
     `;

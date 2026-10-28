@@ -71,23 +71,23 @@ const Installations = {
     }
 
     container.innerHTML = `
-      <div class="stat-card animate-fadeInUp delay-1" style="--card-accent:var(--color-primary-400)">
-        <div class="stat-icon blue">🔧</div>
+      <div class="stat-card animate-fadeInUp delay-1" style="--card-accent:var(--color-primary-500)">
+        <div class="stat-icon blue">${Icons.installations(22)}</div>
         <div class="stat-value">${stats.totalInstallations}</div>
         <div class="stat-label">Total Projects</div>
       </div>
-      <div class="stat-card animate-fadeInUp delay-2" style="--card-accent:var(--color-emerald-400)">
-        <div class="stat-icon green">⚡</div>
+      <div class="stat-card animate-fadeInUp delay-2" style="--card-accent:var(--color-emerald-500)">
+        <div class="stat-icon green">${Icons.zap(22)}</div>
         <div class="stat-value">${(parseFloat(stats.totalCapacity) || 0).toFixed(1)} kW</div>
         <div class="stat-label">Installed Capacity</div>
       </div>
-      <div class="stat-card animate-fadeInUp delay-3" style="--card-accent:var(--color-solar-400)">
-        <div class="stat-icon amber">🚧</div>
+      <div class="stat-card animate-fadeInUp delay-3" style="--card-accent:var(--color-solar-500)">
+        <div class="stat-icon amber">${Icons.clock(22)}</div>
         <div class="stat-value">${stats.activeProjects}</div>
         <div class="stat-label">Active Projects</div>
       </div>
-      <div class="stat-card animate-fadeInUp delay-4" style="--card-accent:var(--color-purple-400)">
-        <div class="stat-icon purple">☀️</div>
+      <div class="stat-card animate-fadeInUp delay-4" style="--card-accent:var(--color-purple-500)">
+        <div class="stat-icon purple">${Icons.solarPanel(22)}</div>
         <div class="stat-value">${Utils.formatNumber(stats.totalPanelsInstalled)}</div>
         <div class="stat-label">Panels Installed</div>
       </div>
@@ -112,14 +112,14 @@ const Installations = {
         <button class="btn btn-sm ${this.state.activeTab === 'all' ? 'btn-primary' : 'btn-ghost'}" data-inst-tab="all">
           All Projects <span class="badge ${this.state.activeTab === 'all' ? 'badge-primary' : 'badge-neutral'} ml-1" style="font-size:10px">${counts.all}</span>
         </button>
-        <button class="btn btn-sm ${this.state.activeTab === 'In Progress' ? 'btn-primary' : 'btn-ghost'}" data-inst-tab="In Progress">
-          🚧 In Progress <span class="badge ml-1" style="font-size:10px">${counts['In Progress']}</span>
+        <button class="btn btn-sm ${this.state.activeTab === 'In Progress' ? 'btn-primary' : 'btn-ghost'}" data-inst-tab="In Progress" style="display:inline-flex;align-items:center;gap:4px">
+          ${Icons.clock(13)} In Progress <span class="badge ml-1" style="font-size:10px">${counts['In Progress']}</span>
         </button>
-        <button class="btn btn-sm ${this.state.activeTab === 'Completed' ? 'btn-primary' : 'btn-ghost'}" data-inst-tab="Completed">
-          ✅ Completed <span class="badge ml-1" style="font-size:10px">${counts['Completed']}</span>
+        <button class="btn btn-sm ${this.state.activeTab === 'Completed' ? 'btn-primary' : 'btn-ghost'}" data-inst-tab="Completed" style="display:inline-flex;align-items:center;gap:4px">
+          ${Icons.check(13)} Completed <span class="badge ml-1" style="font-size:10px">${counts['Completed']}</span>
         </button>
-        <button class="btn btn-sm ${this.state.activeTab === 'Pending' ? 'btn-primary' : 'btn-ghost'}" data-inst-tab="Pending">
-          📋 Pending <span class="badge ml-1" style="font-size:10px">${counts['Pending']}</span>
+        <button class="btn btn-sm ${this.state.activeTab === 'Pending' ? 'btn-primary' : 'btn-ghost'}" data-inst-tab="Pending" style="display:inline-flex;align-items:center;gap:4px">
+          ${Icons.fileText(13)} Pending <span class="badge ml-1" style="font-size:10px">${counts['Pending']}</span>
         </button>
       </div>
     `;
@@ -132,18 +132,18 @@ const Installations = {
 
     container.innerHTML = `
       <div class="search-box" style="flex:1;max-width:320px">
-        <span class="search-icon">🔍</span>
+        <span class="search-icon">${Icons.search(16)}</span>
         <input type="text" id="inst-search" placeholder="Search customer, address, ID..." value="${Utils.escapeHtml(this.state.searchQuery)}">
       </div>
       <div class="toolbar-actions d-flex align-center gap-2">
-        <button class="btn btn-secondary btn-sm" id="inst-export-btn" title="Export CSV report">
-          📥 Export CSV
+        <button class="btn btn-secondary btn-sm" id="inst-export-btn" title="Export CSV report" style="display:inline-flex;align-items:center;gap:5px">
+          ${Icons.download(15)} Export CSV
         </button>
         <button class="btn btn-secondary btn-sm btn-icon" id="inst-refresh-btn" title="Refresh live installations">
-          🔄
+          ${Icons.refresh(15)}
         </button>
-        <button class="btn btn-primary btn-sm" id="inst-add-btn">
-          + Add Installation
+        <button class="btn btn-primary btn-sm" id="inst-add-btn" style="display:inline-flex;align-items:center;gap:5px">
+          ${Icons.plus(15)} Add Installation
         </button>
       </div>
     `;
@@ -204,15 +204,15 @@ const Installations = {
         render: (r) => `
           <div>
             <div class="fw-semibold">${Utils.escapeHtml(r.customerName)}</div>
-            <div class="fs-xs text-muted">📞 ${Utils.escapeHtml(r.phone || 'No phone')}</div>
+            <div class="fs-xs text-muted" style="display:flex;align-items:center;gap:4px">${Icons.phone(12)} ${Utils.escapeHtml(r.phone || 'No phone')}</div>
           </div>`
       },
       {
         label: 'Location / Site',
         key: 'address',
         render: (r) => `
-          <span class="text-truncate" style="max-width:200px;display:block" title="${Utils.escapeHtml(r.address)}">
-            📍 ${Utils.escapeHtml(r.address)}
+          <span class="text-truncate" style="max-width:200px;display:flex;align-items:center;gap:4px" title="${Utils.escapeHtml(r.address)}">
+            ${Icons.mapPin(12)} <span>${Utils.escapeHtml(r.address)}</span>
           </span>`
       },
       {
@@ -248,9 +248,9 @@ const Installations = {
         label: 'Actions',
         render: (r) => `
           <div class="actions d-flex align-center gap-1">
-            <button class="btn btn-ghost btn-sm btn-icon" data-view-inst="${r.id}" title="View Project Details">👁️</button>
-            <button class="btn btn-ghost btn-sm btn-icon" data-edit-inst="${r.id}" title="Edit Installation">✏️</button>
-            <button class="btn btn-ghost btn-sm btn-icon text-danger" data-delete-inst="${r.id}" title="Delete Installation">🗑️</button>
+            <button class="btn btn-ghost btn-sm btn-icon" data-view-inst="${r.id}" title="View Project Details">${Icons.eye(15)}</button>
+            <button class="btn btn-ghost btn-sm btn-icon" data-edit-inst="${r.id}" title="Edit Installation">${Icons.edit(15)}</button>
+            <button class="btn btn-ghost btn-sm btn-icon text-danger" data-delete-inst="${r.id}" title="Delete Installation">${Icons.trash(15)}</button>
           </div>`
       }
     ];
@@ -492,7 +492,7 @@ const Installations = {
         <div class="d-flex justify-between align-center mb-4 pb-3" style="border-bottom:1px solid var(--border-color)">
           <div>
             <h3 class="mb-1">${item.installationCode || item.id} — ${Utils.escapeHtml(item.customerName)}</h3>
-            <span class="fs-sm text-muted">📍 ${Utils.escapeHtml(item.address)}</span>
+            <span class="fs-sm text-muted" style="display:inline-flex;align-items:center;gap:4px">${Icons.mapPin(13)} ${Utils.escapeHtml(item.address)}</span>
           </div>
           <span class="badge ${item.status === 'Completed' ? 'badge-success' : 'badge-warning'}" style="font-size:14px;padding:6px 12px">
             ${item.status}
@@ -512,14 +512,14 @@ const Installations = {
 
         <table class="table mb-4" style="font-size:var(--fs-sm)">
           <tbody>
-            <tr><th style="width:35%">Contact Phone</th><td>📞 ${Utils.escapeHtml(item.phone)}</td></tr>
-            <tr><th>Contact Email</th><td>✉️ ${Utils.escapeHtml(item.email || 'N/A')}</td></tr>
-            <tr><th>Panel Model</th><td>☀️ ${Utils.escapeHtml(item.panelType)}</td></tr>
-            <tr><th>Installation Date</th><td>📅 ${Utils.formatDate(item.installationDate)}</td></tr>
-            <tr><th>Install Team</th><td>👷 ${Utils.escapeHtml(item.teamAssigned || item.installationTeam || 'Standard Team')}</td></tr>
-            <tr><th>Inverter</th><td>⚡ ${Utils.escapeHtml(item.inverterUsed || 'Not specified')}</td></tr>
-            <tr><th>Battery Storage</th><td>🔋 ${Utils.escapeHtml(item.batteryUsed || 'Grid-Tie Only')}</td></tr>
-            <tr><th>Warranty</th><td>🛡️ ${Utils.escapeHtml(item.warranty || '25 Years')}</td></tr>
+            <tr><th style="width:35%">Contact Phone</th><td><span style="display:inline-flex;align-items:center;gap:5px">${Icons.phone(14)} ${Utils.escapeHtml(item.phone)}</span></td></tr>
+            <tr><th>Contact Email</th><td><span style="display:inline-flex;align-items:center;gap:5px">${Icons.mail(14)} ${Utils.escapeHtml(item.email || 'N/A')}</span></td></tr>
+            <tr><th>Panel Model</th><td><span style="display:inline-flex;align-items:center;gap:5px">${Icons.solarPanel(14)} ${Utils.escapeHtml(item.panelType)}</span></td></tr>
+            <tr><th>Installation Date</th><td><span style="display:inline-flex;align-items:center;gap:5px">${Icons.calendar(14)} ${Utils.formatDate(item.installationDate)}</span></td></tr>
+            <tr><th>Install Team</th><td><span style="display:inline-flex;align-items:center;gap:5px">${Icons.worker(14)} ${Utils.escapeHtml(item.teamAssigned || item.installationTeam || 'Standard Team')}</span></td></tr>
+            <tr><th>Inverter</th><td><span style="display:inline-flex;align-items:center;gap:5px">${Icons.zap(14)} ${Utils.escapeHtml(item.inverterUsed || 'Not specified')}</span></td></tr>
+            <tr><th>Battery Storage</th><td><span style="display:inline-flex;align-items:center;gap:5px">${Icons.zap(14)} ${Utils.escapeHtml(item.batteryUsed || 'Grid-Tie Only')}</span></td></tr>
+            <tr><th>Warranty</th><td><span style="display:inline-flex;align-items:center;gap:5px">${Icons.shield(14)} ${Utils.escapeHtml(item.warranty || '25 Years')}</span></td></tr>
             <tr><th>Notes</th><td>${Utils.escapeHtml(item.notes || 'None')}</td></tr>
           </tbody>
         </table>

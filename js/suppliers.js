@@ -37,10 +37,10 @@ const Suppliers = {
     const container = document.getElementById('suppliers-toolbar');
     if (!container) return;
     container.innerHTML = `
-      <div class="search-box" style="flex:1;max-width:320px"><span class="search-icon">🔍</span>
+      <div class="search-box" style="flex:1;max-width:320px"><span class="search-icon">${Icons.search(16)}</span>
         <input type="text" id="sup-search" placeholder="Search suppliers..."></div>
       <div class="toolbar-actions">
-        <button class="btn btn-primary btn-sm" id="sup-add-btn">+ Add Supplier</button>
+        <button class="btn btn-primary btn-sm" id="sup-add-btn">${Icons.plus(15)} <span>Add Supplier</span></button>
       </div>`;
   },
 
@@ -53,7 +53,7 @@ const Suppliers = {
     }
 
     if (!items.length) {
-      container.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🤝</div>
+      container.innerHTML = `<div class="empty-state"><div class="empty-state-icon" style="color:var(--color-primary-500);margin-bottom:var(--space-3)">${Icons.suppliers(44)}</div>
         <div class="empty-state-title">No Suppliers Found</div>
         <div class="empty-state-text">Add suppliers with verified details to manage your supply chain.</div></div>`;
       return;
@@ -70,15 +70,15 @@ const Suppliers = {
             </div>
           </div>
           <div class="actions" style="flex-shrink:0">
-            <button class="btn btn-ghost btn-sm btn-icon" data-edit-sup="${s.id}" title="Edit Supplier">✏️</button>
-            <button class="btn btn-ghost btn-sm btn-icon text-danger" data-delete-sup="${s.id}" title="Delete Supplier">🗑️</button>
+            <button class="btn btn-ghost btn-sm btn-icon" data-edit-sup="${s.id}" title="Edit Supplier">${Icons.edit(15)}</button>
+            <button class="btn btn-ghost btn-sm btn-icon text-danger" data-delete-sup="${s.id}" title="Delete Supplier">${Icons.trash(15)}</button>
           </div>
         </div>
         <div style="display:flex;flex-direction:column;gap:var(--space-2);font-size:var(--fs-sm);color:var(--text-secondary);flex:1">
-          <div class="d-flex align-center gap-2">📞 <span>${Utils.escapeHtml(s.phone || '—')}</span></div>
-          <div class="d-flex align-center gap-2">📧 <span class="text-truncate">${Utils.escapeHtml(s.email || '—')}</span></div>
-          <div class="d-flex align-center gap-2">📍 <span class="text-truncate" style="max-width:240px" title="${Utils.escapeHtml(s.address || '')}">${Utils.escapeHtml(s.address || '—')}</span></div>
-          ${s.gst ? `<div class="d-flex align-center gap-2">🏢 <span class="text-truncate"><strong>GST:</strong> ${Utils.escapeHtml(s.gst)}</span></div>` : ''}
+          <div class="d-flex align-center gap-2">${Icons.phone(14)} <span>${Utils.escapeHtml(s.phone || '—')}</span></div>
+          <div class="d-flex align-center gap-2">${Icons.mail(14)} <span class="text-truncate">${Utils.escapeHtml(s.email || '—')}</span></div>
+          <div class="d-flex align-center gap-2">${Icons.mapPin(14)} <span class="text-truncate" style="max-width:240px" title="${Utils.escapeHtml(s.address || '')}">${Utils.escapeHtml(s.address || '—')}</span></div>
+          ${s.gst ? `<div class="d-flex align-center gap-2">${Icons.building(14)} <span class="text-truncate"><strong>GST:</strong> ${Utils.escapeHtml(s.gst)}</span></div>` : ''}
         </div>
         <div style="margin-top:auto;padding-top:var(--space-3);border-top:1px solid var(--border-light)">
           <div class="fs-xs text-muted mb-1">Materials Supplied</div>

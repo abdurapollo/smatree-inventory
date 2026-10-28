@@ -182,26 +182,26 @@ const Sales = {
     const stats = this.state.stats;
 
     container.innerHTML = `
-      <div class="stat-card animate-fadeInUp delay-1" style="--card-accent:var(--color-emerald-400)">
-        <div class="stat-icon green">🏷️</div>
+      <div class="stat-card animate-fadeInUp delay-1" style="--card-accent:var(--color-emerald-500)">
+        <div class="stat-icon green">${Icons.sales(22)}</div>
         <div class="stat-value" id="stat-ready-to-sell">${Utils.formatNumber(stats.readyToSell)}</div>
         <div class="stat-label">Ready to Sell Stock</div>
         <div class="stat-trend" style="color:var(--color-success)">● Available in catalog</div>
       </div>
-      <div class="stat-card animate-fadeInUp delay-2" style="--card-accent:var(--color-solar-400)">
-        <div class="stat-icon amber">📋</div>
+      <div class="stat-card animate-fadeInUp delay-2" style="--card-accent:var(--color-solar-500)">
+        <div class="stat-icon amber">${Icons.clock(22)}</div>
         <div class="stat-value" id="stat-reserved-units">${Utils.formatNumber(stats.reservedUnits)}</div>
         <div class="stat-label">Reserved Units</div>
         <div class="stat-trend" style="color:var(--color-warning)">Awaiting dispatch</div>
       </div>
-      <div class="stat-card animate-fadeInUp delay-3" style="--card-accent:var(--color-primary-400)">
-        <div class="stat-icon blue">✅</div>
+      <div class="stat-card animate-fadeInUp delay-3" style="--card-accent:var(--color-primary-500)">
+        <div class="stat-icon blue">${Icons.check(22)}</div>
         <div class="stat-value" id="stat-sold-units">${Utils.formatNumber(stats.soldUnits)}</div>
         <div class="stat-label">Sold Units</div>
-        <div class="stat-trend" style="color:var(--color-primary-400)">Fulfilled & dispatched</div>
+        <div class="stat-trend" style="color:var(--color-primary-500)">Fulfilled & dispatched</div>
       </div>
       <div class="stat-card animate-fadeInUp delay-4" style="--card-accent:#8b5cf6">
-        <div class="stat-icon purple" style="background:rgba(139,92,246,0.12);color:#8b5cf6">💰</div>
+        <div class="stat-icon purple" style="background:rgba(139,92,246,0.12);color:#8b5cf6">${Icons.coins(22)}</div>
         <div class="stat-value" id="stat-total-revenue">${Utils.formatCurrency(stats.totalRevenue || 0)}</div>
         <div class="stat-label">Total Realized Revenue</div>
         <div class="stat-trend" style="color:#8b5cf6">From completed sales</div>
@@ -224,17 +224,17 @@ const Sales = {
     container.innerHTML = `
       <div class="tabs" style="border-bottom:1px solid var(--border-color);margin-bottom:var(--space-4)">
         <button type="button" class="tab ${this.state.currentTab === 'all' ? 'active' : ''}" id="tab-sales-all" style="background:none;border:none">
-          📋 All Sales Orders <span class="badge ${this.state.currentTab === 'all' ? 'badge-primary' : 'badge-neutral'}" style="margin-left:6px">${allCount}</span>
+          ${Icons.sales(15)} All Sales Orders <span class="badge ${this.state.currentTab === 'all' ? 'badge-primary' : 'badge-neutral'}" style="margin-left:6px">${allCount}</span>
         </button>
         <button type="button" class="tab ${this.state.currentTab === 'Reserved' ? 'active' : ''}" id="tab-sales-reserved" style="background:none;border:none">
-          ⏳ Reserved (Hold) <span class="badge ${this.state.currentTab === 'Reserved' ? 'badge-warning' : 'badge-neutral'}" style="margin-left:6px">${reservedCount}</span>
+          ${Icons.clock(15)} Reserved (Hold) <span class="badge ${this.state.currentTab === 'Reserved' ? 'badge-warning' : 'badge-neutral'}" style="margin-left:6px">${reservedCount}</span>
         </button>
         <button type="button" class="tab ${this.state.currentTab === 'Sold' ? 'active' : ''}" id="tab-sales-sold" style="background:none;border:none">
-          ✅ Sold & Dispatched <span class="badge ${this.state.currentTab === 'Sold' ? 'badge-success' : 'badge-neutral'}" style="margin-left:6px">${soldCount}</span>
+          ${Icons.check(15)} Sold & Dispatched <span class="badge ${this.state.currentTab === 'Sold' ? 'badge-success' : 'badge-neutral'}" style="margin-left:6px">${soldCount}</span>
         </button>
         ${cancelledCount > 0 ? `
           <button type="button" class="tab ${this.state.currentTab === 'Cancelled' ? 'active' : ''}" id="tab-sales-cancelled" style="background:none;border:none">
-            ❌ Cancelled <span class="badge badge-neutral" style="margin-left:6px">${cancelledCount}</span>
+            ${Icons.x(15)} Cancelled <span class="badge badge-neutral" style="margin-left:6px">${cancelledCount}</span>
           </button>
         ` : ''}
       </div>
@@ -253,7 +253,7 @@ const Sales = {
 
     container.innerHTML = `
       <div class="search-box" style="flex:1;max-width:320px">
-        <span class="search-icon">🔍</span>
+        <span class="search-icon">${Icons.search(16)}</span>
         <input type="text" id="sales-search" placeholder="Search sales by ID, customer, product..." value="${Utils.escapeHtml(this.state.searchQuery || '')}">
       </div>
 
@@ -277,10 +277,10 @@ const Sales = {
         </select>
 
         <button class="btn btn-secondary btn-sm" id="sales-export-btn" title="Export sales orders to CSV">
-          📥 Export CSV
+          ${Icons.download(15)} Export CSV
         </button>
         <button class="btn btn-primary btn-sm" id="sales-add-btn" style="box-shadow:var(--shadow-md)">
-          <span style="font-size:1.1rem;margin-right:2px">+</span> Add Sale Record
+          ${Icons.plus(15)} Add Sale Record
         </button>
       </div>
     `;
@@ -314,7 +314,7 @@ const Sales = {
         sortable: true,
         render: (r) => `
           <div class="d-flex align-center gap-2" style="min-width:200px">
-            <div class="product-thumb" style="width:34px;height:34px;font-size:1.1rem">☀️</div>
+            <div class="product-thumb" style="width:34px;height:34px;display:flex;align-items:center;justify-content:center;color:var(--color-primary-500)">${Icons.solarPanel(18)}</div>
             <div>
               <div class="fw-semibold text-primary" title="${Utils.escapeHtml(r.productName || r.product_name || '—')}">
                 ${Utils.escapeHtml(r.productName || r.product_name || '—')}
@@ -333,7 +333,7 @@ const Sales = {
         render: (r) => `
           <div style="min-width:160px">
             <div class="fw-medium text-primary">${Utils.escapeHtml(r.customerName || r.customer_name || '—')}</div>
-            ${(r.customerPhone || r.customer_phone) ? `<div class="fs-xs text-muted">📞 ${Utils.escapeHtml(r.customerPhone || r.customer_phone)}</div>` : ''}
+            ${(r.customerPhone || r.customer_phone) ? `<div class="fs-xs text-muted" style="display:flex;align-items:center;gap:4px">${Icons.phone(12)} ${Utils.escapeHtml(r.customerPhone || r.customer_phone)}</div>` : ''}
           </div>
         `
       },
@@ -394,14 +394,14 @@ const Sales = {
 
           return `
             <div class="actions">
-              <button type="button" class="btn btn-ghost btn-sm btn-icon" data-view-sale="${saleId}" title="View Order Details">👁️</button>
-              <button type="button" class="btn btn-ghost btn-sm btn-icon" data-edit-sale="${saleId}" title="Edit Sale Record & Adjust Stock">✏️</button>
+              <button type="button" class="btn btn-ghost btn-sm btn-icon" data-view-sale="${saleId}" title="View Order Details">${Icons.eye(15)}</button>
+              <button type="button" class="btn btn-ghost btn-sm btn-icon" data-edit-sale="${saleId}" title="Edit Sale Record & Adjust Stock">${Icons.edit(15)}</button>
               ${isReserved ? `
                 <button type="button" class="btn btn-success btn-sm" data-mark-sold="${saleId}" title="Mark as Sold & Dispatch Panels" style="font-size:var(--fs-xs);padding:4px 8px;font-weight:600">
                   Mark Sold
                 </button>
               ` : ''}
-              <button type="button" class="btn btn-ghost btn-sm btn-icon text-danger" data-delete-sale="${saleId}" title="Delete Record & Restore Stock">🗑️</button>
+              <button type="button" class="btn btn-ghost btn-sm btn-icon text-danger" data-delete-sale="${saleId}" title="Delete Record & Restore Stock">${Icons.trash(15)}</button>
             </div>
           `;
         }
@@ -573,8 +573,8 @@ const Sales = {
 
         <h4 style="font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:0.05em;color:var(--text-tertiary);margin-bottom:8px">Customer & Delivery Info</h4>
         <div style="background:var(--bg-surface);border:1px solid var(--border-light);border-radius:var(--radius-md);padding:12px 16px;margin-bottom:16px">
-          <div style="font-size:var(--fs-base);font-weight:700;color:var(--text-primary);margin-bottom:6px">
-            👤 ${Utils.escapeHtml(sale.customerName || sale.customer_name || 'Customer')}
+          <div style="font-size:var(--fs-base);font-weight:700;color:var(--text-primary);margin-bottom:6px;display:flex;align-items:center;gap:6px">
+            ${Icons.user(16)} ${Utils.escapeHtml(sale.customerName || sale.customer_name || 'Customer')}
           </div>
           <div style="display:grid;grid-template-columns:repeat(2, 1fr);gap:8px;font-size:var(--fs-xs)">
             <div><strong>Phone:</strong> ${sale.customerPhone || sale.customer_phone ? Utils.escapeHtml(sale.customerPhone || sale.customer_phone) : '<span class="text-muted">—</span>'}</div>
@@ -585,7 +585,7 @@ const Sales = {
         <h4 style="font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:0.05em;color:var(--text-tertiary);margin-bottom:8px">Ordered Solar Product & Pricing</h4>
         <div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-lg);padding:14px;margin-bottom:16px">
           <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
-            <div class="product-thumb">☀️</div>
+            <div class="product-thumb" style="display:flex;align-items:center;justify-content:center;color:var(--color-primary-500)">${Icons.solarPanel(20)}</div>
             <div>
               <div style="font-weight:700;font-size:var(--fs-base);color:var(--text-primary)">
                 ${Utils.escapeHtml(sale.productName || sale.product_name)}
@@ -614,7 +614,7 @@ const Sales = {
 
         <!-- Inventory Stock Impact Info Banner -->
         <div style="background:rgba(14,165,233,0.08);border:1px solid rgba(14,165,233,0.25);border-radius:var(--radius-md);padding:12px 16px;margin-bottom:16px;font-size:var(--fs-xs);line-height:1.5">
-          <strong>📦 Live Inventory Synchronization:</strong>
+          <strong style="display:inline-flex;align-items:center;gap:4px">${Icons.package(15)} Live Inventory Synchronization:</strong>
           ${isSold
             ? ` ${sale.quantity} units were deducted from ready inventory and recorded as lifetime fulfilled sales for this product.`
             : ` ${sale.quantity} units are allocated on hold under Reserved status. Ready stock was adjusted accordingly to prevent double-booking.`}
@@ -634,7 +634,7 @@ const Sales = {
       content,
       footer: `
         <button type="button" class="btn btn-secondary" data-close-modal>Close</button>
-        <button type="button" class="btn btn-primary" id="modal-edit-sale-btn">✏️ Edit Order</button>
+        <button type="button" class="btn btn-primary" id="modal-edit-sale-btn">${Icons.edit(15)} Edit Order</button>
       `
     });
 
@@ -1079,7 +1079,7 @@ const Sales = {
     const modalContent = `
       <div style="padding:10px 0">
         <div style="background:rgba(239,68,68,0.08);border-left:4px solid var(--color-danger);padding:12px 16px;border-radius:var(--radius-md);margin-bottom:16px">
-          <div style="font-weight:700;color:var(--color-danger);margin-bottom:4px">⚠️ Delete Sale Order Confirmation</div>
+          <div style="font-weight:700;color:var(--color-danger);margin-bottom:4px;display:flex;align-items:center;gap:6px">${Icons.alertTriangle(16)} Delete Sale Order Confirmation</div>
           <div style="font-size:var(--fs-sm);color:var(--text-secondary);line-height:1.4">
             Are you sure you want to delete order <strong>${Utils.escapeHtml(sale.id || sale.sale_code)}</strong> for <strong>${Utils.escapeHtml(sale.customerName || sale.customer_name)}</strong>?
           </div>

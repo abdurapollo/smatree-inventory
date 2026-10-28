@@ -169,26 +169,26 @@ const FinishedGoods = {
       .reduce((sum, p) => sum + ((p.readyToSell || 0) * (p.pricePerUnit || 0)), 0);
 
     container.innerHTML = `
-      <div class="stat-card animate-fadeInUp delay-1" style="--card-accent:var(--color-primary-400)">
-        <div class="stat-icon blue">☀️</div>
+      <div class="stat-card animate-fadeInUp delay-1" style="--card-accent:var(--color-primary-500)">
+        <div class="stat-icon blue">${Icons.solarPanel(22)}</div>
         <div class="stat-value" id="stat-fg-active">${stats.totalActive}</div>
         <div class="stat-label">Active Panel Models</div>
         <div class="stat-trend" style="color:var(--color-success)">● Catalog Live</div>
       </div>
-      <div class="stat-card animate-fadeInUp delay-2" style="--card-accent:var(--color-emerald-400)">
-        <div class="stat-icon green">📦</div>
+      <div class="stat-card animate-fadeInUp delay-2" style="--card-accent:var(--color-emerald-500)">
+        <div class="stat-icon green">${Icons.package(22)}</div>
         <div class="stat-value" id="stat-fg-produced">${Utils.formatNumber(stats.totalProduced)}</div>
         <div class="stat-label">Total Manufactured</div>
         <div class="stat-trend" style="color:var(--text-muted)">Lifetime production</div>
       </div>
-      <div class="stat-card animate-fadeInUp delay-3" style="--card-accent:var(--color-solar-400)">
-        <div class="stat-icon amber">⚡</div>
+      <div class="stat-card animate-fadeInUp delay-3" style="--card-accent:var(--color-solar-500)">
+        <div class="stat-icon amber">${Icons.zap(22)}</div>
         <div class="stat-value" id="stat-fg-ready">${Utils.formatNumber(stats.readyToSell)}</div>
         <div class="stat-label">Ready to Sell Stock</div>
         <div class="stat-trend" style="color:var(--color-warning)">Est. ${Utils.formatCurrency(readyValue)}</div>
       </div>
       <div class="stat-card animate-fadeInUp delay-4" style="--card-accent:#a855f7">
-        <div class="stat-icon purple" style="background:rgba(168,85,247,0.12);color:#a855f7">📁</div>
+        <div class="stat-icon purple" style="background:rgba(168,85,247,0.12);color:#a855f7">${Icons.folder(22)}</div>
         <div class="stat-value" id="stat-fg-archived">${stats.totalArchived}</div>
         <div class="stat-label">Soft-Deleted / Archived</div>
         <div class="stat-trend" style="color:${stats.totalArchived > 0 ? '#a855f7' : 'var(--text-muted)'}">
@@ -211,10 +211,10 @@ const FinishedGoods = {
     container.innerHTML = `
       <div class="tabs" style="border-bottom:1px solid var(--border-color);margin-bottom:var(--space-4)">
         <button type="button" class="tab ${this.state.currentTab === 'active' ? 'active' : ''}" id="tab-active-prods" style="background:none;border:none">
-          ☀️ Active Products <span class="badge ${this.state.currentTab === 'active' ? 'badge-primary' : 'badge-neutral'}" style="margin-left:6px">${activeCount}</span>
+          ${Icons.solarPanel(16)} Active Products <span class="badge ${this.state.currentTab === 'active' ? 'badge-primary' : 'badge-neutral'}" style="margin-left:6px">${activeCount}</span>
         </button>
         <button type="button" class="tab ${this.state.currentTab === 'archived' ? 'active' : ''}" id="tab-archived-prods" style="background:none;border:none">
-          📁 Archived / Soft-Deleted <span class="badge ${this.state.currentTab === 'archived' ? 'badge-purple' : 'badge-neutral'}" style="margin-left:6px">${archivedCount}</span>
+          ${Icons.folder(16)} Archived / Soft-Deleted <span class="badge ${this.state.currentTab === 'archived' ? 'badge-purple' : 'badge-neutral'}" style="margin-left:6px">${archivedCount}</span>
         </button>
       </div>
     `;
@@ -229,7 +229,7 @@ const FinishedGoods = {
 
     container.innerHTML = `
       <div class="search-box" style="flex:1;max-width:320px">
-        <span class="search-icon">🔍</span>
+        <span class="search-icon">${Icons.search(16)}</span>
         <input type="text" id="fg-search" placeholder="Search solar panels by model, name, watts..." value="${Utils.escapeHtml(this.state.searchQuery)}">
       </div>
       <div class="toolbar-actions" style="display:flex;gap:var(--space-3);align-items:center;flex-wrap:wrap">
@@ -241,7 +241,7 @@ const FinishedGoods = {
         <!-- View Switcher (Table vs Cards) -->
         <div class="view-toggle" title="Switch between Table and Grid Cards view">
           <button type="button" id="fg-btn-view-table" class="btn btn-sm ${this.state.viewMode === 'table' ? 'btn-primary' : 'btn-ghost'}">
-            📊 Table
+            ${Icons.reports(14)} Table
           </button>
           <button type="button" id="fg-btn-view-cards" class="btn btn-sm ${this.state.viewMode === 'cards' ? 'btn-primary' : 'btn-ghost'}">
             ⊞ Cards
@@ -249,10 +249,10 @@ const FinishedGoods = {
         </div>
 
         <button class="btn btn-secondary btn-sm" id="fg-export-btn" title="Export catalog to CSV spreadsheet">
-          📥 Export CSV
+          ${Icons.download(15)} Export CSV
         </button>
         <button class="btn btn-primary btn-sm" id="fg-add-btn" style="box-shadow:var(--shadow-md)">
-          <span style="font-size:1.1rem;margin-right:2px">+</span> Add Solar Product
+          ${Icons.plus(15)} Add Solar Product
         </button>
       </div>
     `;
@@ -296,7 +296,7 @@ const FinishedGoods = {
     const ready = parseInt(product.readyToSell) || 0;
 
     if (isArchived) {
-      return '<span class="badge badge-purple" style="font-weight:600">📁 Archived</span>';
+      return `<span class="badge badge-purple" style="font-weight:600;display:inline-flex;align-items:center;gap:4px">${Icons.folder(12)} Archived</span>`;
     } else if (product.status === 'out_of_stock' || ready <= 0) {
       return '<span class="badge badge-danger">● Out of Stock</span>';
     } else if (product.status === 'low_stock' || ready < 20) {
@@ -326,7 +326,7 @@ const FinishedGoods = {
         render: (row) => `
           <div class="d-flex align-center gap-3">
             <div class="product-thumb">
-              ${row.image ? `<img src="${row.image}" alt="">` : '☀️'}
+              ${row.image ? `<img src="${row.image}" alt="">` : Icons.solarPanel(20)}
             </div>
             <div>
               <div class="fw-semibold text-primary" style="display:flex;align-items:center;gap:6px">
@@ -418,19 +418,19 @@ const FinishedGoods = {
           if (isArchived) {
             return `
               <div class="actions">
-                <button class="btn btn-ghost btn-sm btn-icon" data-view-prod="${id}" title="View Technical Specs">👁️</button>
-                <button class="btn btn-ghost btn-sm btn-icon" data-edit-prod="${id}" title="Edit Specifications">✏️</button>
-                <button class="btn btn-ghost btn-sm btn-icon" data-restore-prod="${id}" title="Restore & Re-enable Product" style="color:var(--color-success)">🔄</button>
-                <button class="btn btn-ghost btn-sm btn-icon" data-permanent-delete-prod="${id}" title="Permanently Delete from Database" style="color:var(--color-danger)">❌</button>
+                <button class="btn btn-ghost btn-sm btn-icon" data-view-prod="${id}" title="View Technical Specs">${Icons.eye(15)}</button>
+                <button class="btn btn-ghost btn-sm btn-icon" data-edit-prod="${id}" title="Edit Specifications">${Icons.edit(15)}</button>
+                <button class="btn btn-ghost btn-sm btn-icon" data-restore-prod="${id}" title="Restore & Re-enable Product" style="color:var(--color-success)">${Icons.refresh(15)}</button>
+                <button class="btn btn-ghost btn-sm btn-icon text-danger" data-permanent-delete-prod="${id}" title="Permanently Delete from Database">${Icons.trash(15)}</button>
               </div>
             `;
           }
 
           return `
             <div class="actions">
-              <button class="btn btn-ghost btn-sm btn-icon" data-view-prod="${id}" title="View Technical Specs">👁️</button>
-              <button class="btn btn-ghost btn-sm btn-icon" data-edit-prod="${id}" title="Edit Specifications">✏️</button>
-              <button class="btn btn-ghost btn-sm btn-icon" data-soft-delete-prod="${id}" title="Soft Delete / Archive">🗑️</button>
+              <button class="btn btn-ghost btn-sm btn-icon" data-view-prod="${id}" title="View Technical Specs">${Icons.eye(15)}</button>
+              <button class="btn btn-ghost btn-sm btn-icon" data-edit-prod="${id}" title="Edit Specifications">${Icons.edit(15)}</button>
+              <button class="btn btn-ghost btn-sm btn-icon text-danger" data-soft-delete-prod="${id}" title="Soft Delete / Archive">${Icons.trash(15)}</button>
             </div>
           `;
         }
@@ -481,7 +481,7 @@ const FinishedGoods = {
       if (this.state.currentTab === 'archived') {
         container.innerHTML = `
           <div class="empty-state animate-fadeIn" style="padding:var(--space-12) var(--space-4);text-align:center">
-            <div class="empty-state-icon" style="font-size:3.5rem;margin-bottom:var(--space-3)">📁</div>
+            <div class="empty-state-icon" style="color:var(--color-purple-500);margin-bottom:var(--space-3)">${Icons.folder(44)}</div>
             <div class="empty-state-title" style="font-size:var(--fs-lg);font-weight:var(--fw-bold)">No Archived Products</div>
             <div class="empty-state-text" style="color:var(--text-muted);max-width:440px;margin:0 auto var(--space-4)">
               When you soft-delete any solar panel from active stock, it is safely preserved here. You can re-enable and restore archived products at any time.
@@ -492,12 +492,12 @@ const FinishedGoods = {
       } else {
         container.innerHTML = `
           <div class="empty-state animate-fadeIn" style="padding:var(--space-12) var(--space-4);text-align:center">
-            <div class="empty-state-icon" style="font-size:3.5rem;margin-bottom:var(--space-3)">☀️</div>
+            <div class="empty-state-icon" style="color:var(--color-primary-500);margin-bottom:var(--space-3)">${Icons.solarPanel(44)}</div>
             <div class="empty-state-title" style="font-size:var(--fs-lg);font-weight:var(--fw-bold)">No Solar Products Found</div>
             <div class="empty-state-text" style="color:var(--text-muted);max-width:440px;margin:0 auto var(--space-4)">
               ${this.state.searchQuery ? 'No solar panels match your current search criteria.' : 'Create your solar panel catalog to manage production batches and sales stock.'}
             </div>
-            <button class="btn btn-primary" id="empty-add-btn">+ Add Solar Product</button>
+            <button class="btn btn-primary" id="empty-add-btn">${Icons.plus(15)} Add Solar Product</button>
           </div>
         `;
       }
@@ -524,7 +524,7 @@ const FinishedGoods = {
               
               ${isArchived ? `
                 <div style="background:rgba(168,85,247,0.08);border-bottom:1px solid rgba(168,85,247,0.2);padding:6px 12px;margin:-1.5rem -1.5rem 1rem -1.5rem;font-size:var(--fs-xs);color:#a855f7;font-weight:600;display:flex;align-items:center;gap:6px">
-                  <span>ℹ️</span> Archived product — Hidden from active sales orders
+                  <span>${Icons.info(14)}</span> Archived product — Hidden from active sales orders
                 </div>
               ` : ''}
 
@@ -539,8 +539,8 @@ const FinishedGoods = {
 
               <!-- Product Info -->
               <div style="text-align:center;margin-bottom:var(--space-4);padding-top:var(--space-2)">
-                <div style="width:64px;height:64px;margin:0 auto var(--space-3);background:linear-gradient(135deg, rgba(245,158,11,0.15), rgba(59,130,246,0.15));border-radius:var(--radius-xl);display:flex;align-items:center;justify-content:center;font-size:2rem;box-shadow:var(--shadow-sm)">
-                  ☀️
+                <div style="width:58px;height:58px;margin:0 auto var(--space-3);background:linear-gradient(135deg, rgba(245,158,11,0.12), rgba(59,130,246,0.12));border-radius:var(--radius-xl);display:flex;align-items:center;justify-content:center;color:var(--color-primary-500);box-shadow:var(--shadow-xs)">
+                  ${Icons.solarPanel(28)}
                 </div>
                 <h4 class="fs-md fw-semibold" style="margin-bottom:4px;color:var(--text-primary)">${Utils.escapeHtml(p.name)}</h4>
                 <div class="d-flex justify-center align-center" style="gap:8px">
@@ -564,7 +564,7 @@ const FinishedGoods = {
                 </div>
                 <div class="d-flex justify-between align-center">
                   <span class="text-muted">Warranty Guarantee</span>
-                  <span class="fw-medium" style="color:var(--color-solar-500)">🛡️ ${Utils.escapeHtml(p.warranty || '25 Years')}</span>
+                  <span class="fw-medium" style="color:var(--color-solar-500);display:inline-flex;align-items:center;gap:4px">${Icons.shield(13)} ${Utils.escapeHtml(p.warranty || '25 Years')}</span>
                 </div>
               </div>
 
@@ -601,29 +601,29 @@ const FinishedGoods = {
 
               <!-- Notes if any -->
               ${p.notes ? `
-                <div class="fs-xs text-muted mb-3" style="font-style:italic;line-height:1.3">
-                  📝 "${Utils.escapeHtml(p.notes)}"
+                <div class="fs-xs text-muted mb-3" style="font-style:italic;line-height:1.3;display:flex;align-items:center;gap:4px">
+                  ${Icons.fileText(12)} "${Utils.escapeHtml(p.notes)}"
                 </div>
               ` : ''}
 
               <!-- Actions Section (Pinned to Bottom) -->
               <div style="margin-top:auto;display:flex;gap:var(--space-2);padding-top:var(--space-3);border-top:1px solid var(--border-light);flex-wrap:wrap">
                 <button type="button" class="btn btn-ghost btn-sm" data-view-prod="${id}" title="View Technical Specs">
-                  👁️ Specs
+                  ${Icons.eye(14)} Specs
                 </button>
                 <button type="button" class="btn btn-secondary btn-sm flex-1" data-edit-prod="${id}" title="Edit Specifications">
-                  ✏️ Edit
+                  ${Icons.edit(14)} Edit
                 </button>
                 ${isArchived ? `
                   <button type="button" class="btn btn-success btn-sm flex-1" data-restore-prod="${id}" style="font-weight:600">
-                    🔄 Re-enable
+                    ${Icons.refresh(14)} Re-enable
                   </button>
                   <button type="button" class="btn btn-danger btn-sm" data-permanent-delete-prod="${id}" title="Delete Permanently" style="padding:6px 10px">
-                    ❌
+                    ${Icons.x(14)}
                   </button>
                 ` : `
                   <button type="button" class="btn btn-danger btn-sm" data-soft-delete-prod="${id}" title="Soft Delete / Archive" style="background:rgba(239,68,68,0.1);color:var(--color-danger);border:1px solid rgba(239,68,68,0.25)">
-                    🗑️ Soft Delete
+                    ${Icons.trash(14)} Soft Delete
                   </button>
                 `}
               </div>
@@ -761,8 +761,8 @@ const FinishedGoods = {
     const content = `
       <div style="padding-top:4px">
         <div style="display:flex;align-items:center;gap:14px;background:var(--bg-badge);padding:14px 18px;border-radius:var(--radius-lg);margin-bottom:16px">
-          <div style="width:52px;height:52px;border-radius:var(--radius-md);background:linear-gradient(135deg, rgba(245,158,11,0.2), rgba(59,130,246,0.2));display:flex;align-items:center;justify-content:center;font-size:1.8rem">
-            ☀️
+          <div style="width:52px;height:52px;border-radius:var(--radius-md);background:linear-gradient(135deg, rgba(245,158,11,0.15), rgba(59,130,246,0.15));display:flex;align-items:center;justify-content:center;color:var(--color-primary-500)">
+            ${Icons.solarPanel(26)}
           </div>
           <div style="flex:1">
             <div style="display:flex;align-items:center;gap:8px">
@@ -844,7 +844,7 @@ const FinishedGoods = {
       content,
       footer: `
         <button type="button" class="btn btn-secondary" data-close-modal>Close</button>
-        <button type="button" class="btn btn-primary" id="fg-view-edit-btn">✏️ Edit Product</button>
+        <button type="button" class="btn btn-primary" id="fg-view-edit-btn">${Icons.edit(15)} Edit Product</button>
       `
     });
 
@@ -1140,7 +1140,7 @@ const FinishedGoods = {
     const modalContent = `
       <div style="padding:10px 0">
         <div style="background:rgba(239,68,68,0.08);border-left:4px solid var(--color-danger);padding:12px 16px;border-radius:var(--radius-md);margin-bottom:16px">
-          <div style="font-weight:600;color:var(--color-danger);margin-bottom:4px">⚠️ Soft Delete Confirmation</div>
+          <div style="font-weight:600;color:var(--color-danger);margin-bottom:4px;display:flex;align-items:center;gap:6px">${Icons.alertTriangle(16)} Soft Delete Confirmation</div>
           <div style="font-size:var(--fs-sm);color:var(--text-secondary);line-height:1.4">
             This will soft-delete <strong>${Utils.escapeHtml(product.name)}</strong> (<code>${product.product_code || product.id}</code>).
           </div>
@@ -1214,7 +1214,7 @@ const FinishedGoods = {
     const modalContent = `
       <div style="padding:10px 0">
         <div style="background:rgba(16,185,129,0.08);border-left:4px solid var(--color-success);padding:12px 16px;border-radius:var(--radius-md);margin-bottom:16px">
-          <div style="font-weight:600;color:var(--color-success);margin-bottom:4px">🔄 Restore & Re-enable Product</div>
+          <div style="font-weight:600;color:var(--color-success);margin-bottom:4px;display:flex;align-items:center;gap:6px">${Icons.refresh(16)} Restore & Re-enable Product</div>
           <div style="font-size:var(--fs-sm);color:var(--text-secondary);line-height:1.4">
             Re-enable <strong>${Utils.escapeHtml(product.name)}</strong> (<code>${product.product_code || product.id}</code>)?
           </div>
@@ -1285,7 +1285,7 @@ const FinishedGoods = {
     const modalContent = `
       <div style="padding:10px 0">
         <div style="background:rgba(239,68,68,0.12);border-left:4px solid var(--color-danger);padding:14px 18px;border-radius:var(--radius-md);margin-bottom:16px">
-          <div style="font-weight:700;color:var(--color-danger);margin-bottom:4px">🚨 Permanent Deletion Warning</div>
+          <div style="font-weight:700;color:var(--color-danger);margin-bottom:4px;display:flex;align-items:center;gap:6px">${Icons.alertTriangle(16)} Permanent Deletion Warning</div>
           <div style="font-size:var(--fs-sm);color:var(--text-secondary);line-height:1.4">
             Are you sure you want to permanently delete <strong>${Utils.escapeHtml(product.name)}</strong> (<code>${product.product_code || product.id}</code>)?
           </div>

@@ -83,23 +83,23 @@ const Production = {
     }
 
     container.innerHTML = `
-      <div class="stat-card animate-fadeInUp delay-1" style="--card-accent:var(--color-primary-400)">
-        <div class="stat-icon blue">🏭</div>
+      <div class="stat-card animate-fadeInUp delay-1" style="--card-accent:var(--color-primary-500)">
+        <div class="stat-icon blue">${Icons.production(22)}</div>
         <div class="stat-value">${stats.totalBatches}</div>
         <div class="stat-label">Total Batches</div>
       </div>
-      <div class="stat-card animate-fadeInUp delay-2" style="--card-accent:var(--color-solar-400)">
-        <div class="stat-icon amber">⏳</div>
+      <div class="stat-card animate-fadeInUp delay-2" style="--card-accent:var(--color-solar-500)">
+        <div class="stat-icon amber">${Icons.clock(22)}</div>
         <div class="stat-value">${stats.inProgress}</div>
         <div class="stat-label">In Production</div>
       </div>
-      <div class="stat-card animate-fadeInUp delay-3" style="--card-accent:var(--color-emerald-400)">
-        <div class="stat-icon green">✅</div>
+      <div class="stat-card animate-fadeInUp delay-3" style="--card-accent:var(--color-emerald-500)">
+        <div class="stat-icon green">${Icons.check(22)}</div>
         <div class="stat-value">${stats.completed}</div>
         <div class="stat-label">Completed</div>
       </div>
-      <div class="stat-card animate-fadeInUp delay-4" style="--card-accent:var(--color-purple-400)">
-        <div class="stat-icon purple">☀️</div>
+      <div class="stat-card animate-fadeInUp delay-4" style="--card-accent:var(--color-purple-500)">
+        <div class="stat-icon purple">${Icons.solarPanel(22)}</div>
         <div class="stat-value">${Utils.formatNumber(stats.totalPanels)}</div>
         <div class="stat-label">Panels Produced</div>
       </div>
@@ -125,17 +125,17 @@ const Production = {
         <button class="btn btn-sm ${this.state.activeTab === 'all' ? 'btn-primary' : 'btn-ghost'}" data-prod-tab="all">
           All Batches <span class="badge ${this.state.activeTab === 'all' ? 'badge-primary' : 'badge-neutral'} ml-1" style="font-size:10px">${counts.all}</span>
         </button>
-        <button class="btn btn-sm ${this.state.activeTab === 'In Production' ? 'btn-primary' : 'btn-ghost'}" data-prod-tab="In Production">
-          ⏳ In Production <span class="badge ml-1" style="font-size:10px">${counts['In Production']}</span>
+        <button class="btn btn-sm ${this.state.activeTab === 'In Production' ? 'btn-primary' : 'btn-ghost'}" data-prod-tab="In Production" style="display:inline-flex;align-items:center;gap:4px">
+          ${Icons.clock(13)} In Production <span class="badge ml-1" style="font-size:10px">${counts['In Production']}</span>
         </button>
-        <button class="btn btn-sm ${this.state.activeTab === 'Quality Check' ? 'btn-primary' : 'btn-ghost'}" data-prod-tab="Quality Check">
-          🔬 Quality Check <span class="badge ml-1" style="font-size:10px">${counts['Quality Check']}</span>
+        <button class="btn btn-sm ${this.state.activeTab === 'Quality Check' ? 'btn-primary' : 'btn-ghost'}" data-prod-tab="Quality Check" style="display:inline-flex;align-items:center;gap:4px">
+          ${Icons.shield(13)} Quality Check <span class="badge ml-1" style="font-size:10px">${counts['Quality Check']}</span>
         </button>
-        <button class="btn btn-sm ${this.state.activeTab === 'Completed' ? 'btn-primary' : 'btn-ghost'}" data-prod-tab="Completed">
-          ✅ Completed <span class="badge ml-1" style="font-size:10px">${counts['Completed']}</span>
+        <button class="btn btn-sm ${this.state.activeTab === 'Completed' ? 'btn-primary' : 'btn-ghost'}" data-prod-tab="Completed" style="display:inline-flex;align-items:center;gap:4px">
+          ${Icons.check(13)} Completed <span class="badge ml-1" style="font-size:10px">${counts['Completed']}</span>
         </button>
-        <button class="btn btn-sm ${this.state.activeTab === 'Pending' ? 'btn-primary' : 'btn-ghost'}" data-prod-tab="Pending">
-          📋 Pending <span class="badge ml-1" style="font-size:10px">${counts['Pending']}</span>
+        <button class="btn btn-sm ${this.state.activeTab === 'Pending' ? 'btn-primary' : 'btn-ghost'}" data-prod-tab="Pending" style="display:inline-flex;align-items:center;gap:4px">
+          ${Icons.fileText(13)} Pending <span class="badge ml-1" style="font-size:10px">${counts['Pending']}</span>
         </button>
       </div>
     `;
@@ -148,18 +148,18 @@ const Production = {
 
     container.innerHTML = `
       <div class="search-box" style="flex:1;max-width:320px">
-        <span class="search-icon">🔍</span>
+        <span class="search-icon">${Icons.search(16)}</span>
         <input type="text" id="prod-search" placeholder="Search batch ID, panel, team..." value="${Utils.escapeHtml(this.state.searchQuery)}">
       </div>
       <div class="toolbar-actions d-flex align-center gap-2">
-        <button class="btn btn-secondary btn-sm" id="prod-export-btn" title="Export CSV report">
-          📥 Export CSV
+        <button class="btn btn-secondary btn-sm" id="prod-export-btn" title="Export CSV report" style="display:inline-flex;align-items:center;gap:5px">
+          ${Icons.download(15)} Export CSV
         </button>
         <button class="btn btn-secondary btn-sm btn-icon" id="prod-refresh-btn" title="Refresh live batches">
-          🔄
+          ${Icons.refresh(15)}
         </button>
-        <button class="btn btn-primary btn-sm" id="prod-add-btn">
-          + New Batch
+        <button class="btn btn-primary btn-sm" id="prod-add-btn" style="display:inline-flex;align-items:center;gap:5px">
+          ${Icons.plus(15)} New Batch
         </button>
       </div>
     `;
@@ -248,7 +248,7 @@ const Production = {
         key: 'teamAssigned',
         render: (r) => `
           <div>
-            <div class="fs-xs fw-semibold">👷 ${Utils.escapeHtml(r.teamAssigned)}</div>
+            <div class="fs-xs fw-semibold" style="display:flex;align-items:center;gap:4px">${Icons.worker(13)} ${Utils.escapeHtml(r.teamAssigned)}</div>
             <div class="fs-xs text-muted">Start: ${Utils.formatDate(r.startDate)}</div>
           </div>`
       },
@@ -259,7 +259,7 @@ const Production = {
           <div class="batch-progress" style="min-width:110px">
             <div class="d-flex justify-between mb-1">
               <span class="fs-xs fw-medium">${r.progress}%</span>
-              ${r.status === 'Completed' ? '<span class="fs-xs text-success fw-bold">✓ Ready</span>' : ''}
+              ${r.status === 'Completed' ? `<span class="fs-xs text-success fw-bold" style="display:inline-flex;align-items:center;gap:3px">${Icons.check(12)} Ready</span>` : ''}
             </div>
             <div class="progress" style="height:6px;background:var(--bg-badge);border-radius:999px;overflow:hidden">
               <div class="progress-bar ${r.progress >= 100 ? 'bg-success' : r.progress > 50 ? 'bg-primary' : 'bg-warning'}" 
@@ -281,10 +281,10 @@ const Production = {
         label: 'Actions',
         render: (r) => `
           <div class="actions d-flex align-center gap-1">
-            <button class="btn btn-ghost btn-sm btn-icon" data-view-prod="${r.id}" title="View Batch Details">👁️</button>
-            ${r.status !== 'Completed' ? `<button class="btn btn-ghost btn-sm btn-icon text-success" data-complete-prod="${r.id}" title="Complete Batch & Add to Stock">✔️</button>` : ''}
-            <button class="btn btn-ghost btn-sm btn-icon" data-edit-prod="${r.id}" title="Edit Batch">✏️</button>
-            <button class="btn btn-ghost btn-sm btn-icon text-danger" data-delete-prod="${r.id}" title="Delete Batch">🗑️</button>
+            <button class="btn btn-ghost btn-sm btn-icon" data-view-prod="${r.id}" title="View Batch Details">${Icons.eye(15)}</button>
+            ${r.status !== 'Completed' ? `<button class="btn btn-ghost btn-sm btn-icon text-success" data-complete-prod="${r.id}" title="Complete Batch & Add to Stock">${Icons.check(15)}</button>` : ''}
+            <button class="btn btn-ghost btn-sm btn-icon" data-edit-prod="${r.id}" title="Edit Batch">${Icons.edit(15)}</button>
+            <button class="btn btn-ghost btn-sm btn-icon text-danger" data-delete-prod="${r.id}" title="Delete Batch">${Icons.trash(15)}</button>
           </div>`
       }
     ];
@@ -604,9 +604,9 @@ const Production = {
 
         <table class="table mb-4" style="font-size:var(--fs-sm)">
           <tbody>
-            <tr><th style="width:35%">Team Assigned</th><td>👷 ${Utils.escapeHtml(item.teamAssigned)}</td></tr>
-            <tr><th>Start Date</th><td>📅 ${Utils.formatDate(item.startDate)}</td></tr>
-            <tr><th>Completion Date</th><td>🏁 ${item.completionDate ? Utils.formatDate(item.completionDate) : 'In Progress'}</td></tr>
+            <tr><th style="width:35%">Team Assigned</th><td><span style="display:inline-flex;align-items:center;gap:5px">${Icons.worker(14)} ${Utils.escapeHtml(item.teamAssigned)}</span></td></tr>
+            <tr><th>Start Date</th><td><span style="display:inline-flex;align-items:center;gap:5px">${Icons.calendar(14)} ${Utils.formatDate(item.startDate)}</span></td></tr>
+            <tr><th>Completion Date</th><td><span style="display:inline-flex;align-items:center;gap:5px">${Icons.check(14)} ${item.completionDate ? Utils.formatDate(item.completionDate) : 'In Progress'}</span></td></tr>
             <tr><th>Progress</th><td>${item.progress}%</td></tr>
             <tr><th>Materials Used</th><td>${Utils.escapeHtml(item.materialsUsed || 'Standard solar cell BOM')}</td></tr>
             <tr><th>Notes</th><td>${Utils.escapeHtml(item.notes || 'None')}</td></tr>

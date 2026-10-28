@@ -64,23 +64,23 @@ const Inventory = {
     const categories = new Set(items.map(i => i.category)).size;
 
     container.innerHTML = `
-      <div class="stat-card animate-fadeInUp delay-1" style="--card-accent:var(--color-primary-400)">
-        <div class="stat-icon blue">📦</div>
+      <div class="stat-card animate-fadeInUp delay-1" style="--card-accent:var(--color-primary-500)">
+        <div class="stat-icon blue">${Icons.package(20)}</div>
         <div class="stat-value">${inv.totalMaterials}</div>
         <div class="stat-label">Total Materials</div>
       </div>
-      <div class="stat-card animate-fadeInUp delay-2" style="--card-accent:var(--color-emerald-400)">
-        <div class="stat-icon green">📂</div>
+      <div class="stat-card animate-fadeInUp delay-2" style="--card-accent:var(--color-emerald-500)">
+        <div class="stat-icon green">${Icons.folder(20)}</div>
         <div class="stat-value">${categories}</div>
         <div class="stat-label">Categories</div>
       </div>
-      <div class="stat-card animate-fadeInUp delay-3" style="--card-accent:var(--color-red-400)">
-        <div class="stat-icon red">⚠️</div>
+      <div class="stat-card animate-fadeInUp delay-3" style="--card-accent:var(--color-red-500)">
+        <div class="stat-icon red">${Icons.alertTriangle(20)}</div>
         <div class="stat-value">${inv.lowStockCount}</div>
         <div class="stat-label">Low Stock Items</div>
       </div>
-      <div class="stat-card animate-fadeInUp delay-4" style="--card-accent:var(--color-solar-400)">
-        <div class="stat-icon amber">💰</div>
+      <div class="stat-card animate-fadeInUp delay-4" style="--card-accent:var(--color-solar-500)">
+        <div class="stat-icon amber">${Icons.coins(20)}</div>
         <div class="stat-value">${Utils.formatCurrency(inv.totalValue)}</div>
         <div class="stat-label">Inventory Value</div>
       </div>
@@ -94,7 +94,7 @@ const Inventory = {
 
     container.innerHTML = `
       <div class="search-box" style="flex:1;max-width:320px">
-        <span class="search-icon">🔍</span>
+        <span class="search-icon">${Icons.search(16)}</span>
         <input type="text" id="inv-search" placeholder="Search materials..." value="${this.state.searchQuery}">
       </div>
       <select class="form-control" id="inv-category-filter" style="width:auto;min-width:160px;border-radius:999px;padding:0.5rem 2rem 0.5rem 0.75rem;font-size:var(--fs-xs)">
@@ -102,8 +102,8 @@ const Inventory = {
         ${this.categories.map(c => `<option value="${c}" ${this.state.categoryFilter === c ? 'selected' : ''}>${c}</option>`).join('')}
       </select>
       <div class="toolbar-actions">
-        <button class="btn btn-secondary btn-sm" id="inv-export-btn">📥 Export CSV</button>
-        <button class="btn btn-primary btn-sm" id="inv-add-btn">+ Add Material</button>
+        <button class="btn btn-secondary btn-sm" id="inv-export-btn">${Icons.download(15)} <span>Export CSV</span></button>
+        <button class="btn btn-primary btn-sm" id="inv-add-btn">${Icons.plus(15)} <span>Add Material</span></button>
       </div>
     `;
   },
@@ -132,7 +132,7 @@ const Inventory = {
     const columns = [
       { label: 'Material', key: 'name', sortable: true, render: (row) => `
         <div class="d-flex align-center gap-3">
-          <div class="material-thumb">${row.image ? `<img src="${row.image}" alt="">` : '📦'}</div>
+          <div class="material-thumb">${row.image ? `<img src="${row.image}" alt="">` : Icons.package(20)}</div>
           <div>
             <div class="fw-semibold text-primary">${Utils.escapeHtml(row.name)}</div>
             <div class="fs-xs text-muted">${row.id}</div>
@@ -149,8 +149,8 @@ const Inventory = {
       }},
       { label: 'Actions', key: 'actions', render: (row) => `
         <div class="actions">
-          <button class="btn btn-ghost btn-sm btn-icon" data-edit="${row.id}" data-tooltip="Edit">✏️</button>
-          <button class="btn btn-ghost btn-sm btn-icon" data-delete="${row.id}" data-tooltip="Delete">🗑️</button>
+          <button class="btn btn-ghost btn-sm btn-icon" data-edit="${row.id}" data-tooltip="Edit">${Icons.edit(15)}</button>
+          <button class="btn btn-ghost btn-sm btn-icon text-danger" data-delete="${row.id}" data-tooltip="Delete">${Icons.trash(15)}</button>
         </div>` },
     ];
 
@@ -285,7 +285,7 @@ const Inventory = {
         <div class="form-group">
           <label class="form-label">Image</label>
           <div class="image-upload" id="mat-image-upload">
-            ${item?.image ? `<img src="${item.image}" alt="Material">` : '<span>📷 Click to upload image</span>'}
+            ${item?.image ? `<img src="${item.image}" alt="Material">` : `<span>${Icons.camera(18)} Click to upload image</span>`}
             <input type="file" id="mat-image-file" accept="image/*">
           </div>
         </div>

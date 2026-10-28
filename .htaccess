@@ -1,0 +1,8 @@
+<IfModule mod_headers.c>
+  # Prevent caching of HTML files so changes and modern assets always load fresh
+  <FilesMatch "\.(html|htm)$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+  </FilesMatch>
+</IfModule>

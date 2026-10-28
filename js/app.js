@@ -5,12 +5,57 @@
 
 const App = {
   init() {
+    // Purge legacy Service Worker & stale CacheStorage
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(regs => {
+        regs.forEach(r => r.unregister());
+      }).catch(() => {});
+    }
+    if (window.caches) {
+      caches.keys().then(keys => {
+        keys.forEach(k => caches.delete(k));
+      }).catch(() => {});
+    }
+
     // Seed demo data on first load
     SeedData.generate();
     // Apply saved theme
     this.applyTheme();
+    // Live navbar clock
+    this.initClock();
     // Setup global event listeners
     this.setupGlobalEvents();
+  },
+
+  /* ── Live Header Clock ── */
+  initClock() {
+    const clockEl = document.getElementById('dash-live-clock');
+    const dateEl = document.getElementById('dash-live-date');
+    if (!clockEl && !dateEl) return;
+
+    const updateClock = () => {
+      const now = new Date();
+      if (clockEl) {
+        clockEl.textContent = now.toLocaleTimeString('en-IN', {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: true
+        });
+      }
+      if (dateEl) {
+        dateEl.textContent = now.toLocaleDateString('en-IN', {
+          weekday: 'long',
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric'
+        });
+      }
+    };
+
+    updateClock();
+    if (this._clockInterval) clearInterval(this._clockInterval);
+    this._clockInterval = setInterval(updateClock, 1000);
   },
 
   /* ── Theme Management ── */
@@ -27,7 +72,7 @@ const App = {
     Store.updateSettings({ theme: newTheme });
     document.documentElement.setAttribute('data-theme', newTheme);
     const btn = document.getElementById('theme-toggle');
-    if (btn) btn.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+    if (btn) btn.innerHTML = typeof Icons !== 'undefined' ? (newTheme === 'dark' ? Icons.sun(18) : Icons.moon(18)) : (newTheme === 'dark' ? '☀️' : '🌙');
   },
 
   /* ── Sidebar Mobile Toggle ── */
@@ -118,6 +163,27 @@ const App = {
           window._onPageChange(page);
         }
       }
+
+      // Header live telemetry sync button
+      if (e.target.closest('#dash-refresh-btn')) {
+        if (typeof Dashboard !== 'undefined' && typeof Dashboard.refreshData === 'function') {
+          Dashboard.refreshData(true);
+        } else {
+          const syncBtn = document.getElementById('dash-refresh-btn');
+          if (syncBtn) {
+            syncBtn.classList.add('loading');
+            syncBtn.style.opacity = '0.7';
+            setTimeout(() => {
+              syncBtn.classList.remove('loading');
+              syncBtn.style.opacity = '1';
+              if (typeof Components !== 'undefined') {
+                Components.syncNavBadgesWithBackend();
+                Components.toast('success', 'Telemetry Synchronized', 'Live operational telemetry refreshed.');
+              }
+            }, 450);
+          }
+        }
+      }
     });
 
     // Escape key to close modals
@@ -150,6 +216,10 @@ const App = {
     if (mainContent) {
       appEl.insertAdjacentHTML('afterbegin', sidebarHtml);
       mainContent.insertAdjacentHTML('afterbegin', navbarHtml);
+
+      // Start common real-time dynamic clock across all pages
+      this.initClock();
+
       if (typeof Components !== 'undefined') {
         Components.updateNavBadges();
         Components.syncNavBadgesWithBackend();

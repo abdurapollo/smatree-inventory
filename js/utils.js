@@ -455,7 +455,7 @@ const Utils = {
         }
       }
       errEl.style.display = 'flex';
-      errEl.innerHTML = `<span class="form-error-icon">⚠️</span><span>${Utils.escapeHtml(message)}</span>`;
+      errEl.innerHTML = `<span class="form-error-icon">${typeof Icons !== 'undefined' ? Icons.alertTriangle(13) : '⚠️'}</span><span>${Utils.escapeHtml(message)}</span>`;
     },
 
     /**

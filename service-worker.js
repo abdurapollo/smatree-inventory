@@ -3,7 +3,7 @@
    PWA offline support and caching
    ========================================================================== */
 
-const CACHE_NAME = 'smatree-solar-v5';
+const CACHE_NAME = 'smatree-solar-v7';
 const ASSETS = [
   '/smatree-inventory/pages/login.html',
   '/smatree-inventory/pages/dashboard.html',
@@ -24,6 +24,7 @@ const ASSETS = [
   '/smatree-inventory/css/production.css',
   '/smatree-inventory/css/installations.css',
   '/smatree-inventory/css/reports.css',
+  '/smatree-inventory/js/icons.js',
   '/smatree-inventory/js/utils.js',
   '/smatree-inventory/js/store.js',
   '/smatree-inventory/js/seed.js',
@@ -40,22 +41,22 @@ const ASSETS = [
   '/smatree-inventory/js/reports.js',
 ];
 
-// Install - cache assets
+// Self-destruct and purge legacy caches
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
-  );
   self.skipWaiting();
 });
 
-// Activate - clean old caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
-    )
+    caches.keys().then((keys) => Promise.all(keys.map((k) => caches.delete(k))))
+      .then(() => self.registration.unregister())
+      .then(() => self.clients.claim())
   );
-  self.clients.claim();
+});
+
+self.addEventListener('fetch', (event) => {
+  // Always network-only
+  event.respondWith(fetch(event.request));
 });
 
 // Fetch - network first, fallback to cache
