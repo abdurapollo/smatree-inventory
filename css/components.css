@@ -142,23 +142,136 @@
   box-shadow: 0 12px 24px -4px rgba(15, 23, 42, 0.08), 0 4px 8px -2px rgba(15, 23, 42, 0.04);
   border-color: rgba(37, 99, 235, 0.3);
 }
-.stat-card .stat-icon {
-  width: 44px; height: 44px;
-  border-radius: 11px;
-  display: flex; align-items: center; justify-content: center;
+
+/* ── Stat Card Header ── */
+.stat-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-3);
+  width: 100%;
+}
+.stat-card-header .stat-icon,
+.stat-card-header .stat-icon-wrap {
+  margin-bottom: 0 !important;
+}
+
+/* ── Dashboard-Style Glowing Stat Icons ── */
+.stat-card .stat-icon,
+.stat-card .stat-icon-wrap,
+.stat-icon,
+.stat-icon-wrap {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-lg, 12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 1.2rem;
   margin-bottom: 0.875rem;
   line-height: 1;
   flex-shrink: 0;
-  transition: transform var(--transition-fast);
+  transition: transform var(--transition-spring, 300ms cubic-bezier(0.34, 1.56, 0.64, 1)), box-shadow var(--transition-fast, 150ms ease);
 }
-.stat-card:hover .stat-icon {
-  transform: scale(1.08);
+.stat-card:hover .stat-icon,
+.stat-card:hover .stat-icon-wrap {
+  transform: scale(1.1);
 }
-.stat-card .stat-icon svg {
-  width: 22px; height: 22px;
+.stat-card .stat-icon svg,
+.stat-card .stat-icon-wrap svg,
+.stat-icon svg,
+.stat-icon-wrap svg {
+  width: 22px;
+  height: 22px;
   stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
 }
+
+/* Dashboard-Style Vibrant Tinted Icon Palettes */
+.stat-icon.blue, .stat-icon-wrap.blue,
+.stat-icon.primary, .stat-icon-wrap.primary {
+  background: rgba(14, 165, 233, 0.12);
+  color: var(--color-primary-500, #0ea5e9);
+  box-shadow: 0 2px 8px rgba(14, 165, 233, 0.14);
+}
+.stat-icon.amber, .stat-icon-wrap.amber,
+.stat-icon.solar, .stat-icon-wrap.solar,
+.stat-icon.yellow, .stat-icon-wrap.yellow,
+.stat-icon.warning, .stat-icon-wrap.warning {
+  background: rgba(245, 158, 11, 0.12);
+  color: var(--color-solar-500, #f59e0b);
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.14);
+}
+.stat-icon.green, .stat-icon-wrap.green,
+.stat-icon.emerald, .stat-icon-wrap.emerald,
+.stat-icon.success, .stat-icon-wrap.success {
+  background: rgba(16, 185, 129, 0.12);
+  color: var(--color-emerald-500, #10b981);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.14);
+}
+.stat-icon.purple, .stat-icon-wrap.purple,
+.stat-icon.violet, .stat-icon-wrap.violet,
+.stat-icon.indigo, .stat-icon-wrap.indigo {
+  background: rgba(168, 85, 247, 0.12);
+  color: var(--color-purple-500, #a855f7);
+  box-shadow: 0 2px 8px rgba(168, 85, 247, 0.14);
+}
+.stat-icon.red, .stat-icon-wrap.red,
+.stat-icon.danger, .stat-icon-wrap.danger {
+  background: rgba(239, 68, 68, 0.12);
+  color: var(--color-red-500, #ef4444);
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.14);
+}
+.stat-icon.cyan, .stat-icon-wrap.cyan,
+.stat-icon.info, .stat-icon-wrap.info {
+  background: rgba(6, 182, 212, 0.12);
+  color: #06b6d4;
+  box-shadow: 0 2px 8px rgba(6, 182, 212, 0.14);
+}
+
+/* Dark Mode Glow & High Contrast */
+[data-theme="dark"] .stat-icon.blue, [data-theme="dark"] .stat-icon-wrap.blue,
+[data-theme="dark"] .stat-icon.primary, [data-theme="dark"] .stat-icon-wrap.primary {
+  background: rgba(14, 165, 233, 0.22);
+  color: #38bdf8;
+  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.28);
+}
+[data-theme="dark"] .stat-icon.amber, [data-theme="dark"] .stat-icon-wrap.amber,
+[data-theme="dark"] .stat-icon.solar, [data-theme="dark"] .stat-icon-wrap.solar,
+[data-theme="dark"] .stat-icon.yellow, [data-theme="dark"] .stat-icon-wrap.yellow,
+[data-theme="dark"] .stat-icon.warning, [data-theme="dark"] .stat-icon-wrap.warning {
+  background: rgba(245, 158, 11, 0.22);
+  color: #fbbf24;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.28);
+}
+[data-theme="dark"] .stat-icon.green, [data-theme="dark"] .stat-icon-wrap.green,
+[data-theme="dark"] .stat-icon.emerald, [data-theme="dark"] .stat-icon-wrap.emerald,
+[data-theme="dark"] .stat-icon.success, [data-theme="dark"] .stat-icon-wrap.success {
+  background: rgba(16, 185, 129, 0.22);
+  color: #34d399;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.28);
+}
+[data-theme="dark"] .stat-icon.purple, [data-theme="dark"] .stat-icon-wrap.purple,
+[data-theme="dark"] .stat-icon.violet, [data-theme="dark"] .stat-icon-wrap.violet,
+[data-theme="dark"] .stat-icon.indigo, [data-theme="dark"] .stat-icon-wrap.indigo {
+  background: rgba(168, 85, 247, 0.22);
+  color: #c084fc;
+  box-shadow: 0 4px 12px rgba(168, 85, 247, 0.28);
+}
+[data-theme="dark"] .stat-icon.red, [data-theme="dark"] .stat-icon-wrap.red,
+[data-theme="dark"] .stat-icon.danger, [data-theme="dark"] .stat-icon-wrap.danger {
+  background: rgba(239, 68, 68, 0.22);
+  color: #f87171;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.28);
+}
+[data-theme="dark"] .stat-icon.cyan, [data-theme="dark"] .stat-icon-wrap.cyan,
+[data-theme="dark"] .stat-icon.info, [data-theme="dark"] .stat-icon-wrap.info {
+  background: rgba(6, 182, 212, 0.22);
+  color: #22d3ee;
+  box-shadow: 0 4px 12px rgba(6, 182, 212, 0.28);
+}
+
 .stat-card .stat-value {
   font-size: 1.75rem; font-weight: 700;
   line-height: 1.15; margin-bottom: 0.25rem;
@@ -171,18 +284,49 @@
   letter-spacing: normal;
   margin-top: auto;
 }
-.stat-card .stat-trend {
+.stat-trend {
   display: inline-flex; align-items: center; gap: 4px;
   font-size: var(--fs-xs); font-weight: 600;
-  margin-top: 0.5rem;
-  padding: 3px 8px; border-radius: var(--radius-full);
+  padding: 2px 8px; border-radius: var(--radius-full);
   width: fit-content;
-  line-height: 1.3;
+  line-height: 1.25;
+  white-space: nowrap;
 }
-.stat-trend.up { color: #059669; background: #ecfdf5; }
-.stat-trend.down { color: #dc2626; background: #fef2f2; }
-[data-theme="dark"] .stat-trend.up { color: #34d399; background: rgba(6, 78, 59, 0.35); }
-[data-theme="dark"] .stat-trend.down { color: #f87171; background: rgba(127, 29, 29, 0.35); }
+.stat-trend.up {
+  color: var(--color-emerald-600, #059669);
+  background: rgba(16, 185, 129, 0.12);
+}
+.stat-trend.down,
+.stat-trend.alert {
+  color: var(--color-red-600, #dc2626);
+  background: rgba(239, 68, 68, 0.12);
+}
+.stat-trend.warning {
+  color: var(--color-solar-600, #d97706);
+  background: rgba(245, 158, 11, 0.12);
+}
+.stat-trend.info {
+  color: var(--color-primary-600, #0284c7);
+  background: rgba(14, 165, 233, 0.12);
+}
+
+[data-theme="dark"] .stat-trend.up {
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.22);
+}
+[data-theme="dark"] .stat-trend.down,
+[data-theme="dark"] .stat-trend.alert {
+  color: #f87171;
+  background: rgba(239, 68, 68, 0.22);
+}
+[data-theme="dark"] .stat-trend.warning {
+  color: #fbbf24;
+  background: rgba(245, 158, 11, 0.22);
+}
+[data-theme="dark"] .stat-trend.info {
+  color: #38bdf8;
+  background: rgba(14, 165, 233, 0.22);
+}
 
 /* ── Badges ── */
 .badge {
@@ -445,7 +589,7 @@ select.form-control { cursor: pointer; appearance: none;
     max-height: 92vh;
     border-radius: var(--radius-xl) var(--radius-xl) 0 0;
     margin: 0;
-    width: 100%;
+    width: 100% !important;
     position: fixed;
     bottom: 0;
     left: 0;
@@ -454,6 +598,21 @@ select.form-control { cursor: pointer; appearance: none;
   }
   .modal-overlay.active .modal {
     transform: translateY(0);
+  }
+  .modal-body {
+    max-height: calc(90vh - 130px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: var(--space-4) !important;
+  }
+  .modal-footer {
+    padding: var(--space-3) var(--space-4) !important;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .modal-footer .btn {
+    flex: 1 1 calc(50% - 4px);
+    justify-content: center;
   }
 }
 
@@ -569,20 +728,82 @@ select.form-control { cursor: pointer; appearance: none;
 .dropdown-item:hover { background: var(--bg-badge); color: var(--text-primary); }
 .dropdown-divider { height: 1px; background: var(--border-light); margin: var(--space-2) 0; }
 
-/* ── Tooltip ── */
-[data-tooltip] { position: relative; }
+/* ── Tooltip System ── */
+[data-tooltip] {
+  position: relative;
+}
+
+/* Tooltip Bubble (Default: Top) */
 [data-tooltip]::after {
   content: attr(data-tooltip);
-  position: absolute; bottom: calc(100% + 6px); left: 50%;
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
   transform: translateX(-50%) translateY(4px);
-  background: var(--bg-tooltip); color: var(--text-tooltip);
-  padding: 4px 10px; border-radius: var(--radius-md);
-  font-size: var(--fs-xs); white-space: nowrap;
-  opacity: 0; visibility: hidden;
-  transition: all var(--transition-fast);
-  pointer-events: none; z-index: var(--z-tooltip);
+  background: var(--bg-tooltip);
+  color: var(--text-tooltip);
+  padding: 5px 10px;
+  border-radius: var(--radius-md);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.2;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 160ms cubic-bezier(0.4, 0, 0.2, 1), transform 160ms cubic-bezier(0.4, 0, 0.2, 1), visibility 160ms cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+  z-index: 1000;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
 }
-[data-tooltip]:hover::after { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+
+/* Tooltip Arrow Caret (Default: Top) */
+[data-tooltip]::before {
+  content: '';
+  position: absolute;
+  bottom: calc(100% + 2px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  border: 5px solid transparent;
+  border-top-color: var(--bg-tooltip);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 160ms cubic-bezier(0.4, 0, 0.2, 1), transform 160ms cubic-bezier(0.4, 0, 0.2, 1), visibility 160ms cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+  z-index: 1000;
+}
+
+[data-tooltip]:hover::after,
+[data-tooltip]:hover::before {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ── Tooltip in Header/Navbar or Explicit Bottom Placement ── */
+.navbar [data-tooltip]::after,
+[data-tooltip-pos="bottom"]::after {
+  bottom: auto;
+  top: calc(100% + 8px);
+  transform: translateX(-50%) translateY(-4px);
+}
+
+.navbar [data-tooltip]::before,
+[data-tooltip-pos="bottom"]::before {
+  bottom: auto;
+  top: calc(100% + 2px);
+  transform: translateX(-50%) translateY(-4px);
+  border-top-color: transparent;
+  border-bottom-color: var(--bg-tooltip);
+}
+
+.navbar [data-tooltip]:hover::after,
+.navbar [data-tooltip]:hover::before,
+[data-tooltip-pos="bottom"]:hover::after,
+[data-tooltip-pos="bottom"]:hover::before {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
 
 /* ── Progress Bar ── */
 .progress {
@@ -773,3 +994,75 @@ select.form-control { cursor: pointer; appearance: none;
 .toggle input:checked + .toggle-slider::before {
   transform: translateX(20px);
 }
+
+/* ── Unified Dashboard-Style Item & Product Thumbnails ── */
+.material-thumb,
+.product-thumb,
+.table-thumb {
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-lg, 12px);
+  background: rgba(14, 165, 233, 0.1);
+  color: var(--color-primary-500, #0ea5e9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  border: 1px solid rgba(14, 165, 233, 0.15);
+  transition: all var(--transition-fast, 150ms ease);
+}
+.material-thumb:hover,
+.product-thumb:hover,
+.table-thumb:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.15);
+}
+.material-thumb img,
+.product-thumb img,
+.table-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.material-thumb svg,
+.product-thumb svg,
+.table-thumb svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+}
+
+[data-theme="dark"] .material-thumb,
+[data-theme="dark"] .product-thumb,
+[data-theme="dark"] .table-thumb {
+  background: rgba(14, 165, 233, 0.18);
+  color: #38bdf8;
+  border-color: rgba(56, 189, 248, 0.25);
+}
+
+/* ── Action Buttons & Confirm Icon Consistency ── */
+.btn-ghost.btn-icon:hover {
+  background: rgba(14, 165, 233, 0.12);
+  color: var(--color-primary-600);
+}
+.btn-ghost.btn-icon.text-danger:hover {
+  background: rgba(239, 68, 68, 0.12);
+  color: var(--color-red-600);
+}
+.btn-ghost.btn-icon.text-success:hover {
+  background: rgba(16, 185, 129, 0.12);
+  color: var(--color-emerald-600);
+}
+
+.confirm-icon svg {
+  width: 28px;
+  height: 28px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+}
+

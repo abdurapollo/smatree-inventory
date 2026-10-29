@@ -72,7 +72,10 @@ const App = {
     Store.updateSettings({ theme: newTheme });
     document.documentElement.setAttribute('data-theme', newTheme);
     const btn = document.getElementById('theme-toggle');
-    if (btn) btn.innerHTML = typeof Icons !== 'undefined' ? (newTheme === 'dark' ? Icons.sun(18) : Icons.moon(18)) : (newTheme === 'dark' ? '☀️' : '🌙');
+    if (btn) {
+      btn.innerHTML = typeof Icons !== 'undefined' ? (newTheme === 'dark' ? Icons.sun(18) : Icons.moon(18)) : (newTheme === 'dark' ? '☀️' : '🌙');
+      btn.setAttribute('data-tooltip', newTheme === 'dark' ? 'Switch to Light Theme' : 'Switch to Dark Theme');
+    }
   },
 
   /* ── Sidebar Mobile Toggle ── */

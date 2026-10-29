@@ -65,24 +65,36 @@ const Inventory = {
 
     container.innerHTML = `
       <div class="stat-card animate-fadeInUp delay-1" style="--card-accent:var(--color-primary-500)">
-        <div class="stat-icon blue">${Icons.package(20)}</div>
+        <div class="stat-card-header">
+          <div class="stat-icon blue">${Icons.package(22)}</div>
+          <span class="stat-trend up">Healthy</span>
+        </div>
         <div class="stat-value">${inv.totalMaterials}</div>
-        <div class="stat-label">Total Materials</div>
+        <div class="stat-label">Raw Materials in Stock</div>
       </div>
       <div class="stat-card animate-fadeInUp delay-2" style="--card-accent:var(--color-emerald-500)">
-        <div class="stat-icon green">${Icons.folder(20)}</div>
+        <div class="stat-card-header">
+          <div class="stat-icon green">${Icons.folder(22)}</div>
+          <span class="stat-trend up">Catalog Linked</span>
+        </div>
         <div class="stat-value">${categories}</div>
-        <div class="stat-label">Categories</div>
+        <div class="stat-label">Material Categories</div>
       </div>
       <div class="stat-card animate-fadeInUp delay-3" style="--card-accent:var(--color-red-500)">
-        <div class="stat-icon red">${Icons.alertTriangle(20)}</div>
+        <div class="stat-card-header">
+          <div class="stat-icon red">${Icons.alertTriangle(22)}</div>
+          <span class="stat-trend ${inv.lowStockCount > 0 ? 'down' : 'up'}">${inv.lowStockCount > 0 ? 'Action Needed' : 'Healthy'}</span>
+        </div>
         <div class="stat-value">${inv.lowStockCount}</div>
-        <div class="stat-label">Low Stock Items</div>
+        <div class="stat-label">Low Stock Alerts</div>
       </div>
       <div class="stat-card animate-fadeInUp delay-4" style="--card-accent:var(--color-solar-500)">
-        <div class="stat-icon amber">${Icons.coins(20)}</div>
+        <div class="stat-card-header">
+          <div class="stat-icon amber">${Icons.coins(22)}</div>
+          <span class="stat-trend up">Live Value</span>
+        </div>
         <div class="stat-value">${Utils.formatCurrency(inv.totalValue)}</div>
-        <div class="stat-label">Inventory Value</div>
+        <div class="stat-label">Inventory Valuation</div>
       </div>
     `;
   },

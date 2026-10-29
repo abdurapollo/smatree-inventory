@@ -10,20 +10,38 @@
 }
 
 .material-thumb {
-  width: 40px; height: 40px;
-  border-radius: var(--radius-md);
-  background: var(--bg-badge);
+  width: 42px; height: 42px;
+  border-radius: var(--radius-lg, 12px);
+  background: rgba(14, 165, 233, 0.12);
+  color: var(--color-primary-500, #0ea5e9);
   display: flex; align-items: center; justify-content: center;
-  font-size: 1.2rem;
   flex-shrink: 0;
   overflow: hidden;
-  line-height: 1;
+  border: 1px solid rgba(14, 165, 233, 0.15);
+  transition: all var(--transition-fast, 150ms ease);
+}
+.material-thumb:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.15);
 }
 .material-thumb img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
+}
+.material-thumb svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+}
+
+[data-theme="dark"] .material-thumb {
+  background: rgba(14, 165, 233, 0.22);
+  color: #38bdf8;
+  border-color: rgba(56, 189, 248, 0.25);
 }
 
 /* ── Category badges ── */
@@ -37,17 +55,35 @@
 
 /* ── Product Thumb & View Toggle ── */
 .product-thumb {
-  width: 40px; height: 40px;
-  border-radius: var(--radius-md);
-  background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(59, 130, 246, 0.15));
+  width: 42px; height: 42px;
+  border-radius: var(--radius-lg, 12px);
+  background: rgba(245, 158, 11, 0.12);
+  color: var(--color-solar-500, #f59e0b);
   display: flex; align-items: center; justify-content: center;
-  font-size: 1.3rem;
   flex-shrink: 0;
-  border: 1px solid var(--border-light);
+  border: 1px solid rgba(245, 158, 11, 0.2);
   overflow: hidden;
+  transition: all var(--transition-fast, 150ms ease);
+}
+.product-thumb:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
 }
 .product-thumb img {
   width: 100%; height: 100%; object-fit: cover;
+}
+.product-thumb svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+}
+
+[data-theme="dark"] .product-thumb {
+  background: rgba(245, 158, 11, 0.22);
+  color: #fbbf24;
+  border-color: rgba(251, 191, 36, 0.25);
 }
 
 .view-toggle {

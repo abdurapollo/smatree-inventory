@@ -72,22 +72,34 @@ const Installations = {
 
     container.innerHTML = `
       <div class="stat-card animate-fadeInUp delay-1" style="--card-accent:var(--color-primary-500)">
-        <div class="stat-icon blue">${Icons.installations(22)}</div>
+        <div class="stat-card-header">
+          <div class="stat-icon blue">${Icons.installations(22)}</div>
+          <span class="stat-trend up">Active Sites</span>
+        </div>
         <div class="stat-value">${stats.totalInstallations}</div>
         <div class="stat-label">Total Projects</div>
       </div>
       <div class="stat-card animate-fadeInUp delay-2" style="--card-accent:var(--color-emerald-500)">
-        <div class="stat-icon green">${Icons.zap(22)}</div>
+        <div class="stat-card-header">
+          <div class="stat-icon green">${Icons.zap(22)}</div>
+          <span class="stat-trend up">Clean Energy</span>
+        </div>
         <div class="stat-value">${(parseFloat(stats.totalCapacity) || 0).toFixed(1)} kW</div>
         <div class="stat-label">Installed Capacity</div>
       </div>
       <div class="stat-card animate-fadeInUp delay-3" style="--card-accent:var(--color-solar-500)">
-        <div class="stat-icon amber">${Icons.clock(22)}</div>
+        <div class="stat-card-header">
+          <div class="stat-icon amber">${Icons.clock(22)}</div>
+          <span class="stat-trend warning">On Field</span>
+        </div>
         <div class="stat-value">${stats.activeProjects}</div>
         <div class="stat-label">Active Projects</div>
       </div>
       <div class="stat-card animate-fadeInUp delay-4" style="--card-accent:var(--color-purple-500)">
-        <div class="stat-icon purple">${Icons.solarPanel(22)}</div>
+        <div class="stat-card-header">
+          <div class="stat-icon purple">${Icons.solarPanel(22)}</div>
+          <span class="stat-trend up">Commissioned</span>
+        </div>
         <div class="stat-value">${Utils.formatNumber(stats.totalPanelsInstalled)}</div>
         <div class="stat-label">Panels Installed</div>
       </div>

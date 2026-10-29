@@ -64,22 +64,34 @@ const Reports = {
 
     container.innerHTML = `
       <div class="stat-card animate-fadeInUp delay-1" style="--card-accent:var(--color-primary-500)">
-        <div class="stat-icon blue">${Icons.package(20)}</div>
+        <div class="stat-card-header">
+          <div class="stat-icon blue">${Icons.package(22)}</div>
+          <span class="stat-trend up">In Stock</span>
+        </div>
         <div class="stat-value">${inv.totalMaterials}</div>
         <div class="stat-label">Raw Materials</div>
       </div>
       <div class="stat-card animate-fadeInUp delay-2" style="--card-accent:var(--color-emerald-500)">
-        <div class="stat-icon green">${Icons.production(20)}</div>
+        <div class="stat-card-header">
+          <div class="stat-icon green">${Icons.production(22)}</div>
+          <span class="stat-trend up">Yield</span>
+        </div>
         <div class="stat-value">${Utils.formatNumber(prod.totalPanels)}</div>
         <div class="stat-label">Panels Produced</div>
       </div>
       <div class="stat-card animate-fadeInUp delay-3" style="--card-accent:var(--color-solar-500)">
-        <div class="stat-icon amber">${Icons.installations(20)}</div>
+        <div class="stat-card-header">
+          <div class="stat-icon amber">${Icons.installations(22)}</div>
+          <span class="stat-trend up">Sites</span>
+        </div>
         <div class="stat-value">${inst.totalInstallations}</div>
         <div class="stat-label">Installations</div>
       </div>
       <div class="stat-card animate-fadeInUp delay-4" style="--card-accent:var(--color-purple-500)">
-        <div class="stat-icon purple">${Icons.coins(20)}</div>
+        <div class="stat-card-header">
+          <div class="stat-icon purple">${Icons.coins(22)}</div>
+          <span class="stat-trend up">Asset Total</span>
+        </div>
         <div class="stat-value">${Utils.formatCurrency(inv.totalValue)}</div>
         <div class="stat-label">Total Inventory Value</div>
       </div>

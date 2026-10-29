@@ -4,30 +4,19 @@
    ========================================================================== */
 
 const Icons = {
-  // Brand Logo
-  logo: (size = 28, className = '') => `
-    <svg width="${size}" height="${size}" viewBox="0 0 32 32" fill="none" class="brand-logo-svg ${className}" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <linearGradient id="solarGrad" x1="2" y1="2" x2="30" y2="30" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stop-color="#38bdf8"/>
-          <stop offset="50%" stop-color="#0284c7"/>
-          <stop offset="100%" stop-color="#f59e0b"/>
-        </linearGradient>
-        <linearGradient id="sunRay" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stop-color="#fbbf24"/>
-          <stop offset="100%" stop-color="#ea580c"/>
-        </linearGradient>
-      </defs>
-      <rect width="32" height="32" rx="9" fill="url(#solarGrad)"/>
-      <!-- Photovoltaic Grid Silhouette -->
-      <path d="M6 18L16 12L26 18L16 24L6 18Z" fill="rgba(255,255,255,0.22)" stroke="#ffffff" stroke-width="1.2" stroke-linejoin="round"/>
-      <path d="M16 12V24" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round"/>
-      <path d="M11 15L21 21" stroke="#ffffff" stroke-width="1" stroke-linecap="round" stroke-dasharray="1.5 1.5"/>
-      <!-- Glowing Sun Center -->
-      <circle cx="16" cy="11" r="4.5" fill="url(#sunRay)" stroke="#ffffff" stroke-width="1.5"/>
-      <path d="M16 4V5.5M16 16.5V18M9 11H10.5M21.5 11H23M11.05 6.05L12.11 7.11M19.89 14.89L20.95 15.95M11.05 15.95L12.11 14.89M19.89 7.11L20.95 6.05" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round"/>
-    </svg>
-  `,
+  // Official SMAtree Company Logo Mark (SM green badge)
+  logo: (size = 32, className = '') => {
+    const isPagesDir = typeof window !== 'undefined' && window.location.pathname.includes('/pages/');
+    const basePath = isPagesDir ? '../assets' : 'assets';
+    return `<img src="${basePath}/logo-icon.png" width="${size}" height="${size}" alt="SMAtree Solar" class="brand-logo-img ${className}" style="width:${size}px;height:${size}px;object-fit:contain;display:block;" onerror="this.onerror=null;this.src='/smatree-inventory/assets/logo-icon.png'">`;
+  },
+
+  // Official SMAtree Full Brand Logo (Badge + tree text)
+  logoFull: (height = 36, className = '') => {
+    const isPagesDir = typeof window !== 'undefined' && window.location.pathname.includes('/pages/');
+    const basePath = isPagesDir ? '../assets' : 'assets';
+    return `<img src="${basePath}/logo.png" height="${height}" alt="SMAtree Solar" class="brand-logo-full ${className}" style="height:${height}px;width:auto;object-fit:contain;display:block;" onerror="this.onerror=null;this.src='/smatree-inventory/assets/logo.png'">`;
+  },
 
   // Sidebar Navigation Icons
   dashboard: (size = 19, className = '') => `

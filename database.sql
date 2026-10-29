@@ -1,5 +1,5 @@
 -- ==========================================================================
--- Smatree Solar Panel Production Inventory Management System
+-- SMAtree Solar Panel Production Inventory Management System
 -- Database Schema for Users, Suppliers & Purchased Raw Materials
 -- Database Name: smatree_inventory
 -- ==========================================================================

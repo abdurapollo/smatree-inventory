@@ -170,30 +170,36 @@ const FinishedGoods = {
 
     container.innerHTML = `
       <div class="stat-card animate-fadeInUp delay-1" style="--card-accent:var(--color-primary-500)">
-        <div class="stat-icon blue">${Icons.solarPanel(22)}</div>
+        <div class="stat-card-header">
+          <div class="stat-icon blue">${Icons.solarPanel(22)}</div>
+          <span class="stat-trend up">Live Catalog</span>
+        </div>
         <div class="stat-value" id="stat-fg-active">${stats.totalActive}</div>
         <div class="stat-label">Active Panel Models</div>
-        <div class="stat-trend" style="color:var(--color-success)">● Catalog Live</div>
       </div>
       <div class="stat-card animate-fadeInUp delay-2" style="--card-accent:var(--color-emerald-500)">
-        <div class="stat-icon green">${Icons.package(22)}</div>
+        <div class="stat-card-header">
+          <div class="stat-icon green">${Icons.package(22)}</div>
+          <span class="stat-trend up">Manufactured</span>
+        </div>
         <div class="stat-value" id="stat-fg-produced">${Utils.formatNumber(stats.totalProduced)}</div>
         <div class="stat-label">Total Manufactured</div>
-        <div class="stat-trend" style="color:var(--text-muted)">Lifetime production</div>
       </div>
       <div class="stat-card animate-fadeInUp delay-3" style="--card-accent:var(--color-solar-500)">
-        <div class="stat-icon amber">${Icons.zap(22)}</div>
+        <div class="stat-card-header">
+          <div class="stat-icon amber">${Icons.zap(22)}</div>
+          <span class="stat-trend warning">Est. ${Utils.formatCurrency(readyValue)}</span>
+        </div>
         <div class="stat-value" id="stat-fg-ready">${Utils.formatNumber(stats.readyToSell)}</div>
         <div class="stat-label">Ready to Sell Stock</div>
-        <div class="stat-trend" style="color:var(--color-warning)">Est. ${Utils.formatCurrency(readyValue)}</div>
       </div>
       <div class="stat-card animate-fadeInUp delay-4" style="--card-accent:#a855f7">
-        <div class="stat-icon purple" style="background:rgba(168,85,247,0.12);color:#a855f7">${Icons.folder(22)}</div>
+        <div class="stat-card-header">
+          <div class="stat-icon purple">${Icons.folder(22)}</div>
+          <span class="stat-trend ${stats.totalArchived > 0 ? 'down' : 'up'}">${stats.totalArchived > 0 ? 'Archived' : 'Clean'}</span>
+        </div>
         <div class="stat-value" id="stat-fg-archived">${stats.totalArchived}</div>
         <div class="stat-label">Soft-Deleted / Archived</div>
-        <div class="stat-trend" style="color:${stats.totalArchived > 0 ? '#a855f7' : 'var(--text-muted)'}">
-          ${stats.totalArchived > 0 ? 'Can be re-enabled anytime' : 'Zero archived products'}
-        </div>
       </div>
     `;
   },

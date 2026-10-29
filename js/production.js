@@ -84,22 +84,34 @@ const Production = {
 
     container.innerHTML = `
       <div class="stat-card animate-fadeInUp delay-1" style="--card-accent:var(--color-primary-500)">
-        <div class="stat-icon blue">${Icons.production(22)}</div>
+        <div class="stat-card-header">
+          <div class="stat-icon blue">${Icons.production(22)}</div>
+          <span class="stat-trend up">All Lines</span>
+        </div>
         <div class="stat-value">${stats.totalBatches}</div>
         <div class="stat-label">Total Batches</div>
       </div>
       <div class="stat-card animate-fadeInUp delay-2" style="--card-accent:var(--color-solar-500)">
-        <div class="stat-icon amber">${Icons.clock(22)}</div>
+        <div class="stat-card-header">
+          <div class="stat-icon amber">${Icons.clock(22)}</div>
+          <span class="stat-trend warning">Active</span>
+        </div>
         <div class="stat-value">${stats.inProgress}</div>
         <div class="stat-label">In Production</div>
       </div>
       <div class="stat-card animate-fadeInUp delay-3" style="--card-accent:var(--color-emerald-500)">
-        <div class="stat-icon green">${Icons.check(22)}</div>
+        <div class="stat-card-header">
+          <div class="stat-icon green">${Icons.check(22)}</div>
+          <span class="stat-trend up">QC Passed</span>
+        </div>
         <div class="stat-value">${stats.completed}</div>
-        <div class="stat-label">Completed</div>
+        <div class="stat-label">Completed Batches</div>
       </div>
       <div class="stat-card animate-fadeInUp delay-4" style="--card-accent:var(--color-purple-500)">
-        <div class="stat-icon purple">${Icons.solarPanel(22)}</div>
+        <div class="stat-card-header">
+          <div class="stat-icon purple">${Icons.solarPanel(22)}</div>
+          <span class="stat-trend up">Factory Yield</span>
+        </div>
         <div class="stat-value">${Utils.formatNumber(stats.totalPanels)}</div>
         <div class="stat-label">Panels Produced</div>
       </div>

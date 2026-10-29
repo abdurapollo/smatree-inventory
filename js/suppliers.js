@@ -11,6 +11,7 @@ const Suppliers = {
     ])) return;
 
     await this.loadData();
+    this.renderStats();
     this.renderToolbar();
     this.renderCards();
     this.setupEvents();
@@ -31,6 +32,51 @@ const Suppliers = {
         console.warn('Backend suppliers fetch failed, using local store:', err);
       }
     }
+  },
+
+  renderStats() {
+    const container = document.getElementById('suppliers-stats');
+    if (!container) return;
+    const items = Store.getAll('suppliers');
+    const totalSuppliers = items.length;
+    const gstCount = items.filter(s => s.gst && s.gst.trim()).length;
+    const allMaterials = items.flatMap(s => (s.materials || '').split(',').map(m => m.trim()).filter(Boolean));
+    const uniqueMats = new Set(allMaterials).size;
+
+    container.innerHTML = `
+      <div class="stat-card animate-fadeInUp delay-1" style="--card-accent:var(--color-primary-500)">
+        <div class="stat-card-header">
+          <div class="stat-icon blue">${Icons.suppliers(22)}</div>
+          <span class="stat-trend up">Verified</span>
+        </div>
+        <div class="stat-value">${totalSuppliers}</div>
+        <div class="stat-label">Active Suppliers</div>
+      </div>
+      <div class="stat-card animate-fadeInUp delay-2" style="--card-accent:var(--color-emerald-500)">
+        <div class="stat-card-header">
+          <div class="stat-icon green">${Icons.check(22)}</div>
+          <span class="stat-trend up">Compliant</span>
+        </div>
+        <div class="stat-value">${gstCount}</div>
+        <div class="stat-label">GST Registered</div>
+      </div>
+      <div class="stat-card animate-fadeInUp delay-3" style="--card-accent:var(--color-solar-500)">
+        <div class="stat-card-header">
+          <div class="stat-icon amber">${Icons.package(22)}</div>
+          <span class="stat-trend up">Categories</span>
+        </div>
+        <div class="stat-value">${uniqueMats}</div>
+        <div class="stat-label">Material Types</div>
+      </div>
+      <div class="stat-card animate-fadeInUp delay-4" style="--card-accent:var(--color-purple-500)">
+        <div class="stat-card-header">
+          <div class="stat-icon purple">${Icons.building(22)}</div>
+          <span class="stat-trend up">Network</span>
+        </div>
+        <div class="stat-value">${totalSuppliers > 0 ? '100%' : '0%'}</div>
+        <div class="stat-label">Supply Chain Coverage</div>
+      </div>
+    `;
   },
 
   renderToolbar() {
@@ -119,6 +165,7 @@ const Suppliers = {
               }
               Store.delete('suppliers', id);
               Components.toast('success', 'Deleted', `Supplier ${name} was removed.`);
+              this.renderStats();
               this.renderCards();
             } catch (err) {
               console.error('Delete supplier error:', err);
@@ -534,6 +581,7 @@ const Suppliers = {
 
           Components.toast('success', isEdit ? 'Supplier Updated' : 'Supplier Added', `${savedData.company} was saved to the database.`);
           modal.close();
+          this.renderStats();
           this.renderCards();
           return;
         }
@@ -549,6 +597,7 @@ const Suppliers = {
 
         Components.toast('success', isEdit ? 'Updated' : 'Added', `${payload.company} saved.`);
         modal.close();
+        this.renderStats();
         this.renderCards();
 
       } catch (err) {

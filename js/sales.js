@@ -183,28 +183,36 @@ const Sales = {
 
     container.innerHTML = `
       <div class="stat-card animate-fadeInUp delay-1" style="--card-accent:var(--color-emerald-500)">
-        <div class="stat-icon green">${Icons.sales(22)}</div>
+        <div class="stat-card-header">
+          <div class="stat-icon green">${Icons.sales(22)}</div>
+          <span class="stat-trend up">Available</span>
+        </div>
         <div class="stat-value" id="stat-ready-to-sell">${Utils.formatNumber(stats.readyToSell)}</div>
         <div class="stat-label">Ready to Sell Stock</div>
-        <div class="stat-trend" style="color:var(--color-success)">● Available in catalog</div>
       </div>
       <div class="stat-card animate-fadeInUp delay-2" style="--card-accent:var(--color-solar-500)">
-        <div class="stat-icon amber">${Icons.clock(22)}</div>
+        <div class="stat-card-header">
+          <div class="stat-icon amber">${Icons.clock(22)}</div>
+          <span class="stat-trend warning">Reserved</span>
+        </div>
         <div class="stat-value" id="stat-reserved-units">${Utils.formatNumber(stats.reservedUnits)}</div>
         <div class="stat-label">Reserved Units</div>
-        <div class="stat-trend" style="color:var(--color-warning)">Awaiting dispatch</div>
       </div>
       <div class="stat-card animate-fadeInUp delay-3" style="--card-accent:var(--color-primary-500)">
-        <div class="stat-icon blue">${Icons.check(22)}</div>
+        <div class="stat-card-header">
+          <div class="stat-icon blue">${Icons.check(22)}</div>
+          <span class="stat-trend up">Fulfilled</span>
+        </div>
         <div class="stat-value" id="stat-sold-units">${Utils.formatNumber(stats.soldUnits)}</div>
         <div class="stat-label">Sold Units</div>
-        <div class="stat-trend" style="color:var(--color-primary-500)">Fulfilled & dispatched</div>
       </div>
       <div class="stat-card animate-fadeInUp delay-4" style="--card-accent:#8b5cf6">
-        <div class="stat-icon purple" style="background:rgba(139,92,246,0.12);color:#8b5cf6">${Icons.coins(22)}</div>
+        <div class="stat-card-header">
+          <div class="stat-icon purple">${Icons.coins(22)}</div>
+          <span class="stat-trend up">Realized</span>
+        </div>
         <div class="stat-value" id="stat-total-revenue">${Utils.formatCurrency(stats.totalRevenue || 0)}</div>
         <div class="stat-label">Total Realized Revenue</div>
-        <div class="stat-trend" style="color:#8b5cf6">From completed sales</div>
       </div>
     `;
   },

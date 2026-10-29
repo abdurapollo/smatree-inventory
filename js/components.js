@@ -134,6 +134,7 @@ const Components = {
       success: typeof Icons !== 'undefined' ? Icons.check(24) : '✅'
     };
     const bgColors = { danger: 'var(--color-danger-bg)', warning: 'var(--color-warning-bg)', info: 'var(--color-info-bg)', success: 'var(--color-success-bg)' };
+    const textColors = { danger: 'var(--color-danger)', warning: 'var(--color-warning)', info: 'var(--color-info)', success: 'var(--color-success)' };
 
     const modal = this.showModal({
       id: 'confirm-dialog',
@@ -141,7 +142,7 @@ const Components = {
       size: 'sm',
       content: `
         <div style="text-align:center; padding: var(--space-4) 0;">
-          <div class="confirm-icon" style="background:${bgColors[type]}">${icons[type]}</div>
+          <div class="confirm-icon" style="background:${bgColors[type]};color:${textColors[type]}">${icons[type]}</div>
           <div class="confirm-title">${title}</div>
           <div class="confirm-message">${message}</div>
           <div class="confirm-actions">
@@ -295,11 +296,11 @@ const Components = {
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-brand">
         <div class="brand-icon">
-          ${typeof Icons !== 'undefined' ? Icons.logo(32) : '☀️'}
+          ${typeof Icons !== 'undefined' ? Icons.logo(36) : '<img src="../assets/logo-icon.png" width="36" height="36" alt="SMAtree Solar">'}
         </div>
         <div class="brand-text">
-          <div class="brand-name">Smatree <span class="brand-accent">Solar</span></div>
-          <div class="brand-sub">Enterprise Photovoltaics</div>
+          <div class="brand-name">SMAtree <span class="brand-accent">Solar</span></div>
+          <div class="brand-sub">Inventory Management</div>
         </div>
       </div>
       <nav class="sidebar-nav">`;
@@ -445,17 +446,17 @@ const Components = {
             <span class="live-clock-time" id="dash-live-clock">${initialTime}</span>
             <span class="live-clock-date" id="dash-live-date">${initialDate}</span>
           </div>
-          <button class="navbar-sync-btn btn btn-sm btn-secondary" id="dash-refresh-btn" title="Sync live telemetry">
+          <button class="navbar-sync-btn btn btn-sm btn-secondary" id="dash-refresh-btn" data-tooltip="Sync Telemetry" data-tooltip-pos="bottom" aria-label="Sync Telemetry">
             ${refreshSvg}
             <span>Sync</span>
           </button>
         </div>
       </div>
       <div class="navbar-right">
-        <button class="theme-toggle" id="theme-toggle" data-tooltip="Toggle theme" title="Toggle Theme">
+        <button class="theme-toggle" id="theme-toggle" data-tooltip="${theme === 'dark' ? 'Switch to Light Theme' : 'Switch to Dark Theme'}" data-tooltip-pos="bottom" aria-label="Toggle Theme">
           ${theme === 'dark' ? sunSvg : moonSvg}
         </button>
-        <button class="navbar-icon-btn" id="notifications-btn" data-tooltip="Notifications" title="System Alerts">
+        <button class="navbar-icon-btn" id="notifications-btn" data-tooltip="Notifications" data-tooltip-pos="bottom" aria-label="Notifications">
           ${bellSvg}
           <span class="notif-badge" id="notif-count">3</span>
         </button>
