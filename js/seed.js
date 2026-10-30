@@ -20,10 +20,10 @@ const SeedData = {
 
   seedUsers() {
     const users = [
-      { id: 'USR-001', name: 'Rajesh Kumar', email: 'admin@smatree.com', password: 'admin123', role: 'Admin', avatar: null, createdAt: '2025-01-15T10:00:00Z' },
-      { id: 'USR-002', name: 'Priya Sharma', email: 'inventory@smatree.com', password: 'inv123', role: 'Inventory Manager', avatar: null, createdAt: '2025-02-01T10:00:00Z' },
-      { id: 'USR-003', name: 'Amit Patel', email: 'production@smatree.com', password: 'prod123', role: 'Production Manager', avatar: null, createdAt: '2025-02-15T10:00:00Z' },
-      { id: 'USR-004', name: 'Sneha Reddy', email: 'sales@smatree.com', password: 'sales123', role: 'Sales Manager', avatar: null, createdAt: '2025-03-01T10:00:00Z' },
+      { id: 'USR-001', name: 'Rajesh Kumar', display_name: 'Rajesh K.', email: 'admin@smatree.com', password: 'admin123', role: 'Admin', role_label: 'Super Admin', avatar: null, createdAt: '2025-01-15T10:00:00Z' },
+      { id: 'USR-002', name: 'Priya Sharma', display_name: 'Priya S.', email: 'inventory@smatree.com', password: 'inv123', role: 'Inventory Manager', role_label: 'Inventory Lead', avatar: null, createdAt: '2025-02-01T10:00:00Z' },
+      { id: 'USR-003', name: 'Amit Patel', display_name: 'Amit P.', email: 'production@smatree.com', password: 'prod123', role: 'Production Manager', role_label: 'Plant Manager', avatar: null, createdAt: '2025-02-15T10:00:00Z' },
+      { id: 'USR-004', name: 'Sneha Reddy', display_name: 'Sneha R.', email: 'sales@smatree.com', password: 'sales123', role: 'Sales Manager', role_label: 'Sales Director', avatar: null, createdAt: '2025-03-01T10:00:00Z' },
     ];
     Store._set(Store.keys.users, users);
   },

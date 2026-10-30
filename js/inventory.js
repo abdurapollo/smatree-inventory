@@ -63,7 +63,19 @@ const Inventory = {
     const items = Store.getAll('inventory');
     const categories = new Set(items.map(i => i.category)).size;
 
+    const isReadOnly = typeof RBAC !== 'undefined' && RBAC.isReadOnly('inventory');
+    const readOnlyBannerHtml = isReadOnly ? `
+      <div class="rbac-readonly-banner animate-fadeInUp" style="grid-column: 1 / -1; margin-bottom: 0;">
+        <div class="rbac-banner-icon">👁️</div>
+        <div class="rbac-banner-content">
+          <div class="rbac-banner-title">Plant Manager View • Read-Only Material Telemetry</div>
+          <div class="rbac-banner-text">You have permission to inspect solar cell raw materials, stock availability, and warehouse storage locations for manufacturing batches. Modifying supplier procurement contracts or material catalogs is restricted to Inventory Lead.</div>
+        </div>
+      </div>
+    ` : '';
+
     container.innerHTML = `
+      ${readOnlyBannerHtml}
       <div class="stat-card animate-fadeInUp delay-1" style="--card-accent:var(--color-primary-500)">
         <div class="stat-card-header">
           <div class="stat-icon blue">${Icons.package(22)}</div>
@@ -104,6 +116,11 @@ const Inventory = {
     const container = document.getElementById('inventory-toolbar');
     if (!container) return;
 
+    const canCreate = typeof RBAC === 'undefined' || RBAC.hasPermission('inventory.create');
+    const addBtnHtml = canCreate
+      ? `<button class="btn btn-primary btn-sm" id="inv-add-btn">${Icons.plus(15)} <span>Add Material</span></button>`
+      : `<span class="badge badge-neutral" style="font-size:11px;padding:6px 12px;font-weight:600;display:inline-flex;align-items:center;gap:4px;">👁️ Read-Only Mode</span>`;
+
     container.innerHTML = `
       <div class="search-box" style="flex:1;max-width:320px">
         <span class="search-icon">${Icons.search(16)}</span>
@@ -115,7 +132,7 @@ const Inventory = {
       </select>
       <div class="toolbar-actions">
         <button class="btn btn-secondary btn-sm" id="inv-export-btn">${Icons.download(15)} <span>Export CSV</span></button>
-        <button class="btn btn-primary btn-sm" id="inv-add-btn">${Icons.plus(15)} <span>Add Material</span></button>
+        ${addBtnHtml}
       </div>
     `;
   },
@@ -141,6 +158,9 @@ const Inventory = {
     // Paginate
     const paginated = Utils.paginate(items, this.state.currentPage, this.state.perPage);
 
+    const canEdit = typeof RBAC === 'undefined' || RBAC.hasPermission('inventory.edit');
+    const canDelete = typeof RBAC === 'undefined' || RBAC.hasPermission('inventory.delete');
+
     const columns = [
       { label: 'Material', key: 'name', sortable: true, render: (row) => `
         <div class="d-flex align-center gap-3">
@@ -159,12 +179,25 @@ const Inventory = {
         const s = Utils.getStockStatus(row.quantity, row.reorderLevel);
         return `<span class="badge badge-dot ${s.class}">${s.label}</span>`;
       }},
-      { label: 'Actions', key: 'actions', render: (row) => `
-        <div class="actions">
-          <button class="btn btn-ghost btn-sm btn-icon" data-edit="${row.id}" data-tooltip="Edit">${Icons.edit(15)}</button>
-          <button class="btn btn-ghost btn-sm btn-icon text-danger" data-delete="${row.id}" data-tooltip="Delete">${Icons.trash(15)}</button>
-        </div>` },
     ];
+
+    if (canEdit || canDelete) {
+      columns.push({
+        label: 'Actions',
+        key: 'actions',
+        render: (row) => `
+          <div class="actions">
+            ${canEdit ? `<button class="btn btn-ghost btn-sm btn-icon" data-edit="${row.id}" data-tooltip="Edit">${Icons.edit(15)}</button>` : ''}
+            ${canDelete ? `<button class="btn btn-ghost btn-sm btn-icon text-danger" data-delete="${row.id}" data-tooltip="Delete">${Icons.trash(15)}</button>` : ''}
+          </div>`
+      });
+    } else {
+      columns.push({
+        label: 'Access',
+        key: 'access',
+        render: () => `<span class="badge badge-neutral" style="font-size:10px;">Read-Only</span>`
+      });
+    }
 
     container.innerHTML = Components.renderTable({ columns, data: paginated.items, emptyMessage: 'No materials found' });
 
@@ -182,9 +215,27 @@ const Inventory = {
   /* ── Events ── */
   setupEvents() {
     document.addEventListener('click', (e) => {
-      if (e.target.closest('#inv-add-btn')) this.showForm();
-      if (e.target.closest('[data-edit]')) this.showForm(e.target.closest('[data-edit]').dataset.edit);
-      if (e.target.closest('[data-delete]')) this.confirmDelete(e.target.closest('[data-delete]').dataset.delete);
+      if (e.target.closest('#inv-add-btn')) {
+        if (typeof RBAC !== 'undefined' && !RBAC.hasPermission('inventory.create')) {
+          Components.toast('warning', 'Access Restricted', 'Your role cannot add raw materials.');
+          return;
+        }
+        this.showForm();
+      }
+      if (e.target.closest('[data-edit]')) {
+        if (typeof RBAC !== 'undefined' && !RBAC.hasPermission('inventory.edit')) {
+          Components.toast('warning', 'Access Restricted', 'Your role cannot edit raw materials.');
+          return;
+        }
+        this.showForm(e.target.closest('[data-edit]').dataset.edit);
+      }
+      if (e.target.closest('[data-delete]')) {
+        if (typeof RBAC !== 'undefined' && !RBAC.hasPermission('inventory.delete')) {
+          Components.toast('warning', 'Access Restricted', 'Your role cannot delete raw materials.');
+          return;
+        }
+        this.confirmDelete(e.target.closest('[data-delete]').dataset.delete);
+      }
       if (e.target.closest('#inv-export-btn')) this.exportCSV();
 
       // Table sort
@@ -368,6 +419,14 @@ const Inventory = {
   },
 
   async saveForm(modal, isEdit) {
+    if (typeof RBAC !== 'undefined') {
+      const perm = isEdit ? 'inventory.edit' : 'inventory.create';
+      if (!RBAC.hasPermission(perm)) {
+        Components.toast('warning', 'Access Restricted', 'Your role does not have permission to modify raw materials.');
+        modal.close();
+        return;
+      }
+    }
     const existing = isEdit ? Store.getById('inventory', this.state.editingId) : null;
     const catEl = document.getElementById('mat-category');
     const supEl = document.getElementById('mat-supplier');
@@ -508,6 +567,18 @@ const Inventory = {
       }
     }
 
+    if (typeof Notifications !== 'undefined') {
+      const isLow = quantity <= reorderLevel;
+      Notifications.notify({
+        title: isLow ? `Low Stock Alert: ${name}` : (isEdit ? `Material Updated: ${name}` : `Material Added: ${name}`),
+        message: isLow ? `Stock is ${quantity} ${unit} (threshold: ${reorderLevel}). Reorder from ${supplier || 'supplier'}.` : `Current inventory: ${quantity} ${unit} stored at ${warehouse || 'warehouse'}.`,
+        category: 'inventory',
+        severity: quantity === 0 ? 'critical' : (isLow ? 'warning' : (isEdit ? 'info' : 'success')),
+        link: 'inventory.html',
+        actionLabel: 'Inspect Stock'
+      }, false);
+    }
+
     modal.close();
     await this.loadFromDatabase();
     if (typeof Components !== 'undefined') {
@@ -519,6 +590,10 @@ const Inventory = {
   },
 
   confirmDelete(id) {
+    if (typeof RBAC !== 'undefined' && !RBAC.hasPermission('inventory.delete')) {
+      Components.toast('warning', 'Access Restricted', 'Your role cannot delete raw materials.');
+      return;
+    }
     const item = Store.getById('inventory', id);
     if (!item) return;
     Components.confirm({
@@ -537,6 +612,16 @@ const Inventory = {
           console.warn('Database delete request failed:', e);
         }
         Store.delete('inventory', id);
+        if (typeof Notifications !== 'undefined') {
+          Notifications.notify({
+            title: `Material Removed: ${item.name}`,
+            message: `Material was deleted from the inventory records.`,
+            category: 'inventory',
+            severity: 'warning',
+            link: 'inventory.html',
+            actionLabel: 'View Inventory'
+          }, false);
+        }
         Components.toast('success', 'Deleted', `${item.name} removed from database.`);
         await this.loadFromDatabase();
         if (typeof Components !== 'undefined') {

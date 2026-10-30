@@ -478,6 +478,10 @@ const Sales = {
 
       // Toolbar Actions
       if (e.target.closest('#sales-add-btn')) {
+        if (typeof RBAC !== 'undefined' && !RBAC.hasPermission('sales.create')) {
+          Components.toast('warning', 'Access Restricted', 'Your role cannot create sales orders.');
+          return;
+        }
         this.showForm();
       }
       if (e.target.closest('#sales-export-btn')) {
@@ -492,12 +496,20 @@ const Sales = {
 
       // Row Actions: Edit Sale
       if (e.target.closest('[data-edit-sale]')) {
+        if (typeof RBAC !== 'undefined' && !RBAC.hasPermission('sales.edit')) {
+          Components.toast('warning', 'Access Restricted', 'Your role cannot edit sales orders.');
+          return;
+        }
         const id = e.target.closest('[data-edit-sale]').dataset.editSale;
         this.showForm(id);
       }
 
       // Row Actions: Mark Sold
       if (e.target.closest('[data-mark-sold]')) {
+        if (typeof RBAC !== 'undefined' && !RBAC.hasPermission('sales.edit')) {
+          Components.toast('warning', 'Access Restricted', 'Your role cannot modify order dispatch status.');
+          return;
+        }
         const id = e.target.closest('[data-mark-sold]').dataset.markSold;
         const btn = e.target.closest('[data-mark-sold]');
         await this.handleMarkSold(id, btn);
@@ -505,6 +517,10 @@ const Sales = {
 
       // Row Actions: Delete Sale
       if (e.target.closest('[data-delete-sale]')) {
+        if (typeof RBAC !== 'undefined' && !RBAC.hasPermission('sales.delete')) {
+          Components.toast('warning', 'Access Restricted', 'Your role cannot delete sales records.');
+          return;
+        }
         const id = e.target.closest('[data-delete-sale]').dataset.deleteSale;
         this.confirmDelete(id);
       }
@@ -1010,6 +1026,17 @@ const Sales = {
       }
 
       Components.toast('success', isEdit ? 'Sale Updated' : 'Sale Recorded', result.message || 'Order saved and inventory stock synchronized.');
+      if (typeof Notifications !== 'undefined') {
+        const prod = this.state.products.find(p => p.id == productId || p.product_code == productId);
+        Notifications.notify({
+          title: status === 'Sold' ? `Order Dispatched: ${customerName}` : (status === 'Reserved' ? `Stock Reserved: ${customerName}` : `Order Updated: ${customerName}`),
+          message: `${quantity} panels (${prod ? prod.name : 'Solar Panels'}) marked as ${status}. Total: ${Utils.formatCurrency(quantity * unitPrice)}.`,
+          category: 'sales',
+          severity: status === 'Sold' ? 'success' : (status === 'Reserved' ? 'info' : 'warning'),
+          link: 'sales.html',
+          actionLabel: 'View Orders'
+        }, false);
+      }
       modal.close();
 
       // Refresh data and UI
@@ -1061,6 +1088,16 @@ const Sales = {
       }
 
       Components.toast('success', 'Sale Fulfilled', res.message || `Sale ${saleId} marked as Sold and inventory updated.`);
+      if (typeof Notifications !== 'undefined') {
+        Notifications.notify({
+          title: `Order Fulfilled: ${sale.customerName || sale.customer_name}`,
+          message: `${sale.quantity} panels of ${sale.productName || sale.product_name} fulfilled and dispatched to customer.`,
+          category: 'sales',
+          severity: 'success',
+          link: 'sales.html',
+          actionLabel: 'View Sales'
+        }, false);
+      }
 
       await this.loadData();
       this.renderStats();

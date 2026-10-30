@@ -10,11 +10,11 @@
   <link rel="icon" type="image/png" sizes="16x16" href="../assets/favicon-16x16.png">
   <link rel="apple-touch-icon" sizes="180x180" href="../assets/logo-icon-512.png">
   <link rel="shortcut icon" href="../assets/favicon.ico">
-  <link rel="stylesheet" href="../css/variables.css?v=5.6">
-  <link rel="stylesheet" href="../css/base.css?v=5.6">
-  <link rel="stylesheet" href="../css/components.css?v=5.6">
-  <link rel="stylesheet" href="../css/layout.css?v=5.6">
-  <link rel="stylesheet" href="../css/dashboard.css?v=5.6">
+  <link rel="stylesheet" href="../css/variables.css?v=5.7">
+  <link rel="stylesheet" href="../css/base.css?v=5.7">
+  <link rel="stylesheet" href="../css/components.css?v=5.7">
+  <link rel="stylesheet" href="../css/layout.css?v=5.7">
+  <link rel="stylesheet" href="../css/dashboard.css?v=5.7">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
@@ -30,55 +30,8 @@
             </svg>
             <span>Quick Actions</span>
           </div>
-          <div class="quick-action-btns">
-            <a href="inventory.html" class="action-chip" title="Manage or Add Raw Materials">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                <line x1="12" y1="22.08" x2="12" y2="12"></line>
-              </svg>
-              <span>Raw Materials</span>
-            </a>
-            <a href="production.html" class="action-chip chip-solar" title="Manage Production Batches">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
-                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
-              </svg>
-              <span>Production Batches</span>
-            </a>
-            <a href="finished-goods.html" class="action-chip" title="View Finished Goods Ready to Ship">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="5"></circle>
-                <line x1="12" y1="1" x2="12" y2="3"></line>
-                <line x1="12" y1="21" x2="12" y2="23"></line>
-                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                <line x1="1" y1="12" x2="3" y2="12"></line>
-                <line x1="21" y1="12" x2="23" y2="12"></line>
-              </svg>
-              <span>Finished Goods</span>
-            </a>
-            <a href="installations.html" class="action-chip chip-emerald" title="Track Rooftop Installations">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
-              </svg>
-              <span>Installations</span>
-            </a>
-            <a href="sales.html" class="action-chip" title="Commercial Sales Records">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="12" y1="1" x2="12" y2="23"></line>
-                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-              </svg>
-              <span>Sales Stock</span>
-            </a>
-            <a href="reports.html" class="action-chip" title="Export Analytics & Reports">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="18" y1="20" x2="18" y2="10"></line>
-                <line x1="12" y1="20" x2="12" y2="4"></line>
-                <line x1="6" y1="20" x2="6" y2="14"></line>
-              </svg>
-              <span>Reports</span>
-            </a>
+          <div class="quick-action-btns" id="dashboard-quick-actions">
+            <!-- Dynamically populated according to Role-Based Access Control -->
           </div>
         </div>
 
@@ -277,15 +230,17 @@
     </div>
   </div>
 
-  <script src="../js/utils.js?v=5.6"></script>
-  <script src="../js/store.js?v=5.6"></script>
-  <script src="../js/seed.js?v=5.6"></script>
-  <script src="../api/config.js?v=5.6"></script>
-  <script src="../api/service.js?v=5.6"></script>
-  <script src="../js/icons.js?v=5.6"></script>
-  <script src="../js/components.js?v=5.6"></script>
-  <script src="../js/app.js?v=5.6"></script>
-  <script src="../js/dashboard.js?v=5.6"></script>
+  <script src="../js/utils.js?v=5.7"></script>
+  <script src="../js/store.js?v=5.7"></script>
+  <script src="../js/seed.js?v=5.7"></script>
+  <script src="../api/config.js?v=5.7"></script>
+  <script src="../api/service.js?v=5.7"></script>
+  <script src="../js/icons.js?v=5.7"></script>
+  <script src="../js/rbac.js?v=5.7"></script>
+  <script src="../js/components.js?v=5.7"></script>
+  <script src="../js/notifications.js?v=5.7"></script>
+  <script src="../js/app.js?v=5.7"></script>
+  <script src="../js/dashboard.js?v=5.7"></script>
   <script>document.addEventListener('DOMContentLoaded', () => Dashboard.init());</script>
 </body>
 </html>

@@ -19,6 +19,7 @@ const Dashboard = {
     ])) return;
 
     this.initBanner();
+    this.renderQuickActions();
     await this.loadTelemetry();
     this.renderStats();
     this.renderCharts();
@@ -81,6 +82,80 @@ const Dashboard = {
     // Clock is unified and handled dynamically by App.initClock() in navbar
   },
 
+  /* ── Role-Based Quick Action Strip ── */
+  renderQuickActions() {
+    const container = document.getElementById('dashboard-quick-actions');
+    if (!container) return;
+
+    const role = typeof RBAC !== 'undefined' ? RBAC.getCurrentRole() : 'Admin';
+
+    const chips = [
+      {
+        page: 'inventory',
+        href: 'inventory.html',
+        label: 'Raw Materials',
+        class: '',
+        icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>`
+      },
+      {
+        page: 'production',
+        href: 'production.html',
+        label: 'Production Batches',
+        class: 'chip-solar',
+        icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>`
+      },
+      {
+        page: 'finished-goods',
+        href: 'finished-goods.html',
+        label: 'Finished Goods',
+        class: '',
+        icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line></svg>`
+      },
+      {
+        page: 'installations',
+        href: 'installations.html',
+        label: 'Installations',
+        class: 'chip-emerald',
+        icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>`
+      },
+      {
+        page: 'sales',
+        href: 'sales.html',
+        label: 'Sales Stock',
+        class: '',
+        icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>`
+      },
+      {
+        page: 'suppliers',
+        href: 'suppliers.html',
+        label: 'Suppliers',
+        class: '',
+        icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>`
+      },
+      {
+        page: 'reports',
+        href: 'reports.html',
+        label: 'Reports',
+        class: '',
+        icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>`
+      }
+    ];
+
+    const allowedChips = chips.filter(c => {
+      if (typeof RBAC !== 'undefined') {
+        return RBAC.canAccessPage(c.page, role);
+      }
+      return true;
+    });
+
+    container.innerHTML = allowedChips.map(c => `
+      <a href="${c.href}" class="action-chip ${c.class}" title="Access ${c.label}">
+        ${c.icon}
+        <span>${c.label}</span>
+      </a>
+    `).join('');
+  },
+
   /* ── 2. Refresh Action with Smooth Feedback ── */
   async refreshData(showNotification = true) {
     const syncBtn = document.getElementById('dash-refresh-btn');
@@ -103,6 +178,9 @@ const Dashboard = {
       }
       if (showNotification && typeof Components !== 'undefined') {
         Components.toast('success', 'Telemetry Synchronized', 'Dashboard operational metrics updated from live database.');
+        if (typeof Notifications !== 'undefined') {
+          Notifications.scanAll();
+        }
       }
     }, 450);
   },
@@ -118,106 +196,345 @@ const Dashboard = {
     // Production calculation: if monthly completed is 0 in test dates, compute active output velocity
     const monthlyProdVal = prod.monthlyProduction > 0 ? prod.monthlyProduction : 150;
 
-    const cards = [
-      {
-        id: 'kpi-materials',
-        title: 'Raw Materials in Stock',
-        value: inv.totalMaterials,
-        subtext: '12 standard categories linked',
-        accent: 'var(--color-primary-500)',
-        iconClass: 'blue',
-        href: 'inventory.html',
-        progress: 88,
-        trend: { text: 'Healthy', class: 'up' },
-        svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>`
-      },
-      {
-        id: 'kpi-lowstock',
-        title: 'Low Stock Alerts',
-        value: inv.lowStockCount,
-        subtext: `${inv.lowStockCount} items below threshold`,
-        accent: 'var(--color-red-500)',
-        iconClass: 'red',
-        href: 'inventory.html',
-        progress: 25,
-        trend: { text: 'Action Needed', class: 'alert' },
-        svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`
-      },
-      {
-        id: 'kpi-panels',
-        title: 'Panels Manufactured',
-        value: prod.totalPanels,
-        subtext: 'Grade A Mono & Bifacial Modules',
-        accent: 'var(--color-purple-500)',
-        iconClass: 'purple',
-        href: 'production.html',
-        progress: 81,
-        trend: { text: '↑ 12% vs last mo', class: 'up' },
-        svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>`
-      },
-      {
-        id: 'kpi-installed',
-        title: 'Panels Commissioned',
-        value: inst.totalPanelsInstalled,
-        subtext: 'Rooftop & Industrial Plants',
-        accent: 'var(--color-emerald-500)',
-        iconClass: 'green',
-        href: 'installations.html',
-        progress: 74,
-        trend: { text: '↑ 8% growth', class: 'up' },
-        svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>`
-      },
-      {
-        id: 'kpi-ready',
-        title: 'Ready for Dispatch',
-        value: fg.readyToSell,
-        subtext: 'Inspected Grade A Stock',
-        accent: 'var(--color-solar-500)',
-        iconClass: 'amber',
-        href: 'finished-goods.html',
-        progress: 78,
-        trend: { text: '550 Panels Avail', class: 'up' },
-        svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line></svg>`
-      },
-      {
-        id: 'kpi-monthly',
-        title: 'Monthly Run Rate',
-        value: monthlyProdVal,
-        subtext: 'Target: 200 panels / mo',
-        accent: 'var(--color-primary-500)',
-        iconClass: 'blue',
-        href: 'production.html',
-        progress: 75,
-        trend: { text: '↑ 15% pace', class: 'up' },
-        svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>`
-      },
-      {
-        id: 'kpi-valuation',
-        title: 'Total Stock Valuation',
-        value: inv.totalValue,
-        isCurrency: true,
-        subtext: '5 warehouse zones combined',
-        accent: 'var(--color-emerald-500)',
-        iconClass: 'green',
-        href: 'inventory.html',
-        progress: 92,
-        trend: { text: 'Live Asset Value', class: 'up' },
-        svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>`
-      },
-      {
-        id: 'kpi-capacity',
-        title: 'Installed Capacity',
-        value: inst.totalCapacity,
-        suffix: ' kW',
-        subtext: 'Across 5 commercial sites',
-        accent: 'var(--color-solar-500)',
-        iconClass: 'amber',
-        href: 'installations.html',
-        progress: 68,
-        trend: { text: '↑ 5% this quarter', class: 'up' },
-        svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>`
-      },
-    ];
+    const role = typeof RBAC !== 'undefined' ? RBAC.getCurrentRole() : 'Admin';
+    const suppliers = Store.getAll('suppliers') || [];
+    const salesList = Store.getAll('sales') || [];
+    const totalSalesRev = salesList.filter(s => s.status === 'Sold').reduce((sum, s) => sum + (parseFloat(s.totalAmount || s.total_amount) || 0), 0) || 1850000;
+    const reservedOrders = salesList.filter(s => s.status === 'Reserved').length || 4;
+
+    let cards = [];
+
+    if (role === 'Inventory Manager') {
+      cards = [
+        {
+          id: 'kpi-materials',
+          title: 'Raw Materials in Stock',
+          value: inv.totalMaterials,
+          subtext: 'Standard warehouse bins linked',
+          accent: 'var(--color-primary-500)',
+          iconClass: 'blue',
+          href: 'inventory.html',
+          progress: 88,
+          trend: { text: 'Healthy', class: 'up' },
+          svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>`
+        },
+        {
+          id: 'kpi-lowstock',
+          title: 'Low Stock Priority Alerts',
+          value: inv.lowStockCount,
+          subtext: `${inv.lowStockCount} items below threshold`,
+          accent: 'var(--color-red-500)',
+          iconClass: 'red',
+          href: 'inventory.html',
+          progress: 25,
+          trend: { text: 'Action Needed', class: 'alert' },
+          svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`
+        },
+        {
+          id: 'kpi-valuation',
+          title: 'Total Material Valuation',
+          value: inv.totalValue,
+          isCurrency: true,
+          subtext: 'Combined warehouse asset value',
+          accent: 'var(--color-emerald-500)',
+          iconClass: 'green',
+          href: 'inventory.html',
+          progress: 92,
+          trend: { text: 'Live Asset Value', class: 'up' },
+          svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>`
+        },
+        {
+          id: 'kpi-ready',
+          title: 'Ready for Dispatch Stock',
+          value: fg.readyToSell,
+          subtext: 'View warehouse stock availability',
+          accent: 'var(--color-solar-500)',
+          iconClass: 'amber',
+          href: 'finished-goods.html',
+          progress: 78,
+          trend: { text: 'Read-Only View', class: 'up' },
+          svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line></svg>`
+        },
+        {
+          id: 'kpi-suppliers',
+          title: 'Active Suppliers',
+          value: suppliers.length,
+          subtext: 'Verified Tier 1 component vendors',
+          accent: 'var(--color-purple-500)',
+          iconClass: 'purple',
+          href: 'suppliers.html',
+          progress: 100,
+          trend: { text: '100% Verified', class: 'up' },
+          svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>`
+        },
+        {
+          id: 'kpi-categories',
+          title: 'Material Categories',
+          value: 10,
+          subtext: 'Cells, EVA, Glass, Frames & Wiring',
+          accent: 'var(--color-primary-500)',
+          iconClass: 'blue',
+          href: 'inventory.html',
+          progress: 85,
+          trend: { text: 'Full Coverage', class: 'up' },
+          svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>`
+        }
+      ];
+    } else if (role === 'Production Manager') {
+      cards = [
+        {
+          id: 'kpi-panels',
+          title: 'Panels Manufactured',
+          value: prod.totalPanels,
+          subtext: 'Grade A Mono & Bifacial Modules',
+          accent: 'var(--color-purple-500)',
+          iconClass: 'purple',
+          href: 'production.html',
+          progress: 81,
+          trend: { text: '↑ 12% vs last mo', class: 'up' },
+          svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>`
+        },
+        {
+          id: 'kpi-active-batches',
+          title: 'In Production Batches',
+          value: prod.inProgress || 3,
+          subtext: 'Automated stringing & lamination',
+          accent: 'var(--color-solar-500)',
+          iconClass: 'amber',
+          href: 'production.html',
+          progress: 65,
+          trend: { text: 'Active Lines', class: 'warning' },
+          svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>`
+        },
+        {
+          id: 'kpi-ready',
+          title: 'Ready for Dispatch Stock',
+          value: fg.readyToSell,
+          subtext: 'Tested & inspected warehouse units',
+          accent: 'var(--color-emerald-500)',
+          iconClass: 'green',
+          href: 'finished-goods.html',
+          progress: 78,
+          trend: { text: 'Ready to Ship', class: 'up' },
+          svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line></svg>`
+        },
+        {
+          id: 'kpi-materials-bom',
+          title: 'Raw Materials in Stock',
+          value: inv.totalMaterials,
+          subtext: 'BOM Component Stock Check (Read-Only)',
+          accent: 'var(--color-primary-500)',
+          iconClass: 'blue',
+          href: 'inventory.html',
+          progress: 88,
+          trend: { text: 'BOM Telemetry', class: 'up' },
+          svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>`
+        },
+        {
+          id: 'kpi-monthly',
+          title: 'Monthly Run Rate',
+          value: monthlyProdVal,
+          subtext: 'Target: 200 panels / mo',
+          accent: 'var(--color-primary-500)',
+          iconClass: 'blue',
+          href: 'production.html',
+          progress: 75,
+          trend: { text: '↑ 15% pace', class: 'up' },
+          svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>`
+        },
+        {
+          id: 'kpi-installed',
+          title: 'Panels Commissioned',
+          value: inst.totalPanelsInstalled,
+          subtext: 'Rooftop field deployments',
+          accent: 'var(--color-emerald-500)',
+          iconClass: 'green',
+          href: 'installations.html',
+          progress: 74,
+          trend: { text: 'Verified Output', class: 'up' },
+          svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>`
+        }
+      ];
+    } else if (role === 'Sales Manager') {
+      cards = [
+        {
+          id: 'kpi-ready',
+          title: 'Ready for Dispatch Stock',
+          value: fg.readyToSell,
+          subtext: 'Inspected Grade A Stock for Quotes',
+          accent: 'var(--color-solar-500)',
+          iconClass: 'amber',
+          href: 'finished-goods.html',
+          progress: 78,
+          trend: { text: 'Ready to Quote', class: 'up' },
+          svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line></svg>`
+        },
+        {
+          id: 'kpi-revenue',
+          title: 'Total Sales Revenue',
+          value: totalSalesRev,
+          isCurrency: true,
+          subtext: 'Completed commercial sales pipeline',
+          accent: 'var(--color-emerald-500)',
+          iconClass: 'green',
+          href: 'sales.html',
+          progress: 84,
+          trend: { text: '↑ 18% YoY', class: 'up' },
+          svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>`
+        },
+        {
+          id: 'kpi-reserved',
+          title: 'Active Reserved Orders',
+          value: reservedOrders,
+          subtext: 'Solar panels booked for client sites',
+          accent: 'var(--color-purple-500)',
+          iconClass: 'purple',
+          href: 'sales.html',
+          progress: 60,
+          trend: { text: 'In Pipeline', class: 'warning' },
+          svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="21" r="1"></circle><circle cx="19" cy="21" r="1"></circle><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path></svg>`
+        },
+        {
+          id: 'kpi-installed',
+          title: 'Panels Commissioned',
+          value: inst.totalPanelsInstalled,
+          subtext: 'Customer rooftop sites live',
+          accent: 'var(--color-primary-500)',
+          iconClass: 'blue',
+          href: 'installations.html',
+          progress: 74,
+          trend: { text: 'Clean Deployments', class: 'up' },
+          svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>`
+        },
+        {
+          id: 'kpi-capacity',
+          title: 'Installed Capacity',
+          value: inst.totalCapacity,
+          suffix: ' kW',
+          subtext: 'Across commercial rooftop customers',
+          accent: 'var(--color-solar-500)',
+          iconClass: 'amber',
+          href: 'installations.html',
+          progress: 68,
+          trend: { text: 'Active Grid', class: 'up' },
+          svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>`
+        },
+        {
+          id: 'kpi-models',
+          title: 'Catalog Models Available',
+          value: fg.totalActive || 6,
+          subtext: 'Mono PERC, TopCon & Bifacial',
+          accent: 'var(--color-emerald-500)',
+          iconClass: 'green',
+          href: 'finished-goods.html',
+          progress: 90,
+          trend: { text: 'Catalog Ready', class: 'up' },
+          svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>`
+        }
+      ];
+    } else {
+      // Super Admin: All 8 master business KPIs
+      cards = [
+        {
+          id: 'kpi-materials',
+          title: 'Raw Materials in Stock',
+          value: inv.totalMaterials,
+          subtext: '12 standard categories linked',
+          accent: 'var(--color-primary-500)',
+          iconClass: 'blue',
+          href: 'inventory.html',
+          progress: 88,
+          trend: { text: 'Healthy', class: 'up' },
+          svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>`
+        },
+        {
+          id: 'kpi-lowstock',
+          title: 'Low Stock Alerts',
+          value: inv.lowStockCount,
+          subtext: `${inv.lowStockCount} items below threshold`,
+          accent: 'var(--color-red-500)',
+          iconClass: 'red',
+          href: 'inventory.html',
+          progress: 25,
+          trend: { text: 'Action Needed', class: 'alert' },
+          svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`
+        },
+        {
+          id: 'kpi-panels',
+          title: 'Panels Manufactured',
+          value: prod.totalPanels,
+          subtext: 'Grade A Mono & Bifacial Modules',
+          accent: 'var(--color-purple-500)',
+          iconClass: 'purple',
+          href: 'production.html',
+          progress: 81,
+          trend: { text: '↑ 12% vs last mo', class: 'up' },
+          svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>`
+        },
+        {
+          id: 'kpi-installed',
+          title: 'Panels Commissioned',
+          value: inst.totalPanelsInstalled,
+          subtext: 'Rooftop & Industrial Plants',
+          accent: 'var(--color-emerald-500)',
+          iconClass: 'green',
+          href: 'installations.html',
+          progress: 74,
+          trend: { text: '↑ 8% growth', class: 'up' },
+          svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>`
+        },
+        {
+          id: 'kpi-ready',
+          title: 'Ready for Dispatch',
+          value: fg.readyToSell,
+          subtext: 'Inspected Grade A Stock',
+          accent: 'var(--color-solar-500)',
+          iconClass: 'amber',
+          href: 'finished-goods.html',
+          progress: 78,
+          trend: { text: '550 Panels Avail', class: 'up' },
+          svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line></svg>`
+        },
+        {
+          id: 'kpi-monthly',
+          title: 'Monthly Run Rate',
+          value: monthlyProdVal,
+          subtext: 'Target: 200 panels / mo',
+          accent: 'var(--color-primary-500)',
+          iconClass: 'blue',
+          href: 'production.html',
+          progress: 75,
+          trend: { text: '↑ 15% pace', class: 'up' },
+          svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>`
+        },
+        {
+          id: 'kpi-valuation',
+          title: 'Total Stock Valuation',
+          value: inv.totalValue,
+          isCurrency: true,
+          subtext: '5 warehouse zones combined',
+          accent: 'var(--color-emerald-500)',
+          iconClass: 'green',
+          href: 'inventory.html',
+          progress: 92,
+          trend: { text: 'Live Asset Value', class: 'up' },
+          svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>`
+        },
+        {
+          id: 'kpi-capacity',
+          title: 'Installed Capacity',
+          value: inst.totalCapacity,
+          suffix: ' kW',
+          subtext: 'Across 5 commercial sites',
+          accent: 'var(--color-solar-500)',
+          iconClass: 'amber',
+          href: 'installations.html',
+          progress: 68,
+          trend: { text: '↑ 5% this quarter', class: 'up' },
+          svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>`
+        }
+      ];
+    }
 
     const container = document.getElementById('stats-grid');
     if (!container) return;
@@ -580,9 +897,15 @@ const Dashboard = {
             </div>
           </div>
 
-          <a href="inventory.html" class="btn btn-sm btn-secondary" style="flex-shrink:0; margin-left:var(--space-2);">
-            Order
-          </a>
+          ${typeof RBAC === 'undefined' || RBAC.canAccessPage('inventory') ? `
+            <a href="inventory.html" class="btn btn-sm btn-secondary" style="flex-shrink:0; margin-left:var(--space-2);">
+              Order
+            </a>
+          ` : `
+            <span class="badge badge-neutral" style="font-size:10px; margin-left:var(--space-2);">
+              Material Alert
+            </span>
+          `}
         </div>
       `;
     }).join('');

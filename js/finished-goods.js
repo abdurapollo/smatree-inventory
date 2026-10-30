@@ -168,7 +168,19 @@ const FinishedGoods = {
       .filter(p => !p.isDeleted && p.is_deleted === 0)
       .reduce((sum, p) => sum + ((p.readyToSell || 0) * (p.pricePerUnit || 0)), 0);
 
+    const isReadOnly = typeof RBAC !== 'undefined' && RBAC.isReadOnly('finishedGoods');
+    const readOnlyBannerHtml = isReadOnly ? `
+      <div class="rbac-readonly-banner animate-fadeInUp" style="grid-column: 1 / -1; margin-bottom: 0;">
+        <div class="rbac-banner-icon">👁️</div>
+        <div class="rbac-banner-content">
+          <div class="rbac-banner-title">Finished Goods Stock Telemetry • Read-Only Mode</div>
+          <div class="rbac-banner-text">Finished goods inventory levels and solar panel specifications are accessible for warehouse storage tracking and quotation availability. Product catalog definitions, engineering changes, and archiving are restricted to Plant Manager & Super Admin.</div>
+        </div>
+      </div>
+    ` : '';
+
     container.innerHTML = `
+      ${readOnlyBannerHtml}
       <div class="stat-card animate-fadeInUp delay-1" style="--card-accent:var(--color-primary-500)">
         <div class="stat-card-header">
           <div class="stat-icon blue">${Icons.solarPanel(22)}</div>
@@ -233,6 +245,11 @@ const FinishedGoods = {
     const container = document.getElementById('fg-toolbar');
     if (!container) return;
 
+    const canCreate = typeof RBAC === 'undefined' || RBAC.hasPermission('finishedGoods.create');
+    const addBtnHtml = canCreate
+      ? `<button class="btn btn-primary btn-sm" id="fg-add-btn" style="box-shadow:var(--shadow-md)">${Icons.plus(15)} Add Solar Product</button>`
+      : `<span class="badge badge-neutral" style="font-size:11px;padding:6px 12px;font-weight:600;display:inline-flex;align-items:center;gap:4px;">👁️ Read-Only Mode</span>`;
+
     container.innerHTML = `
       <div class="search-box" style="flex:1;max-width:320px">
         <span class="search-icon">${Icons.search(16)}</span>
@@ -257,9 +274,7 @@ const FinishedGoods = {
         <button class="btn btn-secondary btn-sm" id="fg-export-btn" title="Export catalog to CSV spreadsheet">
           ${Icons.download(15)} Export CSV
         </button>
-        <button class="btn btn-primary btn-sm" id="fg-add-btn" style="box-shadow:var(--shadow-md)">
-          ${Icons.plus(15)} Add Solar Product
-        </button>
+        ${addBtnHtml}
       </div>
     `;
   },
@@ -421,13 +436,27 @@ const FinishedGoods = {
           const id = row.product_code || row.id;
           const isArchived = row.isDeleted || row.is_deleted === 1;
 
+          const canEdit = typeof RBAC === 'undefined' || RBAC.hasPermission('finishedGoods.edit');
+          const canDelete = typeof RBAC === 'undefined' || RBAC.hasPermission('finishedGoods.delete');
+
+          if (!canEdit && !canDelete) {
+            return `
+              <div class="actions">
+                <button class="btn btn-ghost btn-sm btn-icon" data-view-prod="${id}" title="View Technical Specs">${Icons.eye(15)}</button>
+                <span class="badge badge-neutral" style="font-size:10px;">Stock View</span>
+              </div>
+            `;
+          }
+
           if (isArchived) {
             return `
               <div class="actions">
                 <button class="btn btn-ghost btn-sm btn-icon" data-view-prod="${id}" title="View Technical Specs">${Icons.eye(15)}</button>
-                <button class="btn btn-ghost btn-sm btn-icon" data-edit-prod="${id}" title="Edit Specifications">${Icons.edit(15)}</button>
-                <button class="btn btn-ghost btn-sm btn-icon" data-restore-prod="${id}" title="Restore & Re-enable Product" style="color:var(--color-success)">${Icons.refresh(15)}</button>
-                <button class="btn btn-ghost btn-sm btn-icon text-danger" data-permanent-delete-prod="${id}" title="Permanently Delete from Database">${Icons.trash(15)}</button>
+                ${canEdit ? `<button class="btn btn-ghost btn-sm btn-icon" data-edit-prod="${id}" title="Edit Specifications">${Icons.edit(15)}</button>` : ''}
+                ${canDelete ? `
+                  <button class="btn btn-ghost btn-sm btn-icon" data-restore-prod="${id}" title="Restore & Re-enable Product" style="color:var(--color-success)">${Icons.refresh(15)}</button>
+                  <button class="btn btn-ghost btn-sm btn-icon text-danger" data-permanent-delete-prod="${id}" title="Permanently Delete from Database">${Icons.trash(15)}</button>
+                ` : ''}
               </div>
             `;
           }
@@ -435,8 +464,8 @@ const FinishedGoods = {
           return `
             <div class="actions">
               <button class="btn btn-ghost btn-sm btn-icon" data-view-prod="${id}" title="View Technical Specs">${Icons.eye(15)}</button>
-              <button class="btn btn-ghost btn-sm btn-icon" data-edit-prod="${id}" title="Edit Specifications">${Icons.edit(15)}</button>
-              <button class="btn btn-ghost btn-sm btn-icon text-danger" data-soft-delete-prod="${id}" title="Soft Delete / Archive">${Icons.trash(15)}</button>
+              ${canEdit ? `<button class="btn btn-ghost btn-sm btn-icon" data-edit-prod="${id}" title="Edit Specifications">${Icons.edit(15)}</button>` : ''}
+              ${canDelete ? `<button class="btn btn-ghost btn-sm btn-icon text-danger" data-soft-delete-prod="${id}" title="Soft Delete / Archive">${Icons.trash(15)}</button>` : ''}
             </div>
           `;
         }
@@ -511,6 +540,8 @@ const FinishedGoods = {
     }
 
     const isArchivedTab = this.state.currentTab === 'archived';
+    const canEdit = typeof RBAC === 'undefined' || RBAC.hasPermission('finishedGoods.edit');
+    const canDelete = typeof RBAC === 'undefined' || RBAC.hasPermission('finishedGoods.delete');
 
     container.innerHTML = `
       <div class="grid-cols-3">
@@ -614,24 +645,26 @@ const FinishedGoods = {
 
               <!-- Actions Section (Pinned to Bottom) -->
               <div style="margin-top:auto;display:flex;gap:var(--space-2);padding-top:var(--space-3);border-top:1px solid var(--border-light);flex-wrap:wrap">
-                <button type="button" class="btn btn-ghost btn-sm" data-view-prod="${id}" title="View Technical Specs">
-                  ${Icons.eye(14)} Specs
+                <button type="button" class="btn btn-ghost btn-sm ${!canEdit && !canDelete ? 'flex-1' : ''}" data-view-prod="${id}" title="View Technical Specs">
+                  ${Icons.eye(14)} View Specs
                 </button>
-                <button type="button" class="btn btn-secondary btn-sm flex-1" data-edit-prod="${id}" title="Edit Specifications">
-                  ${Icons.edit(14)} Edit
-                </button>
-                ${isArchived ? `
+                ${canEdit ? `
+                  <button type="button" class="btn btn-secondary btn-sm flex-1" data-edit-prod="${id}" title="Edit Specifications">
+                    ${Icons.edit(14)} Edit
+                  </button>
+                ` : ''}
+                ${canDelete && isArchived ? `
                   <button type="button" class="btn btn-success btn-sm flex-1" data-restore-prod="${id}" style="font-weight:600">
                     ${Icons.refresh(14)} Re-enable
                   </button>
                   <button type="button" class="btn btn-danger btn-sm" data-permanent-delete-prod="${id}" title="Delete Permanently" style="padding:6px 10px">
                     ${Icons.x(14)}
                   </button>
-                ` : `
+                ` : (canDelete ? `
                   <button type="button" class="btn btn-danger btn-sm" data-soft-delete-prod="${id}" title="Soft Delete / Archive" style="background:rgba(239,68,68,0.1);color:var(--color-danger);border:1px solid rgba(239,68,68,0.25)">
                     ${Icons.trash(14)} Soft Delete
                   </button>
-                `}
+                ` : '')}
               </div>
 
             </div>
@@ -684,8 +717,12 @@ const FinishedGoods = {
         this.renderCurrentView();
       }
 
-      // Action buttons
+      // Action buttons with RBAC authorization
       if (e.target.closest('#fg-add-btn') || e.target.closest('#empty-add-btn')) {
+        if (typeof RBAC !== 'undefined' && !RBAC.hasPermission('finishedGoods.create')) {
+          Components.toast('warning', 'Access Restricted', 'Your role cannot add finished solar products.');
+          return;
+        }
         this.showForm();
       }
       if (e.target.closest('#fg-export-btn')) {
@@ -696,18 +733,34 @@ const FinishedGoods = {
         this.showViewModal(id);
       }
       if (e.target.closest('[data-edit-prod]')) {
+        if (typeof RBAC !== 'undefined' && !RBAC.hasPermission('finishedGoods.edit')) {
+          Components.toast('warning', 'Access Restricted', 'Your role cannot edit solar product specifications.');
+          return;
+        }
         const id = e.target.closest('[data-edit-prod]').dataset.editProd;
         this.showForm(id);
       }
       if (e.target.closest('[data-soft-delete-prod]')) {
+        if (typeof RBAC !== 'undefined' && !RBAC.hasPermission('finishedGoods.delete')) {
+          Components.toast('warning', 'Access Restricted', 'Your role cannot archive solar products.');
+          return;
+        }
         const id = e.target.closest('[data-soft-delete-prod]').dataset.softDeleteProd;
         this.confirmSoftDelete(id);
       }
       if (e.target.closest('[data-restore-prod]')) {
+        if (typeof RBAC !== 'undefined' && !RBAC.hasPermission('finishedGoods.delete')) {
+          Components.toast('warning', 'Access Restricted', 'Your role cannot restore solar products.');
+          return;
+        }
         const id = e.target.closest('[data-restore-prod]').dataset.restoreProd;
         this.confirmRestore(id);
       }
       if (e.target.closest('[data-permanent-delete-prod]')) {
+        if (typeof RBAC !== 'undefined' && !RBAC.hasPermission('finishedGoods.delete')) {
+          Components.toast('warning', 'Access Restricted', 'Your role cannot permanently delete products.');
+          return;
+        }
         const id = e.target.closest('[data-permanent-delete-prod]').dataset.permanentDeleteProd;
         this.confirmPermanentDelete(id);
       }

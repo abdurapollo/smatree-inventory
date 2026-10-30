@@ -254,6 +254,9 @@ const Components = {
 
   buildSidebar(activePage) {
     const user = Store.getCurrentUser() || { name: 'Admin', role: 'Admin' };
+    const userRole = user.role || 'Admin';
+    const roleConfig = typeof RBAC !== 'undefined' ? RBAC.getRoleConfig(userRole) : { name: userRole, color: '#3b82f6' };
+
     const getNavIcon = (page) => {
       if (typeof Icons === 'undefined') return '📦';
       switch (page) {
@@ -269,7 +272,7 @@ const Components = {
       }
     };
 
-    const menuItems = [
+    const allMenuItems = [
       { section: 'Overview', items: [
         { page: 'dashboard', label: 'Dashboard', href: 'dashboard.html' },
         { page: 'inventory', label: 'Raw Materials', href: 'inventory.html', badge: null },
@@ -286,10 +289,24 @@ const Components = {
       ]},
     ];
 
+    // Filter menu items dynamically according to Role-Based Access Control
+    const menuItems = allMenuItems.map(section => {
+      const allowedItems = section.items.filter(item => {
+        if (typeof RBAC !== 'undefined') {
+          return RBAC.canAccessPage(item.page, userRole);
+        }
+        return true;
+      });
+      return { section: section.section, items: allowedItems };
+    }).filter(section => section.items.length > 0);
+
     // Check low stock for badge
     const invStats = Store.getInventoryStats();
     if (invStats.lowStockCount > 0) {
-      menuItems[0].items[1].badge = invStats.lowStockCount;
+      menuItems.forEach(sec => {
+        const invItem = sec.items.find(i => i.page === 'inventory');
+        if (invItem) invItem.badge = invStats.lowStockCount;
+      });
     }
 
     let html = `
@@ -310,23 +327,30 @@ const Components = {
         <div class="nav-section-title">${section.section}</div>`;
       section.items.forEach(item => {
         const isActive = item.page === activePage;
+        // Check if page is read-only for this role
+        const isReadOnly = typeof RBAC !== 'undefined' && RBAC.isReadOnly(item.page, userRole);
+        const readOnlyHint = isReadOnly ? '<span style="font-size:10px;opacity:0.7;margin-left:4px;" title="Read-Only Mode">👁️</span>' : '';
+
         html += `
           <a href="${item.href}" class="nav-item ${isActive ? 'active' : ''}" data-nav-page="${item.page}">
             <span class="nav-icon">${getNavIcon(item.page)}</span>
-            <span class="nav-label">${item.label}</span>
+            <span class="nav-label" style="display:inline-flex;align-items:center;">${item.label} ${readOnlyHint}</span>
             <span class="nav-badge" id="nav-badge-${item.page}" data-badge-page="${item.page}" style="${item.badge ? 'display:flex' : 'display:none'}">${item.badge || ''}</span>
           </a>`;
       });
       html += `</div>`;
     });
 
+    // Sidebar footer with user profile & role badge
+    const roleBadgeHtml = typeof RBAC !== 'undefined' ? RBAC.renderRoleBadge(userRole, 'sm') : `<span class="user-role">${userRole}</span>`;
+
     html += `</nav>
       <div class="sidebar-footer">
-        <div class="sidebar-user" id="sidebar-user-btn" title="View Profile & Settings">
-          <div class="user-avatar">${Utils.getInitials(user.name)}</div>
-          <div class="user-info">
-            <div class="user-name">${user.name}</div>
-            <div class="user-role">${user.role || 'Administrator'}</div>
+        <div class="sidebar-user" id="sidebar-user-btn" title="Click to view Role Permissions">
+          <div class="user-avatar" style="background:${roleConfig.color || '#3b82f6'};">${Utils.getInitials(user.display_name || user.name)}</div>
+          <div class="user-info" style="display:flex;flex-direction:column;gap:3px;">
+            <div class="user-name">${user.display_name || user.name}</div>
+            <div style="line-height:1;">${roleBadgeHtml}</div>
           </div>
           <div class="user-chevron">${typeof Icons !== 'undefined' ? Icons.chevronDown(13) : '▾'}</div>
         </div>
@@ -390,6 +414,8 @@ const Components = {
 
   buildNavbar(pageTitle, breadcrumbs = []) {
     const user = Store.getCurrentUser() || { name: 'Admin', role: 'Admin' };
+    const userRole = user.role || 'Admin';
+    const roleConfig = typeof RBAC !== 'undefined' ? RBAC.getRoleConfig(userRole) : { name: userRole, color: '#3b82f6' };
     const theme = Store.getSettings().theme || 'light';
 
     let breadcrumbHtml = '';
@@ -412,6 +438,7 @@ const Components = {
     const dbSvg = typeof Icons !== 'undefined' ? Icons.database(16) : '💾';
     const logoutSvg = typeof Icons !== 'undefined' ? Icons.logout(16) : '🚪';
     const refreshSvg = typeof Icons !== 'undefined' ? Icons.refresh(13) : '⟳';
+    const shieldSvg = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`;
 
     const now = new Date();
     const initialTime = now.toLocaleTimeString('en-IN', {
@@ -426,6 +453,53 @@ const Components = {
       month: 'short',
       year: 'numeric'
     });
+
+    // 1-Click Fast Role Switcher Dropdown HTML
+    const demoUsers = typeof RBAC !== 'undefined' ? RBAC.demoUsers : [];
+    let roleSwitcherHtml = '';
+    if (demoUsers.length) {
+      roleSwitcherHtml = `
+        <div class="dropdown rbac-switcher-dropdown-wrap" id="rbac-switcher-dropdown">
+          <button type="button" class="rbac-nav-role-btn" id="rbac-role-toggle-btn" data-tooltip="Fast Role Switcher (1-Click)" data-tooltip-pos="bottom" aria-label="Fast Role Switcher">
+            <span class="rbac-role-dot" style="background:${roleConfig.color || '#3b82f6'};"></span>
+            <span class="rbac-role-label hide-mobile">${roleConfig.name}</span>
+            <span class="rbac-role-switch-chevron">${typeof Icons !== 'undefined' ? Icons.chevronDown(11) : '▾'}</span>
+          </button>
+          <div class="dropdown-menu rbac-switch-menu" id="rbac-switch-menu" style="min-width:280px;padding:0.75rem;">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:0.5rem;margin-bottom:0.5rem;border-bottom:1px solid var(--border-light);">
+              <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);">Switch Demo Role</span>
+              <span class="demo-hint-pill" style="font-size:10px;padding:2px 6px;">1-Click</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:5px;">
+              ${demoUsers.map(du => {
+                const isActive = (user.email && du.email.toLowerCase() === user.email.toLowerCase()) || du.role === userRole;
+                return `
+                  <button type="button" class="rbac-fast-switch-item ${isActive ? 'active' : ''}" data-nav-switch="${du.email}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:${isActive ? 'var(--bg-badge)' : 'transparent'};border:1px solid ${isActive ? 'var(--border-color)' : 'transparent'};cursor:pointer;width:100%;text-align:left;transition:all var(--transition-fast);">
+                    <div style="width:28px;height:28px;border-radius:6px;background:${du.avatarColor};color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;">
+                      ${Utils.getInitials(du.displayName)}
+                    </div>
+                    <div style="flex:1;min-width:0;">
+                      <div style="font-size:12px;font-weight:700;color:var(--text-primary);display:flex;align-items:center;gap:4px;">
+                        <span>${du.displayName}</span>
+                        ${isActive ? '<span style="font-size:10px;color:var(--color-primary-500);font-weight:600;">(Active)</span>' : ''}
+                      </div>
+                      <div style="font-size:11px;color:var(--text-muted);">${du.roleLabel}</div>
+                    </div>
+                    ${isActive ? '<span style="color:var(--color-primary-500);font-weight:700;">✓</span>' : ''}
+                  </button>
+                `;
+              }).join('')}
+            </div>
+            <div style="margin-top:0.625rem;padding-top:0.5rem;border-top:1px solid var(--border-light);text-align:center;">
+              <button type="button" class="btn btn-ghost btn-sm" id="rbac-open-matrix-btn" style="width:100%;font-size:11px;padding:4px 8px;gap:6px;">
+                ${shieldSvg}
+                <span>View Full Permissions Matrix</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
 
     return `
     <header class="navbar" id="navbar">
@@ -453,26 +527,35 @@ const Components = {
         </div>
       </div>
       <div class="navbar-right">
+        ${roleSwitcherHtml}
         <button class="theme-toggle" id="theme-toggle" data-tooltip="${theme === 'dark' ? 'Switch to Light Theme' : 'Switch to Dark Theme'}" data-tooltip-pos="bottom" aria-label="Toggle Theme">
           ${theme === 'dark' ? sunSvg : moonSvg}
         </button>
-        <button class="navbar-icon-btn" id="notifications-btn" data-tooltip="Notifications" data-tooltip-pos="bottom" aria-label="Notifications">
-          ${bellSvg}
-          <span class="notif-badge" id="notif-count">3</span>
-        </button>
+        <div class="dropdown" id="notifications-dropdown">
+          <button class="navbar-icon-btn" id="notifications-btn" data-tooltip="Notifications" data-tooltip-pos="bottom" aria-label="Notifications">
+            ${bellSvg}
+            <span class="notif-badge" id="notif-count" style="display:none">0</span>
+          </button>
+          <div class="dropdown-menu notif-dropdown-menu" id="notifications-menu">
+            <!-- Dynamically populated by Notifications engine -->
+          </div>
+        </div>
         <div class="dropdown" id="profile-dropdown">
           <div class="navbar-profile" id="profile-toggle">
-            <div class="profile-avatar">${Utils.getInitials(user.name)}</div>
-            <span class="profile-name hide-mobile">${user.name}</span>
+            <div class="profile-avatar" style="background:${roleConfig.color || '#3b82f6'};">${Utils.getInitials(user.display_name || user.name)}</div>
+            <span class="profile-name hide-mobile">${user.display_name || user.name}</span>
             <span class="profile-chevron hide-mobile">${typeof Icons !== 'undefined' ? Icons.chevronDown(13) : '▾'}</span>
           </div>
           <div class="dropdown-menu" id="profile-menu">
             <div class="dropdown-header">
-              <div class="dropdown-user-name">${user.name}</div>
-              <div class="dropdown-user-role">${user.role || 'Admin'}</div>
+              <div class="dropdown-user-name">${user.display_name || user.name}</div>
+              <div class="dropdown-user-role" style="display:flex;align-items:center;gap:4px;margin-top:2px;">
+                <span style="width:6px;height:6px;border-radius:50%;background:${roleConfig.color || '#3b82f6'};"></span>
+                <span>${roleConfig.name}</span>
+              </div>
             </div>
             <div class="dropdown-divider"></div>
-            <div class="dropdown-item">${userSvg} <span>Profile</span></div>
+            <div class="dropdown-item" id="rbac-profile-matrix-btn">${shieldSvg} <span>Role & Permissions</span></div>
             <div class="dropdown-item" id="settings-btn">${settingsSvg} <span>Settings</span></div>
             <div class="dropdown-item" id="backup-btn">${dbSvg} <span>Backup Data</span></div>
             <div class="dropdown-divider"></div>

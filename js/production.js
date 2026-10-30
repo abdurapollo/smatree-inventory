@@ -326,7 +326,13 @@ const Production = {
         this.renderTable();
       }
 
-      if (e.target.closest('#prod-add-btn')) this.showForm();
+      if (e.target.closest('#prod-add-btn')) {
+        if (typeof RBAC !== 'undefined' && !RBAC.hasPermission('production.create')) {
+          Components.toast('warning', 'Access Restricted', 'Your role cannot schedule production batches.');
+          return;
+        }
+        this.showForm();
+      }
       if (e.target.closest('#prod-refresh-btn')) this.refreshData();
       if (e.target.closest('#prod-export-btn')) this.exportCSV();
 
@@ -334,13 +340,31 @@ const Production = {
       if (viewBtn) this.viewBatch(viewBtn.dataset.viewProd);
 
       const completeBtn = e.target.closest('[data-complete-prod]');
-      if (completeBtn) this.completeBatchQuick(completeBtn.dataset.completeProd);
+      if (completeBtn) {
+        if (typeof RBAC !== 'undefined' && !RBAC.hasPermission('production.edit')) {
+          Components.toast('warning', 'Access Restricted', 'Your role cannot modify batch status.');
+          return;
+        }
+        this.completeBatchQuick(completeBtn.dataset.completeProd);
+      }
 
       const editBtn = e.target.closest('[data-edit-prod]');
-      if (editBtn) this.showForm(editBtn.dataset.editProd);
+      if (editBtn) {
+        if (typeof RBAC !== 'undefined' && !RBAC.hasPermission('production.edit')) {
+          Components.toast('warning', 'Access Restricted', 'Your role cannot edit batch specifications.');
+          return;
+        }
+        this.showForm(editBtn.dataset.editProd);
+      }
 
       const deleteBtn = e.target.closest('[data-delete-prod]');
-      if (deleteBtn) this.confirmDelete(deleteBtn.dataset.deleteProd);
+      if (deleteBtn) {
+        if (typeof RBAC !== 'undefined' && !RBAC.hasPermission('production.delete')) {
+          Components.toast('warning', 'Access Restricted', 'Your role cannot delete production records.');
+          return;
+        }
+        this.confirmDelete(deleteBtn.dataset.deleteProd);
+      }
     });
 
     // Search input
@@ -532,6 +556,16 @@ const Production = {
 
         if (resp.success) {
           Components.toast('success', isEdit ? 'Batch Updated' : 'Batch Created', resp.data?.message || 'Production record saved.');
+          if (typeof Notifications !== 'undefined') {
+            Notifications.notify({
+              title: isEdit ? `Batch Updated: ${payload.panelType}` : `New Batch Created: ${payload.panelType}`,
+              message: `${payload.quantity} panels scheduled for ${payload.status} stage with ${payload.teamAssigned}.`,
+              category: 'production',
+              severity: payload.status === 'Completed' ? 'success' : (payload.status === 'Quality Check' ? 'warning' : 'info'),
+              link: 'production.html',
+              actionLabel: 'View Production'
+            }, false);
+          }
           modal.close();
           await this.loadData();
           this.renderStats();
@@ -572,6 +606,16 @@ const Production = {
           const resp = await ApiService.updateProduction(payload);
           if (resp.success) {
             Components.toast('success', 'Production Completed', `Batch ${item.batchCode || item.id} completed. Finished goods stock updated.`);
+            if (typeof Notifications !== 'undefined') {
+              Notifications.notify({
+                title: `Batch Completed: ${item.batchCode || item.id}`,
+                message: `${item.quantity} panels of ${item.panelType} completed & added to ready inventory.`,
+                category: 'production',
+                severity: 'success',
+                link: 'finished-goods.html',
+                actionLabel: 'View Products'
+              }, false);
+            }
             await this.loadData();
             this.renderStats();
             this.renderTabs();

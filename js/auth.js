@@ -104,7 +104,7 @@ const Auth = {
       });
     }
 
-    // 5. Quick Demo Role Selector
+    // 5. Quick Demo Role Selector (True 1-Click Fast Switch)
     const demoButtons = document.querySelectorAll('.demo-role-btn, [data-demo]');
     const passwords = {
       'admin@smatree.com': 'admin123',
@@ -131,8 +131,28 @@ const Auth = {
         // Show fast 1-click login hint
         if (this.roleBanner && this.roleLabel) {
           this.roleLabel.textContent = role;
+          const scopeEl = document.getElementById('selected-role-scope');
+          const scope = btn.dataset.scope || '';
+          if (scopeEl) scopeEl.textContent = scope ? `(${scope})` : '';
           this.roleBanner.style.display = 'flex';
         }
+
+        const nameEl = btn.querySelector('.demo-role-name');
+        const userName = nameEl ? nameEl.textContent : role;
+
+        // Visual feedback on the submit button
+        if (this.submitBtn) {
+          this.submitBtn.innerHTML = `
+            <span class="spinner spinner-sm" style="display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.6s linear infinite;margin-right:8px;vertical-align:middle;"></span>
+            <span>Signing in as ${userName}...</span>
+          `;
+          this.submitBtn.disabled = true;
+        }
+
+        // True 1-Click Fast Switch: Automatically sign in immediately!
+        setTimeout(() => {
+          this.handleLogin();
+        }, 180);
       });
     });
 
@@ -342,8 +362,10 @@ const Auth = {
         user = {
           id: localUser.id,
           name: localUser.name,
+          display_name: localUser.display_name || localUser.name,
           email: localUser.email,
-          role: localUser.role
+          role: localUser.role,
+          role_label: localUser.role_label || localUser.role
         };
       }
     }
@@ -384,9 +406,16 @@ const Auth = {
       `;
     }
 
-    // Seamless redirect to dashboard
+    // Seamless redirect to user's authorized workspace or dashboard
     setTimeout(() => {
-      window.location.href = 'dashboard.html';
+      let destination = 'dashboard.html';
+      if (typeof RBAC !== 'undefined' && user && user.role) {
+        const roleConf = RBAC.getRoleConfig(user.role);
+        if (roleConf && roleConf.defaultLanding) {
+          destination = roleConf.defaultLanding;
+        }
+      }
+      window.location.href = destination;
     }, 450);
   },
 

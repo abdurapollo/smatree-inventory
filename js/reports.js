@@ -19,6 +19,11 @@ const Reports = {
       { label: 'Reports' }
     ])) return;
 
+    const role = typeof RBAC !== 'undefined' ? RBAC.getCurrentRole() : 'Admin';
+    if (role === 'Sales Manager') this.state.currentType = 'sales';
+    else if (role === 'Production Manager') this.state.currentType = 'production';
+    else this.state.currentType = 'inventory';
+
     await this.syncDatabaseData();
     this.renderSummary();
     this.renderFilters();
@@ -103,13 +108,37 @@ const Reports = {
     const container = document.getElementById('reports-filters');
     if (!container) return;
 
+    const role = typeof RBAC !== 'undefined' ? RBAC.getCurrentRole() : 'Admin';
+    const reportOptions = [];
+
+    if (role === 'Admin') {
+      reportOptions.push(
+        { val: 'inventory', label: 'Inventory Raw Materials' },
+        { val: 'production', label: 'Production Batches' },
+        { val: 'installations', label: 'Solar Installations' },
+        { val: 'sales', label: 'Solar Sales Orders' }
+      );
+    } else if (role === 'Inventory Manager') {
+      reportOptions.push(
+        { val: 'inventory', label: 'Inventory Raw Materials' }
+      );
+    } else if (role === 'Production Manager') {
+      reportOptions.push(
+        { val: 'production', label: 'Production Batches' },
+        { val: 'installations', label: 'Solar Installations' },
+        { val: 'inventory', label: 'Inventory Materials (BOM)' }
+      );
+    } else if (role === 'Sales Manager') {
+      reportOptions.push(
+        { val: 'sales', label: 'Solar Sales Orders' },
+        { val: 'installations', label: 'Solar Installations' }
+      );
+    }
+
     container.innerHTML = `
       <div class="d-flex align-center gap-2 flex-wrap" style="width:100%">
         <select class="form-control" id="report-type" style="width:auto;min-width:180px;border-radius:999px;padding:0.5rem 2rem 0.5rem 0.75rem;font-size:var(--fs-xs)">
-          <option value="inventory">Inventory Raw Materials</option>
-          <option value="production">Production Batches</option>
-          <option value="installations">Solar Installations</option>
-          <option value="sales">Solar Sales Orders</option>
+          ${reportOptions.map(opt => `<option value="${opt.val}" ${this.state.currentType === opt.val ? 'selected' : ''}>${opt.label}</option>`).join('')}
         </select>
         <span class="fs-xs text-muted">From:</span>
         <input type="date" class="form-control" id="report-from" style="width:auto;border-radius:999px;padding:0.5rem 0.75rem;font-size:var(--fs-xs)" value="2025-01-01">

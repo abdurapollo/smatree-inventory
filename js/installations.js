@@ -291,7 +291,13 @@ const Installations = {
         this.renderTable();
       }
 
-      if (e.target.closest('#inst-add-btn')) this.showForm();
+      if (e.target.closest('#inst-add-btn')) {
+        if (typeof RBAC !== 'undefined' && !RBAC.hasPermission('installations.create')) {
+          Components.toast('warning', 'Access Restricted', 'Your role cannot add installation projects.');
+          return;
+        }
+        this.showForm();
+      }
       if (e.target.closest('#inst-refresh-btn')) this.refreshData();
       if (e.target.closest('#inst-export-btn')) this.exportCSV();
 
@@ -299,10 +305,22 @@ const Installations = {
       if (viewBtn) this.viewInstallation(viewBtn.dataset.viewInst);
 
       const editBtn = e.target.closest('[data-edit-inst]');
-      if (editBtn) this.showForm(editBtn.dataset.editInst);
+      if (editBtn) {
+        if (typeof RBAC !== 'undefined' && !RBAC.hasPermission('installations.edit')) {
+          Components.toast('warning', 'Access Restricted', 'Your role cannot edit installation projects.');
+          return;
+        }
+        this.showForm(editBtn.dataset.editInst);
+      }
 
       const deleteBtn = e.target.closest('[data-delete-inst]');
-      if (deleteBtn) this.confirmDelete(deleteBtn.dataset.deleteInst);
+      if (deleteBtn) {
+        if (typeof RBAC !== 'undefined' && !RBAC.hasPermission('installations.delete')) {
+          Components.toast('warning', 'Access Restricted', 'Your role cannot delete installation records.');
+          return;
+        }
+        this.confirmDelete(deleteBtn.dataset.deleteInst);
+      }
     });
 
     document.addEventListener('input', Utils.debounce((e) => {
@@ -475,6 +493,16 @@ const Installations = {
 
         if (resp.success) {
           Components.toast('success', isEdit ? 'Installation Updated' : 'Installation Added', resp.data?.message || 'Installation record saved.');
+          if (typeof Notifications !== 'undefined') {
+            Notifications.notify({
+              title: payload.status === 'Completed' ? `Installation Commissioned: ${payload.customerName}` : (isEdit ? `Project Updated: ${payload.customerName}` : `New Installation: ${payload.customerName}`),
+              message: `${payload.totalCapacity} kW solar project (${payload.panelType}) scheduled for ${payload.installationDate} with status: ${payload.status}.`,
+              category: 'installations',
+              severity: payload.status === 'Completed' ? 'success' : 'info',
+              link: 'installations.html',
+              actionLabel: 'View Project'
+            }, false);
+          }
           modal.close();
           await this.loadData();
           this.renderStats();

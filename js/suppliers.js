@@ -135,12 +135,26 @@ const Suppliers = {
 
   setupEvents() {
     document.addEventListener('click', (e) => {
-      if (e.target.closest('#sup-add-btn')) this.showForm();
+      if (e.target.closest('#sup-add-btn')) {
+        if (typeof RBAC !== 'undefined' && !RBAC.hasPermission('suppliers.create')) {
+          Components.toast('warning', 'Access Restricted', 'Your role cannot add suppliers.');
+          return;
+        }
+        this.showForm();
+      }
       if (e.target.closest('[data-edit-sup]')) {
+        if (typeof RBAC !== 'undefined' && !RBAC.hasPermission('suppliers.edit')) {
+          Components.toast('warning', 'Access Restricted', 'Your role cannot edit supplier records.');
+          return;
+        }
         const id = e.target.closest('[data-edit-sup]').dataset.editSup;
         this.showForm(id);
       }
       if (e.target.closest('[data-delete-sup]')) {
+        if (typeof RBAC !== 'undefined' && !RBAC.hasPermission('suppliers.delete')) {
+          Components.toast('warning', 'Access Restricted', 'Your role cannot delete suppliers.');
+          return;
+        }
         const id = e.target.closest('[data-delete-sup]').dataset.deleteSup;
         const supplier = Store.getById('suppliers', id);
         const name = supplier ? supplier.company : 'this supplier';
@@ -580,6 +594,16 @@ const Suppliers = {
           }
 
           Components.toast('success', isEdit ? 'Supplier Updated' : 'Supplier Added', `${savedData.company} was saved to the database.`);
+          if (typeof Notifications !== 'undefined') {
+            Notifications.notify({
+              title: isEdit ? `Supplier Updated: ${savedData.company}` : `New Supplier Added: ${savedData.company}`,
+              message: `Materials supplied: ${savedData.materials || 'Solar Raw Materials'}. Contact: ${savedData.phone}.`,
+              category: 'supplier',
+              severity: 'info',
+              link: 'suppliers.html',
+              actionLabel: 'View Suppliers'
+            }, false);
+          }
           modal.close();
           this.renderStats();
           this.renderCards();

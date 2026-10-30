@@ -38,6 +38,9 @@ class DataStore {
       if (key === this.keys.inventory && typeof window !== 'undefined' && window.Components?.updateNavBadges) {
         window.Components.updateNavBadges();
       }
+      if (typeof window !== 'undefined' && window.Notifications?.scanAll && key !== 'smatree_notifications') {
+        window.Notifications.scanAll();
+      }
       return true;
     } catch (e) {
       console.error(`Store write error [${key}]:`, e);
