@@ -21,7 +21,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-require_once __DIR__ . '/../db.php';
+require_once __DIR__ . '/../auth_middleware.php';
+
+// Enforce server-side authorization
+AuthMiddleware::requirePermission('inventory.create');
 
 // Parse raw JSON or POST data
 $rawInput = file_get_contents('php://input');
@@ -140,6 +143,14 @@ try {
     ]);
 
     $insertedDbId = (int)$pdo->lastInsertId();
+
+    AuthMiddleware::logAudit('create', 'inventory', $materialCode, "Added raw material: {$category} (Qty: {$quantity} {$unit})", null, [
+        'materialCode' => $materialCode,
+        'category' => $category,
+        'quantity' => $quantity,
+        'unit' => $unit,
+        'totalValue' => $totalValue
+    ]);
 
     $newMaterial = [
         'id'           => $materialCode,

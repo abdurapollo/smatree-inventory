@@ -1,265 +1,147 @@
 /* ==========================================================================
-   SMATREE SOLAR INVENTORY — Real-time Notification Engine
-   Tracks inventory thresholds, production QA, installations, orders & telemetry
+   SMATREE SOLAR INVENTORY — Database-Driven Real-time Notification Engine
+   All notifications are stored in and fetched directly from the MySQL database.
+   Zero LocalStorage or SessionStorage persistence.
    ========================================================================== */
 
 const Notifications = {
-  storageKey: 'smatree_notifications',
   currentFilter: 'all',
   _audioCtx: null,
   soundEnabled: true,
+  _cache: [],
+  _unreadCount: 0,
+  _isSyncing: false,
 
-  init() {
-    // Scan all entities on initialization
-    this.scanAll();
+  async init() {
+    // Aggressively purge any legacy notification keys from browser storage
+    try { localStorage.removeItem('smatree_notifications'); } catch (_) {}
+    try { sessionStorage.removeItem('smatree_notifications'); } catch (_) {}
 
-    // Render badge
+    // 1. Initial sync and load from MySQL database
+    await this.syncWithDatabase();
+
+    // 2. Render badge
     this.renderBadge();
 
-    // Setup periodic scanner (checks every 25 seconds for inventory threshold changes)
+    // 3. Periodic background sync (checks every 25 seconds for inventory & QC threshold alerts)
     if (this._scanInterval) clearInterval(this._scanInterval);
     this._scanInterval = setInterval(() => {
-      this.scanAll();
+      this.syncWithDatabase(false);
     }, 25000);
 
-    // Setup event listeners
+    // 4. Setup event listeners
     this.setupListeners();
   },
 
-  /* ── Storage Get / Set ── */
+  /* ── Database In-Memory Cache Access (Zero LocalStorage) ── */
 
-  getAll() {
-    try {
-      const data = localStorage.getItem(this.storageKey);
-      return data ? JSON.parse(data) : [];
-    } catch (e) {
-      console.error('Notifications read error:', e);
-      return [];
+  /* ── API Endpoint URL Resolution ── */
+  _getUrl(endpointName, fallbackRelPath) {
+    if (typeof ApiConfig !== 'undefined' && typeof ApiConfig.getUrl === 'function') {
+      try {
+        return ApiConfig.getUrl(endpointName);
+      } catch (_) {}
     }
+    return fallbackRelPath;
   },
 
-  saveAll(list) {
+  /* ── Dual-channel Auth Headers (Cookie + Bearer Token) ── */
+  _getHeaders(extra = {}) {
+    const headers = {
+      'Accept': 'application/json',
+      ...extra
+    };
     try {
-      localStorage.setItem(this.storageKey, JSON.stringify(list));
-      this.renderBadge();
-    } catch (e) {
-      console.error('Notifications write error:', e);
-    }
+      if (typeof Store !== 'undefined' && typeof Store.getSession === 'function') {
+        const session = Store.getSession();
+        if (session && session.token) {
+          headers['Authorization'] = `Bearer ${session.token}`;
+        }
+      }
+    } catch (_) {}
+    return headers;
+  },
+
+  _getAuthHeaders(extra = {}) {
+    return this._getHeaders(extra);
+  },
+
+  getAll() {
+    return Array.isArray(this._cache) ? this._cache : [];
   },
 
   getUnreadCount() {
+    if (typeof this._unreadCount === 'number') {
+      return this._unreadCount;
+    }
     return this.getAll().filter(n => !n.read).length;
   },
 
-  /* ── Scan All Entities for Alerts & Milestones ── */
+  /* ── Fetch & Sync Directly with MySQL Database ── */
 
-  scanAll() {
-    if (typeof Store === 'undefined') return;
-
-    const existing = this.getAll();
-    const existingMap = new Map();
-    existing.forEach(n => existingMap.set(n.id, n));
-
-    const generated = [];
-
-    // 1. Raw Materials Inventory Alerts
-    const inventory = Store.getAll('inventory') || [];
-    inventory.forEach(mat => {
-      const qty = parseFloat(mat.quantity) || 0;
-      const reorder = mat.reorderLevel !== undefined && mat.reorderLevel !== null
-        ? parseFloat(mat.reorderLevel)
-        : (mat.reorder_level !== undefined ? parseFloat(mat.reorder_level) : 50);
-
-      // Out of Stock (Critical)
-      if (qty === 0) {
-        generated.push({
-          id: `stock-out-${mat.id}`,
-          category: 'inventory',
-          severity: 'critical',
-          title: `CRITICAL: ${mat.name} Out of Stock`,
-          message: `Stock level has reached 0 ${mat.unit || 'units'}. Solar module fabrication lines may be halted.`,
-          link: 'inventory.html',
-          actionLabel: 'Restock Material',
-          entityId: mat.id
-        });
+  async fetchFromDatabase() {
+    try {
+      const url = this._getUrl('notifications', '../api/notifications/index.php');
+      const resp = await fetch(url, {
+        method: 'GET',
+        credentials: 'same-origin',
+        headers: this._getHeaders()
+      });
+      const res = await resp.json().catch(() => null);
+      if (res && res.success && Array.isArray(res.data)) {
+        this._cache = res.data;
+        this._unreadCount = typeof res.unread_count === 'number' ? res.unread_count : this._cache.filter(n => !n.read).length;
+        this.renderBadge();
+        const menu = document.getElementById('notifications-menu');
+        if (menu && menu.classList.contains('show')) {
+          this.renderDropdown(this.currentFilter);
+        }
       }
-      // Low Stock Alert (Warning)
-      else if (qty <= reorder) {
-        generated.push({
-          id: `stock-low-${mat.id}`,
-          category: 'inventory',
-          severity: 'warning',
-          title: `Low Stock Alert: ${mat.name}`,
-          message: `Stock is at ${qty} ${mat.unit || 'units'} (below threshold of ${reorder}). Reorder from ${mat.supplier || 'supplier'}.`,
-          link: 'inventory.html',
-          actionLabel: 'Inspect Stock',
-          entityId: mat.id
-        });
-      }
-    });
-
-    // 2. Production Batches
-    const production = Store.getAll('production') || [];
-    production.forEach(batch => {
-      if (batch.status === 'Quality Check') {
-        generated.push({
-          id: `prod-qc-${batch.id}`,
-          category: 'production',
-          severity: 'warning',
-          title: `Quality Check Pending: ${batch.id}`,
-          message: `${batch.panelType} (${batch.quantity} panels) reached ${batch.progress || 90}% and awaits EL flash test verification.`,
-          link: 'production.html',
-          actionLabel: 'Inspect Batch',
-          entityId: batch.id
-        });
-      } else if (batch.status === 'In Production') {
-        generated.push({
-          id: `prod-active-${batch.id}`,
-          category: 'production',
-          severity: 'info',
-          title: `Production Active: ${batch.id}`,
-          message: `${batch.panelType} (${batch.quantity} units) under fabrication by ${batch.teamAssigned || 'Assembly Team'} (${batch.progress || 0}%).`,
-          link: 'production.html',
-          actionLabel: 'View Batch',
-          entityId: batch.id
-        });
-      } else if (batch.status === 'Completed') {
-        generated.push({
-          id: `prod-done-${batch.id}`,
-          category: 'production',
-          severity: 'success',
-          title: `Batch Completed: ${batch.id}`,
-          message: `${batch.quantity} panels of ${batch.panelType} completed & added to ready inventory.`,
-          link: 'finished-goods.html',
-          actionLabel: 'View Products',
-          entityId: batch.id
-        });
-      }
-    });
-
-    // 3. Finished Goods Stock Alerts
-    const finishedGoods = Store.getAll('finishedGoods') || [];
-    finishedGoods.forEach(fg => {
-      const ready = parseInt(fg.readyToSell) || 0;
-      if (ready < 160 && ready > 0) {
-        generated.push({
-          id: `fg-low-${fg.id}`,
-          category: 'production',
-          severity: 'warning',
-          title: `Limited Sales Stock: ${fg.name}`,
-          message: `Only ${ready} panels ready for dispatch. Schedule next fabrication run soon.`,
-          link: 'finished-goods.html',
-          actionLabel: 'Review Stock',
-          entityId: fg.id
-        });
-      }
-    });
-
-    // 4. Installations Projects
-    const installations = Store.getAll('installations') || [];
-    installations.forEach(inst => {
-      if (inst.status === 'In Progress') {
-        generated.push({
-          id: `inst-active-${inst.id}`,
-          category: 'installations',
-          severity: 'info',
-          title: `Installation Active: ${inst.customerName}`,
-          message: `${inst.totalCapacity} kW solar project being commissioned by ${inst.installationTeam || 'Team'}.`,
-          link: 'installations.html',
-          actionLabel: 'View Project',
-          entityId: inst.id
-        });
-      } else if (inst.status === 'Completed') {
-        generated.push({
-          id: `inst-done-${inst.id}`,
-          category: 'installations',
-          severity: 'success',
-          title: `Commissioned: ${inst.customerName}`,
-          message: `${inst.totalCapacity} kW rooftop solar array connected to grid with 25-year warranty.`,
-          link: 'installations.html',
-          actionLabel: 'View Project',
-          entityId: inst.id
-        });
-      }
-    });
-
-    // 5. Sales & Orders
-    const sales = Store.getAll('sales') || [];
-    sales.forEach(sale => {
-      if (sale.status === 'Reserved') {
-        generated.push({
-          id: `sale-res-${sale.id}`,
-          category: 'sales',
-          severity: 'info',
-          title: `Stock Reserved: ${sale.customerName}`,
-          message: `${sale.quantity} panels of ${sale.productName} allocated for upcoming delivery.`,
-          link: 'sales.html',
-          actionLabel: 'View Order',
-          entityId: sale.id
-        });
-      }
-    });
-
-    // 6. Factory Telemetry Grid
-    generated.push({
-      id: 'telemetry-grid-online',
-      category: 'system',
-      severity: 'info',
-      title: 'Solar Telemetry Grid Active',
-      message: 'Automated cell stringing lines #1 - #4 reporting 99.4% EL yield and synchronized telemetry.',
-      link: 'dashboard.html',
-      actionLabel: 'Open Telemetry'
-    });
-
-    // Merge generated with existing preserving user read status & timestamp
-    const merged = [];
-    const nowIso = new Date().toISOString();
-
-    generated.forEach(item => {
-      if (existingMap.has(item.id)) {
-        const prev = existingMap.get(item.id);
-        merged.push({
-          ...item,
-          read: prev.read,
-          timestamp: prev.timestamp || nowIso
-        });
-        existingMap.delete(item.id);
-      } else {
-        merged.push({
-          ...item,
-          read: false,
-          timestamp: nowIso
-        });
-      }
-    });
-
-    // Retain manually added notifications that weren't auto-scanned
-    existingMap.forEach(manualItem => {
-      if (manualItem.isManual) {
-        merged.unshift(manualItem);
-      }
-    });
-
-    // Sort: unread first, then by timestamp descending
-    merged.sort((a, b) => {
-      if (a.read !== b.read) return a.read ? 1 : -1;
-      return new Date(b.timestamp) - new Date(a.timestamp);
-    });
-
-    this.saveAll(merged);
-
-    // If dropdown is open, re-render it
-    if (typeof document !== 'undefined') {
-      const menu = document.getElementById('notifications-menu');
-      if (menu && menu.classList.contains('show')) {
-        this.renderDropdown(this.currentFilter);
-      }
+    } catch (e) {
+      console.warn('Notifications fetch error:', e);
     }
   },
 
-  /* ── Manually Trigger Notification ── */
+  async syncWithDatabase(showChime = false) {
+    if (this._isSyncing) return;
+    this._isSyncing = true;
+    try {
+      const url = this._getUrl('notificationsSync', '../api/notifications/sync.php');
+      const resp = await fetch(url, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: this._getHeaders({ 'Content-Type': 'application/json' })
+      });
+      const res = await resp.json().catch(() => null);
+      if (res && res.success && Array.isArray(res.data)) {
+        const prevCount = this._unreadCount;
+        this._cache = res.data;
+        this._unreadCount = typeof res.unread_count === 'number' ? res.unread_count : this._cache.filter(n => !n.read).length;
+        this.renderBadge();
 
-  notify(options = {}, showToast = true, playSound = true) {
+        if (showChime && this._unreadCount > prevCount && this.soundEnabled) {
+          this.playChime();
+        }
+
+        const menu = document.getElementById('notifications-menu');
+        if (menu && menu.classList.contains('show')) {
+          this.renderDropdown(this.currentFilter);
+        }
+      }
+    } catch (e) {
+      console.warn('Notifications sync error:', e);
+    } finally {
+      this._isSyncing = false;
+    }
+  },
+
+  scanAll() {
+    return this.syncWithDatabase(false);
+  },
+
+  /* ── Manually Trigger Notification into MySQL ── */
+
+  async notify(options = {}, showToast = true, playSound = true) {
     const {
       title = 'System Notification',
       message = '',
@@ -269,9 +151,9 @@ const Notifications = {
       actionLabel = 'View'
     } = options;
 
-    const id = `manual-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+    const notifCode = `manual-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
     const newNotif = {
-      id,
+      id: notifCode,
       category,
       severity,
       title,
@@ -283,10 +165,31 @@ const Notifications = {
       timestamp: new Date().toISOString()
     };
 
-    const list = this.getAll();
-    list.unshift(newNotif);
-    if (list.length > 80) list.length = 80;
-    this.saveAll(list);
+    // Optimistic UI update
+    this._cache.unshift(newNotif);
+    this._unreadCount++;
+    this.renderBadge();
+
+    // Persist to MySQL database
+    try {
+      const url = this._getUrl('notificationsAdd', '../api/notifications/create.php');
+      await fetch(url, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: this._getHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({
+          id: notifCode,
+          category,
+          severity,
+          title,
+          message,
+          link,
+          actionLabel
+        })
+      });
+    } catch (e) {
+      console.error('Failed to save notification to database:', e);
+    }
 
     if (showToast && typeof Components !== 'undefined' && typeof Components.toast === 'function') {
       const toastType = severity === 'critical' ? 'error' : severity;
@@ -297,10 +200,8 @@ const Notifications = {
       this.playChime();
     }
 
-    // Trigger browser native notification if permitted
     this.sendDesktopNotification(title, message);
 
-    // Re-render dropdown if open
     const menu = document.getElementById('notifications-menu');
     if (menu && menu.classList.contains('show')) {
       this.renderDropdown(this.currentFilter);
@@ -328,11 +229,11 @@ const Notifications = {
       const gain = this._audioCtx.createGain();
 
       osc1.type = 'sine';
-      osc1.frequency.setValueAtTime(523.25, now); // C5
-      osc1.frequency.exponentialRampToValueAtTime(659.25, now + 0.12); // E5
+      osc1.frequency.setValueAtTime(523.25, now);
+      osc1.frequency.exponentialRampToValueAtTime(659.25, now + 0.12);
 
       osc2.type = 'triangle';
-      osc2.frequency.setValueAtTime(783.99, now + 0.08); // G5
+      osc2.frequency.setValueAtTime(783.99, now + 0.08);
 
       gain.gain.setValueAtTime(0.08, now);
       gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.38);
@@ -345,12 +246,10 @@ const Notifications = {
       osc1.stop(now + 0.22);
       osc2.start(now + 0.08);
       osc2.stop(now + 0.38);
-    } catch (e) {
-      // Audio not permitted without interaction
-    }
+    } catch (_) {}
   },
 
-  /* ── Native Browser Notification API ── */
+  /* ── Native Browser Desktop Notifications ── */
 
   async requestDesktopPermission() {
     if (!('Notification' in window)) {
@@ -362,7 +261,7 @@ const Notifications = {
     const permission = await Notification.requestPermission();
     if (permission === 'granted') {
       if (typeof Components !== 'undefined') {
-        Components.toast('success', 'Desktop Alerts Enabled', 'You will now receive desktop notifications for solar inventory alerts.');
+        Components.toast('success', 'Desktop Alerts Enabled', 'You will receive desktop alerts for solar inventory thresholds.');
       }
       this.sendDesktopNotification('SMAtree Solar Notifications', 'Desktop notification alerts are active!');
     }
@@ -378,43 +277,108 @@ const Notifications = {
         icon: iconPath,
         badge: iconPath
       });
-    } catch (e) {}
+    } catch (_) {}
   },
 
-  /* ── Actions: Mark Read, Dismiss, Clear ── */
+  /* ── Database-Backed Actions: Mark Read, Dismiss, Clear ── */
 
-  markAsRead(id) {
-    const list = this.getAll();
-    const item = list.find(n => n.id === id);
+  async markAsRead(id) {
+    if (!id) return;
+    const item = this._cache.find(n => n.id === id);
     if (item) {
       item.read = true;
-      this.saveAll(list);
-      this.renderDropdown(this.currentFilter);
+    }
+    this._unreadCount = Math.max(0, this._cache.filter(n => !n.read).length);
+    this.renderBadge();
+    this.renderDropdown(this.currentFilter);
+
+    try {
+      const url = this._getUrl('notificationsEdit', '../api/notifications/update.php');
+      const resp = await fetch(url, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: this._getHeaders({ 'Content-Type': 'application/json' }),
+        keepalive: true,
+        body: JSON.stringify({ id })
+      });
+      const data = await resp.json().catch(() => null);
+      if (!data || !data.success) {
+        console.warn('Failed to update notification read status on server:', data);
+      }
+    } catch (e) {
+      console.error('Failed to update notification read status in DB:', e);
     }
   },
 
-  markAllAsRead() {
-    const list = this.getAll();
-    list.forEach(n => n.read = true);
-    this.saveAll(list);
+  async markAllAsRead() {
+    this._cache.forEach(n => n.read = true);
+    this._unreadCount = 0;
+    this.renderBadge();
     this.renderDropdown(this.currentFilter);
+
     if (typeof Components !== 'undefined') {
-      Components.toast('success', 'Marked as Read', 'All notifications have been marked as read.');
+      Components.toast('success', 'Marked as Read', 'All notifications have been marked as read in database.');
+    }
+
+    try {
+      const url = this._getUrl('notificationsEdit', '../api/notifications/update.php');
+      await fetch(url, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: this._getHeaders({ 'Content-Type': 'application/json' }),
+        keepalive: true,
+        body: JSON.stringify({ mark_all: true })
+      });
+    } catch (e) {
+      console.error('Failed to mark all as read in DB:', e);
     }
   },
 
-  dismiss(id) {
-    let list = this.getAll();
-    list = list.filter(n => n.id !== id);
-    this.saveAll(list);
+  async dismiss(id) {
+    if (!id) return;
+    const item = this._cache.find(n => n.id === id);
+    if (item && !item.read) {
+      this._unreadCount = Math.max(0, this._unreadCount - 1);
+    }
+    this._cache = this._cache.filter(n => n.id !== id);
+    this.renderBadge();
     this.renderDropdown(this.currentFilter);
+
+    try {
+      const url = this._getUrl('notificationsDel', '../api/notifications/delete.php');
+      await fetch(url, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: this._getHeaders({ 'Content-Type': 'application/json' }),
+        keepalive: true,
+        body: JSON.stringify({ id })
+      });
+    } catch (e) {
+      console.error('Failed to delete notification from DB:', e);
+    }
   },
 
-  clearAll() {
-    this.saveAll([]);
+  async clearAll() {
+    this._cache = [];
+    this._unreadCount = 0;
+    this.renderBadge();
     this.renderDropdown(this.currentFilter);
+
     if (typeof Components !== 'undefined') {
-      Components.toast('info', 'Notifications Cleared', 'All notification items have been dismissed.');
+      Components.toast('info', 'Notifications Cleared', 'All notification records have been dismissed from database.');
+    }
+
+    try {
+      const url = this._getUrl('notificationsDel', '../api/notifications/delete.php');
+      await fetch(url, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: this._getHeaders({ 'Content-Type': 'application/json' }),
+        keepalive: true,
+        body: JSON.stringify({ clear_all: true })
+      });
+    } catch (e) {
+      console.error('Failed to clear notifications in DB:', e);
     }
   },
 
@@ -450,18 +414,17 @@ const Notifications = {
     if (!menu) return;
 
     const isShown = menu.classList.contains('show');
-    // Close other open dropdowns
     document.querySelectorAll('.dropdown-menu.show').forEach(m => m.classList.remove('show'));
 
     if (!isShown) {
       this.renderDropdown(this.currentFilter);
       menu.classList.add('show');
+      // Background refresh on open
+      this.fetchFromDatabase();
     } else {
       menu.classList.remove('show');
     }
   },
-
-  /* ── Format Relative Time ── */
 
   formatRelativeTime(isoString) {
     if (!isoString) return 'Just now';
@@ -509,8 +472,7 @@ const Notifications = {
 
     const getIconSvg = (severity, category) => {
       if (typeof Icons === 'undefined') return '⚡';
-      if (severity === 'critical') return Icons.alertTriangle(18);
-      if (severity === 'warning') return Icons.alertTriangle(18);
+      if (severity === 'critical' || severity === 'warning') return Icons.alertTriangle(18);
       if (severity === 'success') return Icons.check(18);
       if (category === 'installations') return Icons.installations ? Icons.installations(18) : Icons.tool(18);
       if (category === 'production') return Icons.production ? Icons.production(18) : Icons.cpu(18);
@@ -526,7 +488,7 @@ const Notifications = {
             <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
           </svg>
           <h4>All Caught Up!</h4>
-          <p>${filter === 'unread' ? 'No unread alerts at this time.' : 'No notifications found for this filter.'}</p>
+          <p>${filter === 'unread' ? 'No unread alerts in database.' : 'No notifications found for this filter.'}</p>
         </div>
       `;
     } else {
@@ -566,8 +528,8 @@ const Notifications = {
           ${unreadCount > 0 ? `<span class="notif-count-pill">${unreadCount} New</span>` : ''}
         </div>
         <div class="notif-header-actions">
-          ${unreadCount > 0 ? `<button class="notif-header-btn" id="notif-mark-all-read" title="Mark all notifications as read">Mark all read</button>` : ''}
-          ${allItems.length > 0 ? `<button class="notif-header-btn" id="notif-clear-all" style="color:var(--text-muted);" title="Clear all notifications">Clear</button>` : ''}
+          ${unreadCount > 0 ? `<button class="notif-header-btn" id="notif-mark-all-read" title="Mark all notifications as read in MySQL">Mark all read</button>` : ''}
+          ${allItems.length > 0 ? `<button class="notif-header-btn" id="notif-clear-all" style="color:var(--text-muted);" title="Clear all notifications from MySQL">Clear</button>` : ''}
         </div>
       </div>
 
@@ -615,7 +577,7 @@ const Notifications = {
         return;
       }
 
-      // Mark all as read
+      // Mark all as read button
       if (e.target.closest('#notif-mark-all-read')) {
         e.preventDefault();
         e.stopPropagation();
@@ -623,7 +585,7 @@ const Notifications = {
         return;
       }
 
-      // Clear all
+      // Clear all button
       if (e.target.closest('#notif-clear-all')) {
         e.preventDefault();
         e.stopPropagation();
@@ -649,19 +611,32 @@ const Notifications = {
         return;
       }
 
-      // Click on action link -> mark as read then navigate
+      // Click on action link -> mark as read, THEN navigate
       const actionLink = e.target.closest('[data-notif-action]');
       if (actionLink) {
+        e.preventDefault();
+        e.stopPropagation();
         const id = actionLink.getAttribute('data-notif-action');
-        this.markAsRead(id);
+        const href = actionLink.getAttribute('href');
+        if (id) {
+          this.markAsRead(id).finally(() => {
+            if (href && href !== '#') {
+              window.location.href = href;
+            }
+          });
+        } else if (href && href !== '#') {
+          window.location.href = href;
+        }
         return;
       }
 
-      // Click anywhere on notif card -> mark as read
+      // Click anywhere on notif card -> mark as read in MySQL
       const card = e.target.closest('.notif-card');
       if (card && !e.target.closest('a') && !e.target.closest('button')) {
         const id = card.getAttribute('data-notif-id');
-        if (id) this.markAsRead(id);
+        if (id) {
+          this.markAsRead(id);
+        }
         return;
       }
 

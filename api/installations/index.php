@@ -15,7 +15,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-require_once __DIR__ . '/../db.php';
+require_once __DIR__ . '/../auth_middleware.php';
+
+// Enforce server-side authorization
+AuthMiddleware::requirePermission('installations.view');
 
 try {
     $statusFilter = isset($_GET['status']) ? trim($_GET['status']) : '';

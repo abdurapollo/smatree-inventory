@@ -21,7 +21,10 @@ if (!in_array($_SERVER['REQUEST_METHOD'], ['POST', 'PUT'])) {
     exit;
 }
 
-require_once __DIR__ . '/../db.php';
+require_once __DIR__ . '/../auth_middleware.php';
+
+// Enforce server-side authorization
+AuthMiddleware::requirePermission('finishedGoods.edit');
 
 $rawInput = file_get_contents('php://input');
 $data = json_decode($rawInput, true);
@@ -152,6 +155,16 @@ try {
         ':status'   => $status,
         ':notes'    => $notes ?: null,
         ':id'       => $prodId
+    ]);
+
+    AuthMiddleware::logAudit('update', 'finishedGoods', $productCode, "Updated solar product {$name} ({$productCode})", [
+        'ready_to_sell' => $existing['ready_to_sell'],
+        'price_per_unit' => $existing['price_per_unit'],
+        'status' => $existing['status']
+    ], [
+        'ready_to_sell' => $readyToSell,
+        'price_per_unit' => $pricePerUnit,
+        'status' => $status
     ]);
 
     http_response_code(200);

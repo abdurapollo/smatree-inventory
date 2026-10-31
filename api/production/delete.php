@@ -22,7 +22,10 @@ if (!in_array($_SERVER['REQUEST_METHOD'], ['POST', 'DELETE'])) {
     exit;
 }
 
-require_once __DIR__ . '/../db.php';
+require_once __DIR__ . '/../auth_middleware.php';
+
+// Enforce server-side authorization
+AuthMiddleware::requirePermission('production.delete');
 
 $raw = file_get_contents('php://input');
 $input = json_decode($raw, true);
@@ -81,6 +84,8 @@ try {
 
     $delStmt = $pdo->prepare('DELETE FROM production_batches WHERE id = :id');
     $delStmt->execute([':id' => $batchDbId]);
+
+    AuthMiddleware::logAudit('delete', 'production', $batchCode, "Deleted production batch {$batchCode} (Qty: {$qty})");
 
     $pdo->commit();
 

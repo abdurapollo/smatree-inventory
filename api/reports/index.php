@@ -16,7 +16,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-require_once __DIR__ . '/../db.php';
+require_once __DIR__ . '/../auth_middleware.php';
+
+// Enforce server-side authorization
+AuthMiddleware::requirePermission('reports.view');
 
 $type = isset($_GET['type']) ? strtolower(trim($_GET['type'])) : 'inventory';
 $from = isset($_GET['from']) ? trim($_GET['from']) : '2025-01-01';

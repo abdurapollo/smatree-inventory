@@ -5,11 +5,6 @@
 
 const Auth = {
   init() {
-    // Seed demo data if not yet seeded
-    if (typeof SeedData !== 'undefined') {
-      SeedData.generate();
-    }
-    
     // Apply current theme
     if (typeof App !== 'undefined') {
       App.applyTheme();
@@ -348,26 +343,8 @@ const Auth = {
         errorMsg = data.message || errorMsg;
       }
     } catch (apiErr) {
-      console.warn('Backend database API error/offline, checking local fallback:', apiErr);
-    }
-
-    // 2. Fallback: If database is unreachable, check local store
-    if (!loginSuccess && typeof Store !== 'undefined') {
-      const localUsers = Store.getAll('users');
-      const localUser = localUsers.find(u => 
-        u.email.toLowerCase() === email.toLowerCase() && u.password === password
-      );
-      if (localUser) {
-        loginSuccess = true;
-        user = {
-          id: localUser.id,
-          name: localUser.name,
-          display_name: localUser.display_name || localUser.name,
-          email: localUser.email,
-          role: localUser.role,
-          role_label: localUser.role_label || localUser.role
-        };
-      }
+      console.error('Backend authentication error:', apiErr);
+      errorMsg = 'Cannot connect to authentication service. Please verify Apache and MySQL are running in XAMPP.';
     }
 
     // Failed authentication

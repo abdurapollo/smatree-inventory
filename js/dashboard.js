@@ -48,11 +48,14 @@ const Dashboard = {
     }
 
     try {
-      const [invResp, prodResp, fgResp, instResp] = await Promise.all([
+      const [invResp, prodResp, fgResp, instResp, supResp, salesResp, auditResp] = await Promise.all([
         ApiService.getInventory(),
         ApiService.getProduction(),
         ApiService.getProducts('all'),
-        ApiService.getInstallations()
+        ApiService.getInstallations(),
+        ApiService.getSuppliers(),
+        ApiService.getSales(),
+        ApiService.getAuditLogs(10)
       ]);
       if (invResp?.success && Array.isArray(invResp.data)) {
         Store._set(Store.keys.inventory, invResp.data);
@@ -60,6 +63,9 @@ const Dashboard = {
       if (prodResp?.success && Array.isArray(prodResp.data?.data)) Store._set(Store.keys.production, prodResp.data.data);
       if (fgResp?.success && Array.isArray(fgResp.data?.data)) Store._set(Store.keys.finishedGoods, fgResp.data.data);
       if (instResp?.success && Array.isArray(instResp.data?.data)) Store._set(Store.keys.installations, instResp.data.data);
+      if (supResp?.success && Array.isArray(supResp.data?.data || supResp.data)) Store._set(Store.keys.suppliers, supResp.data?.data || supResp.data);
+      if (salesResp?.success && Array.isArray(salesResp.data?.data || salesResp.data)) Store._set(Store.keys.sales, salesResp.data?.data || salesResp.data);
+      if (auditResp?.success && Array.isArray(auditResp.data?.data || auditResp.data)) Store._set(Store.keys.activity, auditResp.data?.data || auditResp.data);
 
       if (typeof Components !== 'undefined') {
         const count = this.telemetry?.inventory?.lowStockCount;

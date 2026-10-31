@@ -22,7 +22,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-require_once __DIR__ . '/../db.php';
+require_once __DIR__ . '/../auth_middleware.php';
+
+// Enforce server-side authorization
+AuthMiddleware::requirePermission('suppliers.create');
 
 // Parse raw JSON or POST data
 $rawInput = file_get_contents('php://input');
@@ -172,6 +175,13 @@ try {
     ]);
 
     $newId = (int)$pdo->lastInsertId();
+
+    AuthMiddleware::logAudit('create', 'suppliers', $supplierCode, "Added supplier {$company} ({$name})", null, [
+        'company' => $company,
+        'name' => $name,
+        'gst' => $gst,
+        'phone' => $phone
+    ]);
 
     $newSupplier = [
         'id'            => $supplierCode,

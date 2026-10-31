@@ -23,7 +23,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-require_once __DIR__ . '/../db.php';
+require_once __DIR__ . '/../auth_middleware.php';
+
+// Enforce Super Admin authorization
+AuthMiddleware::requireRole(['Admin']);
 
 // Parse raw JSON or POST body
 $rawInput = file_get_contents('php://input');
@@ -197,6 +200,8 @@ try {
     ]);
 
     $newId = (int)$pdo->lastInsertId();
+
+    AuthMiddleware::logAudit('create', 'users', $userCode, "Admin provisioned user account {$displayName} ({$email}) with role {$roleLabel}");
 
     $newUser = [
         'id'           => $userCode,

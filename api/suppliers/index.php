@@ -15,7 +15,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-require_once __DIR__ . '/../db.php';
+require_once __DIR__ . '/../auth_middleware.php';
+
+// Enforce server-side authorization
+AuthMiddleware::requirePermission('suppliers.view');
 
 try {
     $stmt = $pdo->query('SELECT id, supplier_code, name, company, phone, email, gst, address, materials, status, created_at FROM suppliers ORDER BY id ASC');

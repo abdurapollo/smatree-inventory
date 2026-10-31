@@ -21,7 +21,10 @@ if (!in_array($_SERVER['REQUEST_METHOD'], ['POST', 'PUT'])) {
     exit;
 }
 
-require_once __DIR__ . '/../db.php';
+require_once __DIR__ . '/../auth_middleware.php';
+
+// Enforce server-side authorization
+AuthMiddleware::requirePermission('installations.edit');
 
 $raw = file_get_contents('php://input');
 $input = json_decode($raw, true);
@@ -120,6 +123,8 @@ try {
         ':notes'              => $notes ?: null,
         ':id'                 => $dbId
     ]);
+
+    AuthMiddleware::logAudit('update', 'installations', $code, "Updated installation {$code} for {$customerName} (Status: {$status})");
 
     echo json_encode([
         'success' => true,

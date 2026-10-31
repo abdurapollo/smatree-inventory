@@ -22,7 +22,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-require_once __DIR__ . '/../db.php';
+require_once __DIR__ . '/../auth_middleware.php';
+
+// Enforce server-side authorization
+AuthMiddleware::requirePermission('finishedGoods.create');
 
 $rawInput = file_get_contents('php://input');
 $data = json_decode($rawInput, true);

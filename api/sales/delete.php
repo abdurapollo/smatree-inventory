@@ -15,7 +15,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-require_once __DIR__ . '/../db.php';
+require_once __DIR__ . '/../auth_middleware.php';
+
+// Enforce server-side authorization
+AuthMiddleware::requirePermission('sales.delete');
 
 $rawInput = file_get_contents('php://input');
 $data = json_decode($rawInput, true);
@@ -78,6 +81,8 @@ try {
     // Delete sale
     $delStmt = $pdo->prepare('DELETE FROM sales WHERE id = :id');
     $delStmt->execute([':id' => (int)$sale['id']]);
+
+    AuthMiddleware::logAudit('delete', 'sales', $sale['sale_code'], "Deleted sale record {$sale['sale_code']} and restored {$qty} units to stock");
 
     $pdo->commit();
 

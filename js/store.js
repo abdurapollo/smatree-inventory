@@ -1,6 +1,7 @@
 /* ==========================================================================
-   SMATREE SOLAR INVENTORY — Data Store
-   LocalStorage CRUD abstraction layer for all entities
+   SMATREE SOLAR INVENTORY — In-Memory Data Store Runtime Layer
+   Database-first architecture: All data is loaded directly from MySQL API.
+   LocalStorage persistence is permanently disabled for all business entities.
    ========================================================================== */
 
 class DataStore {
@@ -18,76 +19,148 @@ class DataStore {
       activity: 'smatree_activity',
       settings: 'smatree_settings',
     };
+
+    // In-memory data collections (loaded live from MySQL database; NEVER stored in localStorage)
+    this._memory = {
+      smatree_inventory: [],
+      smatree_production: [],
+      smatree_finished_goods: [],
+      smatree_installations: [],
+      smatree_suppliers: [],
+      smatree_sales: [],
+      smatree_activity: [],
+      smatree_users: [],
+      smatree_session: null,
+    };
+
+    // Purge any stale business data from localStorage on load
+    this._purgeLocalStorageData();
   }
 
-  /* ── Core CRUD ── */
+  /* ── Purge any legacy business records from localStorage ── */
+  _purgeLocalStorageData() {
+    try {
+      const dataKeys = [
+        'smatree_users',
+        'smatree_inventory',
+        'smatree_production',
+        'smatree_finished_goods',
+        'smatree_installations',
+        'smatree_suppliers',
+        'smatree_sales',
+        'smatree_activity',
+        'smatree_notifications'
+      ];
+      dataKeys.forEach(k => {
+        try { localStorage.removeItem(k); } catch (_) {}
+      });
+    } catch (_) {}
+  }
+
+  /* ── Core In-Memory Access (Zero LocalStorage for business data) ── */
 
   _get(key) {
-    try {
-      const data = localStorage.getItem(key);
-      return data ? JSON.parse(data) : null;
-    } catch (e) {
-      console.error(`Store read error [${key}]:`, e);
-      return null;
+    // Only non-sensitive UI theme preferences may use localStorage
+    if (key === this.keys.settings) {
+      try {
+        const data = localStorage.getItem(key);
+        return data ? JSON.parse(data) : null;
+      } catch (e) {
+        return null;
+      }
     }
+
+    // Active session stored in sessionStorage or in-memory (never in localStorage)
+    if (key === this.keys.session) {
+      try {
+        const data = sessionStorage.getItem(key) || this._memory[key];
+        return typeof data === 'string' ? JSON.parse(data) : (data || null);
+      } catch (e) {
+        return this._memory[key] || null;
+      }
+    }
+
+    // All business data is strictly read from in-memory cache
+    return this._memory[key] || [];
   }
 
   _set(key, data) {
-    try {
-      localStorage.setItem(key, JSON.stringify(data));
-      if (key === this.keys.inventory && typeof window !== 'undefined' && window.Components?.updateNavBadges) {
-        window.Components.updateNavBadges();
-      }
-      if (typeof window !== 'undefined' && window.Notifications?.scanAll && key !== 'smatree_notifications') {
-        window.Notifications.scanAll();
-      }
+    // Only UI theme preferences are written to localStorage
+    if (key === this.keys.settings) {
+      try {
+        localStorage.setItem(key, JSON.stringify(data));
+      } catch (e) {}
       return true;
-    } catch (e) {
-      console.error(`Store write error [${key}]:`, e);
-      return false;
     }
+
+    // Session profile stored in sessionStorage (cleared when browser tab closes)
+    if (key === this.keys.session) {
+      const safeData = data ? { ...data } : null;
+      if (safeData) delete safeData.password;
+      this._memory[key] = safeData;
+      try {
+        if (safeData) {
+          sessionStorage.setItem(key, JSON.stringify(safeData));
+        } else {
+          sessionStorage.removeItem(key);
+        }
+      } catch (e) {}
+      return true;
+    }
+
+    // Business entities: stored ONLY in memory, NEVER in localStorage
+    this._memory[key] = Array.isArray(data) ? data : (data || []);
+
+    if (key === this.keys.inventory && typeof window !== 'undefined' && window.Components?.updateNavBadges) {
+      window.Components.updateNavBadges();
+    }
+    if (typeof window !== 'undefined' && window.Notifications?.scanAll && key !== 'smatree_notifications') {
+      window.Notifications.scanAll();
+    }
+    return true;
   }
 
   getAll(entity) {
-    return this._get(this.keys[entity]) || [];
+    const key = this.keys[entity] || entity;
+    return this._get(key) || [];
   }
 
   getById(entity, id) {
     const items = this.getAll(entity);
-    return items.find(item => item.id === id) || null;
+    return items.find(item => (item.id === id || item.db_id === id || item.material_code === id || item.supplier_code === id || item.product_code === id || item.batch_code === id || item.installation_code === id || item.sale_code === id)) || null;
   }
 
   add(entity, item) {
+    const key = this.keys[entity] || entity;
     const items = this.getAll(entity);
     items.push(item);
-    this._set(this.keys[entity], items);
-    this.logActivity('create', entity, item.id, `Added new ${entity} record`);
+    this._set(key, items);
     return item;
   }
 
   update(entity, id, updates) {
+    const key = this.keys[entity] || entity;
     const items = this.getAll(entity);
-    const index = items.findIndex(item => item.id === id);
+    const index = items.findIndex(item => (item.id === id || item.db_id === id || item.material_code === id || item.supplier_code === id || item.product_code === id || item.batch_code === id || item.installation_code === id || item.sale_code === id));
     if (index === -1) return null;
     items[index] = { ...items[index], ...updates, updatedAt: new Date().toISOString() };
-    this._set(this.keys[entity], items);
-    this.logActivity('update', entity, id, `Updated ${entity} record`);
+    this._set(key, items);
     return items[index];
   }
 
   delete(entity, id) {
+    const key = this.keys[entity] || entity;
     const items = this.getAll(entity);
-    const filtered = items.filter(item => item.id !== id);
+    const filtered = items.filter(item => !(item.id === id || item.db_id === id || item.material_code === id || item.supplier_code === id || item.product_code === id || item.batch_code === id || item.installation_code === id || item.sale_code === id));
     if (filtered.length === items.length) return false;
-    this._set(this.keys[entity], filtered);
-    this.logActivity('delete', entity, id, `Deleted ${entity} record`);
+    this._set(key, filtered);
     return true;
   }
 
-  /* ── Activity Log ── */
+  /* ── Activity Log (In-Memory for UI) ── */
 
   logActivity(action, entity, entityId, description) {
-    const activities = this._get(this.keys.activity) || [];
+    const activities = this._memory[this.keys.activity] || [];
     activities.unshift({
       id: Utils.generateId('ACT'),
       action,
@@ -97,21 +170,22 @@ class DataStore {
       user: this.getCurrentUser()?.name || 'System',
       timestamp: new Date().toISOString(),
     });
-    // Keep last 200 activities
     if (activities.length > 200) activities.length = 200;
-    this._set(this.keys.activity, activities);
+    this._memory[this.keys.activity] = activities;
   }
 
   getActivities(limit = 20) {
-    const activities = this._get(this.keys.activity) || [];
+    const activities = this._memory[this.keys.activity] || [];
     return activities.slice(0, limit);
   }
 
-  /* ── Session Management ── */
+  /* ── Session Management (SessionStorage / In-Memory only) ── */
 
   setSession(user) {
+    const safeUser = { ...user };
+    delete safeUser.password;
     this._set(this.keys.session, {
-      ...user,
+      ...safeUser,
       loginTime: new Date().toISOString(),
     });
   }
@@ -125,14 +199,18 @@ class DataStore {
   }
 
   clearSession() {
-    localStorage.removeItem(this.keys.session);
+    this._memory[this.keys.session] = null;
+    try {
+      sessionStorage.removeItem(this.keys.session);
+      localStorage.removeItem(this.keys.session);
+    } catch (_) {}
   }
 
   isAuthenticated() {
     return !!this.getSession();
   }
 
-  /* ── Settings ── */
+  /* ── UI Settings (Theme only) ── */
 
   getSettings() {
     return this._get(this.keys.settings) || { theme: 'light', sidebarCollapsed: false };
@@ -143,7 +221,7 @@ class DataStore {
     this._set(this.keys.settings, { ...settings, ...updates });
   }
 
-  /* ── Aggregate Queries ── */
+  /* ── Aggregate Queries (Computed from in-memory collections) ── */
 
   getInventoryStats() {
     const inventory = this.getAll('inventory');
@@ -195,7 +273,7 @@ class DataStore {
     return { totalInstallations, totalCapacity, activeProjects, totalPanelsInstalled };
   }
 
-  /* ── Full Backup / Restore ── */
+  /* ── Full Backup / Restore (Operates on memory) ── */
 
   exportAllData() {
     const data = {};
@@ -213,12 +291,15 @@ class DataStore {
   }
 
   clearAllData() {
-    Object.values(this.keys).forEach(key => localStorage.removeItem(key));
+    Object.keys(this._memory).forEach(key => {
+      this._memory[key] = [];
+    });
+    this._purgeLocalStorageData();
   }
 
-  /* ── Check if first load ── */
+  /* ── Check if first load: Database handles all persistence ── */
   isFirstLoad() {
-    return !this._get(this.keys.users);
+    return false;
   }
 }
 

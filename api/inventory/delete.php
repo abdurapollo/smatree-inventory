@@ -14,7 +14,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-require_once __DIR__ . '/../db.php';
+require_once __DIR__ . '/../auth_middleware.php';
+
+// Enforce server-side authorization
+AuthMiddleware::requirePermission('inventory.delete');
 
 $rawInput = file_get_contents('php://input');
 $data = json_decode($rawInput, true);
@@ -34,6 +37,7 @@ try {
     $stmt->execute([':code' => $id, ':id' => is_numeric($id) ? (int)$id : 0]);
 
     if ($stmt->rowCount() > 0) {
+        AuthMiddleware::logAudit('delete', 'inventory', $id, "Deleted material record: {$id}");
         echo json_encode([
             'success' => true,
             'message' => 'Material record removed from database successfully.'

@@ -21,7 +21,10 @@ if (!in_array($_SERVER['REQUEST_METHOD'], ['POST', 'DELETE'])) {
     exit;
 }
 
-require_once __DIR__ . '/../db.php';
+require_once __DIR__ . '/../auth_middleware.php';
+
+// Enforce server-side authorization
+AuthMiddleware::requirePermission('installations.delete');
 
 $raw = file_get_contents('php://input');
 $input = json_decode($raw, true);
@@ -50,6 +53,8 @@ try {
 
     $delStmt = $pdo->prepare('DELETE FROM installations WHERE id = :id');
     $delStmt->execute([':id' => $dbId]);
+
+    AuthMiddleware::logAudit('delete', 'installations', $code, "Deleted installation project {$code}");
 
     echo json_encode([
         'success' => true,

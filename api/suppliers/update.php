@@ -16,7 +16,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-require_once __DIR__ . '/../db.php';
+require_once __DIR__ . '/../auth_middleware.php';
+
+// Enforce server-side authorization
+AuthMiddleware::requirePermission('suppliers.edit');
 
 // Parse raw JSON or POST data
 $rawInput = file_get_contents('php://input');
@@ -175,6 +178,18 @@ try {
         $prmUpdate = $pdo->prepare('UPDATE purchased_raw_materials SET supplier_name = :new_company WHERE supplier_id = :sup_id');
         $prmUpdate->execute([':new_company' => $company, ':sup_id' => (int)$existing['id']]);
     }
+
+    AuthMiddleware::logAudit('update', 'suppliers', $existing['supplier_code'], "Updated supplier {$existing['supplier_code']} ({$company})", [
+        'name' => $existing['name'],
+        'company' => $existing['company'],
+        'phone' => $existing['phone'],
+        'gst' => $existing['gst']
+    ], [
+        'name' => $name,
+        'company' => $company,
+        'phone' => $phone,
+        'gst' => $gst
+    ]);
 
     $updatedSupplier = [
         'id'            => $existing['supplier_code'],

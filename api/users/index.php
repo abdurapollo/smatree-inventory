@@ -21,7 +21,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     exit;
 }
 
-require_once __DIR__ . '/../db.php';
+require_once __DIR__ . '/../auth_middleware.php';
+
+// Enforce Super Admin authorization
+AuthMiddleware::requireRole(['Admin']);
 
 try {
     $stmt = $pdo->query('

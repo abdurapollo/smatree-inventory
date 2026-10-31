@@ -3,6 +3,7 @@
    SMATREE SOLAR INVENTORY — Database Login API Endpoint
    Method: POST
    Payload: { "email": "...", "password": "..." }
+   Issues secure server-side session token & HttpOnly cookie
    ========================================================================== */
 
 header('Content-Type: application/json; charset=UTF-8');
@@ -22,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-require_once __DIR__ . '/../db.php';
+require_once __DIR__ . '/../auth_middleware.php';
 
 // Parse raw JSON or standard POST body
 $rawInput = file_get_contents('php://input');
@@ -96,10 +97,13 @@ try {
     $updateStmt = $pdo->prepare('UPDATE users SET last_login = NOW() WHERE id = :id');
     $updateStmt->execute([':id' => $user['id']]);
 
-    // Generate session token
-    $token = bin2hex(random_bytes(24));
+    // Issue secure server-side session token & HttpOnly cookie
+    $token = AuthMiddleware::createSession((int)$user['id']);
 
-    // Response user profile
+    // Log login to server-side audit trail
+    AuthMiddleware::logAudit('login', 'auth', (string)$user['id'], "User signed in: {$user['email']} ({$user['role']})");
+
+    // Response user profile (NO password returned)
     $userData = [
         'id'           => $user['user_code'],
         'db_id'        => (int)$user['id'],

@@ -25,7 +25,7 @@ const Suppliers = {
       try {
         const resp = await fetch('../api/suppliers/index.php');
         const json = await resp.json();
-        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+        if (json.success && Array.isArray(json.data)) {
           Store._set(Store.keys.suppliers, json.data);
         }
       } catch (err) {

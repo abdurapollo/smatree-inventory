@@ -17,8 +17,6 @@ const App = {
       }).catch(() => {});
     }
 
-    // Seed demo data on first load
-    SeedData.generate();
     // Apply saved theme
     this.applyTheme();
     // Live navbar clock
@@ -101,16 +99,49 @@ const App = {
       window.location.href = 'login.html';
       return false;
     }
+    // Asynchronously verify server session validity
+    this.verifyServerSession();
     return true;
+  },
+
+  async verifyServerSession() {
+    try {
+      const resp = await fetch('../api/auth/session.php', {
+        method: 'GET',
+        credentials: 'same-origin'
+      });
+      if (resp.status === 401 || resp.status === 403) {
+        console.warn('Server session expired or invalid. Redirecting to login.');
+        Store.clearSession();
+        window.location.href = 'login.html';
+        return;
+      }
+      const data = await resp.json();
+      if (data && data.success && data.user) {
+        // Synchronize server-verified profile in memory
+        const current = Store.getSession();
+        if (current && (current.role !== data.user.role || current.name !== data.user.name)) {
+          Store.setSession({ ...current, ...data.user });
+        }
+      }
+    } catch (_) {
+      // Offline or network error - allow offline UX
+    }
   },
 
   logout() {
     Components.confirm({
       title: 'Logout',
-      message: 'Are you sure you want to log out?',
+      message: 'Are you sure you want to log out of your session?',
       confirmText: 'Logout',
       type: 'warning',
-      onConfirm: () => {
+      onConfirm: async () => {
+        try {
+          await fetch('../api/auth/logout.php', {
+            method: 'POST',
+            credentials: 'same-origin'
+          });
+        } catch (_) {}
         Store.clearSession();
         window.location.href = 'login.html';
       }

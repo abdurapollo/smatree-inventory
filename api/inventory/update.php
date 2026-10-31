@@ -14,7 +14,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-require_once __DIR__ . '/../db.php';
+require_once __DIR__ . '/../auth_middleware.php';
+
+// Enforce server-side authorization
+AuthMiddleware::requirePermission('inventory.edit');
 
 $rawInput = file_get_contents('php://input');
 $data = json_decode($rawInput, true);
@@ -134,6 +137,16 @@ try {
         ':reorder'   => $reorderLevel,
         ':status'    => $status,
         ':db_id'     => $existing['id']
+    ]);
+
+    AuthMiddleware::logAudit('update', 'inventory', $existing['material_code'], "Updated raw material {$existing['material_code']} ({$category})", [
+        'quantity' => $existing['quantity'],
+        'cost_per_unit' => $existing['cost_per_unit'],
+        'warehouse' => $existing['warehouse_location']
+    ], [
+        'quantity' => $quantity,
+        'cost_per_unit' => $costPerUnit,
+        'warehouse' => $warehouseLocation
     ]);
 
     echo json_encode([

@@ -22,7 +22,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-require_once __DIR__ . '/../db.php';
+require_once __DIR__ . '/../auth_middleware.php';
+
+// Enforce server-side authorization
+AuthMiddleware::requirePermission('sales.create');
 
 // Parse raw JSON or POST data
 $rawInput = file_get_contents('php://input');
@@ -197,6 +200,8 @@ try {
 
     // Commit atomic transaction
     $pdo->commit();
+
+    AuthMiddleware::logAudit('create', 'sales', $saleCode, "Recorded sale {$saleCode} to {$customerName} ({$quantity} units of {$product['name']}, Total: ₹{$totalAmount})");
 
     $newSale = [
         'id'           => $saleCode,

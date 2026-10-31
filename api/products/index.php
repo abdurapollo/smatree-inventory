@@ -18,7 +18,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-require_once __DIR__ . '/../db.php';
+require_once __DIR__ . '/../auth_middleware.php';
+
+// Enforce server-side authorization
+AuthMiddleware::requirePermission('finishedGoods.view');
 
 $filter = isset($_GET['filter']) ? trim((string)$_GET['filter']) : 'active';
 $search = isset($_GET['search']) ? trim((string)$_GET['search']) : '';

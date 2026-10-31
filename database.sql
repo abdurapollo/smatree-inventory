@@ -274,3 +274,69 @@ VALUES
 (3, 'INST-003', 'Sunrise Hospital', '+91 77665 54433', 'admin@sunrisehosp.org', '789 Health Street, Bangalore', 'Mono PERC 540W', 3, 40, 21.60, '2026-05-10', 'Install Team A', 'Hybrid 10kW x2', 'Lithium 5kWh x4', '25 years panels, 10 years inverter', 'In Progress', 'Requires backup power, critical facility')
 ON DUPLICATE KEY UPDATE `customer_name` = VALUES(`customer_name`);
 
+
+
+-- --------------------------------------------------------------------------
+-- 8. Table structure for `user_sessions` (Server-Side Session Management)
+-- --------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `user_sessions` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `user_id` INT NOT NULL,
+  `session_token` VARCHAR(64) NOT NULL UNIQUE,
+  `ip_address` VARCHAR(45) DEFAULT NULL,
+  `user_agent` TEXT DEFAULT NULL,
+  `expires_at` DATETIME NOT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `last_activity` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX `idx_token` (`session_token`),
+  INDEX `idx_expires` (`expires_at`),
+  CONSTRAINT `fk_session_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Secure server-side sessions';
+
+-- --------------------------------------------------------------------------
+-- 9. Table structure for `audit_logs` (Immutable Server-Side Audit Trail)
+-- --------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `audit_logs` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `user_id` INT DEFAULT NULL,
+  `user_name` VARCHAR(100) DEFAULT NULL,
+  `action` VARCHAR(50) NOT NULL,
+  `entity` VARCHAR(50) NOT NULL,
+  `entity_id` VARCHAR(50) DEFAULT NULL,
+  `description` TEXT NOT NULL,
+  `old_values` LONGTEXT DEFAULT NULL,
+  `new_values` LONGTEXT DEFAULT NULL,
+  `ip_address` VARCHAR(45) DEFAULT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX `idx_user` (`user_id`),
+  INDEX `idx_action` (`action`),
+  INDEX `idx_entity` (`entity`),
+  INDEX `idx_created` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Immutable server-side audit logs';
+
+
+-- --------------------------------------------------------------------------
+-- 10. Table structure for `notifications` (Real-Time System Notifications)
+-- --------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `notifications` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `notif_code` VARCHAR(100) NOT NULL UNIQUE COMMENT 'Unique identifier e.g. stock-low-MAT-001 or UUID',
+  `user_id` INT DEFAULT NULL COMMENT 'Optional user target; NULL for broadcast',
+  `category` VARCHAR(50) NOT NULL DEFAULT 'system' COMMENT 'inventory, production, installations, sales, system',
+  `severity` ENUM('info', 'warning', 'success', 'critical') NOT NULL DEFAULT 'info',
+  `title` VARCHAR(255) NOT NULL,
+  `message` TEXT NOT NULL,
+  `link` VARCHAR(255) DEFAULT '#',
+  `action_label` VARCHAR(100) DEFAULT 'View',
+  `entity_id` VARCHAR(50) DEFAULT NULL,
+  `is_read` TINYINT(1) NOT NULL DEFAULT 0,
+  `is_manual` TINYINT(1) NOT NULL DEFAULT 0,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX `idx_notif_code` (`notif_code`),
+  INDEX `idx_category` (`category`),
+  INDEX `idx_severity` (`severity`),
+  INDEX `idx_is_read` (`is_read`),
+  INDEX `idx_created_at` (`created_at`),
+  CONSTRAINT `fk_notif_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='System & operational notifications';

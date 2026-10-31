@@ -11,6 +11,7 @@ const ApiService = {
     const url = ApiConfig.getUrl(endpoint);
     const config = {
       method: options.method || 'GET',
+      credentials: 'same-origin', // Transmits secure HttpOnly session cookies
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
@@ -18,7 +19,11 @@ const ApiService = {
       },
     };
 
-    // Add auth token if available
+    if (options.keepalive) {
+      config.keepalive = true;
+    }
+
+    // Add auth token if available (dual-channel auth: cookie + header)
     const session = Store.getSession();
     if (session?.token) {
       config.headers['Authorization'] = `Bearer ${session.token}`;
@@ -34,6 +39,11 @@ const ApiService = {
       const data = await response.json();
 
       if (!response.ok) {
+        if (response.status === 401 && typeof window !== 'undefined' && !window.location.pathname.includes('login.html')) {
+          console.warn('Session expired or unauthorized. Redirecting to login.');
+          if (typeof Store !== 'undefined') Store.clearSession();
+          window.location.href = 'login.html';
+        }
         throw new Error(data.message || `HTTP ${response.status}`);
       }
 
@@ -42,6 +52,11 @@ const ApiService = {
       console.error(`API Error [${endpoint}]:`, error);
       return { success: false, error: error.message };
     }
+  },
+
+  async getAuditLogs(limit = 20) {
+    if (!ApiConfig.useBackend) return { success: true, data: Store.getActivities(limit) };
+    return this.get('audit' + (limit ? '?limit=' + limit : ''));
   },
 
   /* ── Convenience Methods ── */
@@ -242,6 +257,37 @@ const ApiService = {
       return { success: true };
     }
     return this.post('salesDel', { id });
+  },
+
+  /* ── Notifications API Methods ── */
+
+  async getNotifications(params = {}) {
+    const query = new URLSearchParams(params).toString();
+    return this.get('notifications' + (query ? '?' + query : ''));
+  },
+
+  async syncNotifications() {
+    return this.post('notificationsSync', {});
+  },
+
+  async markNotificationRead(id) {
+    return this.post('notificationsEdit', { id });
+  },
+
+  async markAllNotificationsRead() {
+    return this.post('notificationsEdit', { mark_all: true });
+  },
+
+  async deleteNotification(id) {
+    return this.post('notificationsDel', { id });
+  },
+
+  async clearAllNotifications() {
+    return this.post('notificationsDel', { clear_all: true });
+  },
+
+  async addNotification(notifData) {
+    return this.post('notificationsAdd', notifData);
   }
 };
 

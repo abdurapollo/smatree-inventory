@@ -22,7 +22,10 @@ if (!in_array($_SERVER['REQUEST_METHOD'], ['POST', 'PUT'])) {
     exit;
 }
 
-require_once __DIR__ . '/../db.php';
+require_once __DIR__ . '/../auth_middleware.php';
+
+// Enforce server-side authorization
+AuthMiddleware::requirePermission('production.edit');
 
 $raw = file_get_contents('php://input');
 $input = json_decode($raw, true);
@@ -192,6 +195,14 @@ try {
     }
 
     $pdo->commit();
+
+    AuthMiddleware::logAudit('update', 'production', $batchCode, "Updated production batch {$batchCode} (Status: {$status}, Qty: {$quantity})", [
+        'status' => $oldStatus,
+        'quantity' => $oldQty
+    ], [
+        'status' => $status,
+        'quantity' => $quantity
+    ]);
 
     echo json_encode([
         'success' => true,

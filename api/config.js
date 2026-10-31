@@ -21,12 +21,13 @@ const ApiConfig = {
 
   // API endpoints mapping
   endpoints: {
-    // Auth & Users
+    // Auth & Users & Audit
     login:       '/auth/login.php',
     logout:      '/auth/logout.php',
     session:     '/auth/session.php',
     users:       '/users/index.php',
     usersCreate: '/users/create.php',
+    audit:       '/audit/index.php',
 
     // Inventory
     inventory:     '/inventory/index.php',
@@ -77,6 +78,13 @@ const ApiConfig = {
     // Dashboard
     dashboardStats: '/dashboard/stats.php',
     activities:     '/dashboard/activities.php',
+
+    // Notifications
+    notifications:     '/notifications/index.php',
+    notificationsSync: '/notifications/sync.php',
+    notificationsEdit: '/notifications/update.php',
+    notificationsDel:  '/notifications/delete.php',
+    notificationsAdd:  '/notifications/create.php',
   },
 
   // Get full URL for an endpoint

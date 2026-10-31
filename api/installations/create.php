@@ -21,7 +21,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-require_once __DIR__ . '/../db.php';
+require_once __DIR__ . '/../auth_middleware.php';
+
+// Enforce server-side authorization
+AuthMiddleware::requirePermission('installations.create');
 
 $raw = file_get_contents('php://input');
 $input = json_decode($raw, true);
@@ -126,6 +129,8 @@ try {
     ]);
 
     $newId = (int)$pdo->lastInsertId();
+
+    AuthMiddleware::logAudit('create', 'installations', $nextCode, "Created installation {$nextCode} for {$customerName} ({$totalCapacity} kW)");
 
     echo json_encode([
         'success' => true,

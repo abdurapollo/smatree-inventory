@@ -15,7 +15,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-require_once __DIR__ . '/../db.php';
+require_once __DIR__ . '/../auth_middleware.php';
+
+// Enforce server-side authorization
+AuthMiddleware::requirePermission('suppliers.delete');
 
 $rawInput = file_get_contents('php://input');
 $data = json_decode($rawInput, true);
@@ -48,6 +51,8 @@ try {
     // Delete supplier record (foreign key ON DELETE SET NULL handles references in purchased_raw_materials)
     $delStmt = $pdo->prepare('DELETE FROM suppliers WHERE id = :id');
     $delStmt->execute([':id' => $supplierId]);
+
+    AuthMiddleware::logAudit('delete', 'suppliers', $id, "Deleted supplier {$company} ({$id})");
 
     echo json_encode([
         'success' => true,
