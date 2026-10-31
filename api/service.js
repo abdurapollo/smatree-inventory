@@ -153,6 +153,31 @@ const ApiService = {
     return this.post('login', { email, password });
   },
 
+  async getUsers() {
+    if (!ApiConfig.useBackend) return { success: true, data: Store.getAll('users') };
+    return this.get('users');
+  },
+
+  async createUser(userData) {
+    if (!ApiConfig.useBackend) {
+      const nextId = 'USR-' + String(Store.getAll('users').length + 1).padStart(3, '0');
+      const newUser = {
+        id: nextId,
+        user_code: nextId,
+        createdAt: new Date().toISOString(),
+        status: 'active',
+        ...userData
+      };
+      Store.add('users', newUser);
+      return { success: true, data: newUser };
+    }
+    const resp = await this.post('usersCreate', userData);
+    if (resp?.success && resp.data?.data) {
+      Store.add('users', resp.data.data);
+    }
+    return resp;
+  },
+
   async getProducts(filter = 'active') {
     if (!ApiConfig.useBackend) return { success: true, data: Store.getAll('finishedGoods') };
     const query = filter ? `?filter=${encodeURIComponent(filter)}` : '';

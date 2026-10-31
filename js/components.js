@@ -455,7 +455,7 @@ const Components = {
     });
 
     // 1-Click Fast Role Switcher Dropdown HTML
-    const demoUsers = typeof RBAC !== 'undefined' ? RBAC.demoUsers : [];
+    const demoUsers = typeof RBAC !== 'undefined' ? RBAC.getAvailableUsers() : [];
     let roleSwitcherHtml = '';
     if (demoUsers.length) {
       roleSwitcherHtml = `
@@ -490,7 +490,13 @@ const Components = {
                 `;
               }).join('')}
             </div>
-            <div style="margin-top:0.625rem;padding-top:0.5rem;border-top:1px solid var(--border-light);text-align:center;">
+            <div style="margin-top:0.625rem;padding-top:0.5rem;border-top:1px solid var(--border-light);display:flex;flex-direction:column;gap:5px;">
+              ${userRole === 'Admin' ? `
+                <button type="button" class="btn btn-primary btn-sm" id="rbac-switch-create-user-btn" style="width:100%;font-size:11px;padding:6px 8px;gap:6px;justify-content:center;">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+                  <span>+ Create New User</span>
+                </button>
+              ` : ''}
               <button type="button" class="btn btn-ghost btn-sm" id="rbac-open-matrix-btn" style="width:100%;font-size:11px;padding:4px 8px;gap:6px;">
                 ${shieldSvg}
                 <span>View Full Permissions Matrix</span>
@@ -556,6 +562,16 @@ const Components = {
             </div>
             <div class="dropdown-divider"></div>
             <div class="dropdown-item" id="rbac-profile-matrix-btn">${shieldSvg} <span>Role & Permissions</span></div>
+            ${userRole === 'Admin' ? `
+              <div class="dropdown-item" id="rbac-create-user-btn" style="color:var(--color-primary-600);font-weight:600;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+                <span>+ Create New User</span>
+              </div>
+              <div class="dropdown-item" id="rbac-manage-users-btn">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                <span>User Directory</span>
+              </div>
+            ` : ''}
             <div class="dropdown-item" id="settings-btn">${settingsSvg} <span>Settings</span></div>
             <div class="dropdown-item" id="backup-btn">${dbSvg} <span>Backup Data</span></div>
             <div class="dropdown-divider"></div>

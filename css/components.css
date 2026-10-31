@@ -1468,3 +1468,31 @@ select.form-control { cursor: pointer; appearance: none;
   color: var(--text-secondary);
 }
 
+/* ── Super Admin User Creation & Directory Modal ── */
+.cu-role-card {
+  user-select: none;
+  position: relative;
+  transition: all var(--transition-fast);
+}
+.cu-role-card:hover {
+  border-color: var(--color-primary-400) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+.cu-role-card.selected {
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.15);
+}
+[data-theme="dark"] .cu-role-card.selected {
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);
+}
+.cu-domain-btn:hover {
+  background: var(--color-primary-50);
+  color: var(--color-primary-600);
+  border-color: var(--color-primary-300);
+}
+[data-theme="dark"] .cu-domain-btn:hover {
+  background: rgba(59, 130, 246, 0.15);
+  color: #93c5fd;
+  border-color: rgba(59, 130, 246, 0.3);
+}
+

@@ -168,6 +168,28 @@ const App = {
         }
       }
 
+      // Open Create New User Modal (Super Admin privileged action)
+      if (e.target.closest('#rbac-create-user-btn') || e.target.closest('#rbac-switch-create-user-btn') || e.target.closest('#dash-create-user-btn') || e.target.closest('[data-open-create-user]')) {
+        const menu1 = document.getElementById('profile-menu');
+        if (menu1) menu1.classList.remove('show');
+        const menu2 = document.getElementById('rbac-switch-menu');
+        if (menu2) menu2.classList.remove('show');
+        if (typeof RBAC !== 'undefined') {
+          RBAC.showCreateUserModal();
+        }
+      }
+
+      // Open User Directory Modal (Super Admin)
+      if (e.target.closest('#rbac-manage-users-btn') || e.target.closest('#rbac-switch-directory-btn') || e.target.closest('[data-open-user-directory]')) {
+        const menu1 = document.getElementById('profile-menu');
+        if (menu1) menu1.classList.remove('show');
+        const menu2 = document.getElementById('rbac-switch-menu');
+        if (menu2) menu2.classList.remove('show');
+        if (typeof RBAC !== 'undefined') {
+          RBAC.showUserDirectoryModal();
+        }
+      }
+
       // Close dropdowns on outside click
       if (!e.target.closest('.dropdown')) {
         document.querySelectorAll('.dropdown-menu.show').forEach(m => m.classList.remove('show'));

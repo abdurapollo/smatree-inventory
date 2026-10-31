@@ -21,10 +21,12 @@ const ApiConfig = {
 
   // API endpoints mapping
   endpoints: {
-    // Auth
+    // Auth & Users
     login:       '/auth/login.php',
     logout:      '/auth/logout.php',
     session:     '/auth/session.php',
+    users:       '/users/index.php',
+    usersCreate: '/users/create.php',
 
     // Inventory
     inventory:     '/inventory/index.php',
