@@ -454,59 +454,6 @@ const Components = {
       year: 'numeric'
     });
 
-    // 1-Click Fast Role Switcher Dropdown HTML
-    const demoUsers = typeof RBAC !== 'undefined' ? RBAC.getAvailableUsers() : [];
-    let roleSwitcherHtml = '';
-    if (demoUsers.length) {
-      roleSwitcherHtml = `
-        <div class="dropdown rbac-switcher-dropdown-wrap" id="rbac-switcher-dropdown">
-          <button type="button" class="rbac-nav-role-btn" id="rbac-role-toggle-btn" data-tooltip="Fast Role Switcher (1-Click)" data-tooltip-pos="bottom" aria-label="Fast Role Switcher">
-            <span class="rbac-role-dot" style="background:${roleConfig.color || '#3b82f6'};"></span>
-            <span class="rbac-role-label hide-mobile">${roleConfig.name}</span>
-            <span class="rbac-role-switch-chevron">${typeof Icons !== 'undefined' ? Icons.chevronDown(11) : '▾'}</span>
-          </button>
-          <div class="dropdown-menu rbac-switch-menu" id="rbac-switch-menu" style="min-width:280px;padding:0.75rem;">
-            <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:0.5rem;margin-bottom:0.5rem;border-bottom:1px solid var(--border-light);">
-              <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);">Switch Demo Role</span>
-              <span class="demo-hint-pill" style="font-size:10px;padding:2px 6px;">1-Click</span>
-            </div>
-            <div style="display:flex;flex-direction:column;gap:5px;">
-              ${demoUsers.map(du => {
-                const isActive = (user.email && du.email.toLowerCase() === user.email.toLowerCase()) || du.role === userRole;
-                return `
-                  <button type="button" class="rbac-fast-switch-item ${isActive ? 'active' : ''}" data-nav-switch="${du.email}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:${isActive ? 'var(--bg-badge)' : 'transparent'};border:1px solid ${isActive ? 'var(--border-color)' : 'transparent'};cursor:pointer;width:100%;text-align:left;transition:all var(--transition-fast);">
-                    <div style="width:28px;height:28px;border-radius:6px;background:${du.avatarColor};color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;">
-                      ${Utils.getInitials(du.displayName)}
-                    </div>
-                    <div style="flex:1;min-width:0;">
-                      <div style="font-size:12px;font-weight:700;color:var(--text-primary);display:flex;align-items:center;gap:4px;">
-                        <span>${du.displayName}</span>
-                        ${isActive ? '<span style="font-size:10px;color:var(--color-primary-500);font-weight:600;">(Active)</span>' : ''}
-                      </div>
-                      <div style="font-size:11px;color:var(--text-muted);">${du.roleLabel}</div>
-                    </div>
-                    ${isActive ? '<span style="color:var(--color-primary-500);font-weight:700;">✓</span>' : ''}
-                  </button>
-                `;
-              }).join('')}
-            </div>
-            <div style="margin-top:0.625rem;padding-top:0.5rem;border-top:1px solid var(--border-light);display:flex;flex-direction:column;gap:5px;">
-              ${userRole === 'Admin' ? `
-                <button type="button" class="btn btn-primary btn-sm" id="rbac-switch-create-user-btn" style="width:100%;font-size:11px;padding:6px 8px;gap:6px;justify-content:center;">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
-                  <span>+ Create New User</span>
-                </button>
-              ` : ''}
-              <button type="button" class="btn btn-ghost btn-sm" id="rbac-open-matrix-btn" style="width:100%;font-size:11px;padding:4px 8px;gap:6px;">
-                ${shieldSvg}
-                <span>View Full Permissions Matrix</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      `;
-    }
-
     return `
     <header class="navbar" id="navbar">
       <div class="navbar-left">
@@ -533,7 +480,6 @@ const Components = {
         </div>
       </div>
       <div class="navbar-right">
-        ${roleSwitcherHtml}
         <button class="theme-toggle" id="theme-toggle" data-tooltip="${theme === 'dark' ? 'Switch to Light Theme' : 'Switch to Dark Theme'}" data-tooltip-pos="bottom" aria-label="Toggle Theme">
           ${theme === 'dark' ? sunSvg : moonSvg}
         </button>

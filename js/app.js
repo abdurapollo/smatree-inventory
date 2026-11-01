@@ -178,19 +178,7 @@ const App = {
         if (menu) menu.classList.toggle('show');
       }
 
-      // Fast Demo Role Switcher toggle
-      if (e.target.closest('#rbac-role-toggle-btn')) {
-        const menu = document.getElementById('rbac-switch-menu');
-        if (menu) menu.classList.toggle('show');
-      }
 
-      // Fast Switcher item clicked
-      if (e.target.closest('[data-nav-switch]')) {
-        const email = e.target.closest('[data-nav-switch]').dataset.navSwitch;
-        if (typeof RBAC !== 'undefined') {
-          RBAC.switchDemoUser(email);
-        }
-      }
 
       // Open RBAC matrix modal from navbar / profile / sidebar user card
       if (e.target.closest('#rbac-open-matrix-btn') || e.target.closest('#rbac-profile-matrix-btn') || e.target.closest('#sidebar-user-btn')) {

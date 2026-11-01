@@ -99,63 +99,50 @@ const Auth = {
       });
     }
 
-    // 5. Quick Demo Role Selector (True 1-Click Fast Switch)
+    // 5. Quick Account Selector (Populates email, leaves password empty for manual entry)
     const demoButtons = document.querySelectorAll('.demo-role-btn, [data-demo]');
-    const passwords = {
-      'admin@smatree.com': 'admin123',
-      'inventory@smatree.com': 'inv123',
-      'production@smatree.com': 'prod123',
-      'sales@smatree.com': 'sales123',
-    };
 
     demoButtons.forEach(btn => {
       btn.addEventListener('click', () => {
         const email = btn.dataset.demo;
-        const role = btn.dataset.role || 'Demo User';
+        const role = btn.dataset.role || 'User';
         if (!email) return;
 
         // Clear active classes & set active on this
         demoButtons.forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
 
-        // Populate fields
-        this.emailInput.value = email;
-        this.passwordInput.value = passwords[email] || '';
+        // Populate email field only (never auto-fill password)
+        if (this.emailInput) {
+          this.emailInput.value = email;
+        }
+
+        // Clear password field & any previous errors
+        if (this.passwordInput) {
+          this.passwordInput.value = '';
+        }
         this.clearErrors();
 
-        // Show fast 1-click login hint
+        // Show selected account feedback banner
+        const nameEl = btn.querySelector('.demo-role-name');
+        const userName = nameEl ? nameEl.textContent : role;
         if (this.roleBanner && this.roleLabel) {
-          this.roleLabel.textContent = role;
+          this.roleLabel.textContent = userName;
           const scopeEl = document.getElementById('selected-role-scope');
-          const scope = btn.dataset.scope || '';
-          if (scopeEl) scopeEl.textContent = scope ? `(${scope})` : '';
+          if (scopeEl) scopeEl.textContent = `(${role})`;
           this.roleBanner.style.display = 'flex';
         }
 
-        const nameEl = btn.querySelector('.demo-role-name');
-        const userName = nameEl ? nameEl.textContent : role;
-
-        // Visual feedback on the submit button
-        if (this.submitBtn) {
-          this.submitBtn.innerHTML = `
-            <span class="spinner spinner-sm" style="display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.6s linear infinite;margin-right:8px;vertical-align:middle;"></span>
-            <span>Signing in as ${userName}...</span>
-          `;
-          this.submitBtn.disabled = true;
+        // Focus password input for user to manually enter password
+        if (this.passwordInput) {
+          this.passwordInput.focus();
         }
-
-        // True 1-Click Fast Switch: Automatically sign in immediately!
-        setTimeout(() => {
-          this.handleLogin();
-        }, 180);
       });
     });
 
-    // 6. Fast 1-Click Login Trigger
+    // 6. Fast Login Trigger (Disabled: user must enter password)
     if (this.quickLoginBtn) {
-      this.quickLoginBtn.addEventListener('click', () => {
-        this.handleLogin();
-      });
+      this.quickLoginBtn.style.display = 'none';
     }
 
     // 7. Theme Toggle Synchronization
@@ -312,7 +299,7 @@ const Auth = {
 
     let user = null;
     let loginSuccess = false;
-    let errorMsg = 'Invalid email or password. Select a demo role below to try immediately.';
+    let errorMsg = 'Invalid email or password. Please try again.';
 
     // 1. Primary: Database Authentication via PHP API
     try {

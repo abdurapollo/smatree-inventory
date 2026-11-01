@@ -10,10 +10,10 @@
   <link rel="icon" type="image/png" sizes="16x16" href="../assets/favicon-16x16.png">
   <link rel="apple-touch-icon" sizes="180x180" href="../assets/logo-icon-512.png">
   <link rel="shortcut icon" href="../assets/favicon.ico">
-  <link rel="stylesheet" href="../css/variables.css?v=6.1">
-  <link rel="stylesheet" href="../css/base.css?v=6.1">
-  <link rel="stylesheet" href="../css/components.css?v=6.1">
-  <link rel="stylesheet" href="../css/auth.css?v=6.1">
+  <link rel="stylesheet" href="../css/variables.css?v=6.3">
+  <link rel="stylesheet" href="../css/base.css?v=6.3">
+  <link rel="stylesheet" href="../css/components.css?v=6.3">
+  <link rel="stylesheet" href="../css/auth.css?v=6.3">
 </head>
 <body class="auth-page">
 
@@ -347,7 +347,7 @@
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
               <span>Quick Demo Access</span>
             </span>
-            <span class="demo-hint-pill">1-Click Fast Switch</span>
+            <span class="demo-hint-pill">Select Account</span>
           </div>
 
           <div class="demo-roles-grid">
@@ -396,10 +396,9 @@
             </button>
           </div>
 
-          <!-- Fast 1-Click Login Toast -->
-          <div class="demo-selected-banner" id="selected-role-banner">
-            <span>Filled: <strong id="selected-role-label">Admin</strong> <span id="selected-role-scope" style="font-size:11px;opacity:0.85;margin-left:4px;">(Full Access)</span></span>
-            <button type="button" class="demo-quick-login-link" id="quick-login-btn">Auto Sign In →</button>
+          <!-- Selected Account Instruction Banner -->
+          <div class="demo-selected-banner" id="selected-role-banner" style="display:none;">
+            <span>Selected: <strong id="selected-role-label">Rajesh K.</strong> <span id="selected-role-scope" style="font-size:11px;opacity:0.85;margin-left:4px;">(Super Admin)</span> &bull; Enter password above to sign in</span>
           </div>
         </div>
 
@@ -476,16 +475,16 @@
     </div>
   </div>
 
-  <script src="../js/utils.js?v=6.1"></script>
-  <script src="../js/store.js?v=6.1"></script>
-  <script src="../js/seed.js?v=6.1"></script>
-  <script src="../api/config.js?v=6.1"></script>
-  <script src="../api/service.js?v=6.1"></script>
-  <script src="../js/notifications.js?v=6.1"></script>
-  <script src="../js/rbac.js?v=6.1"></script>
-  <script src="../js/app.js?v=6.1"></script>
-  <script src="../js/auth.js?v=6.1"></script>
+  <script src="../js/utils.js?v=6.3"></script>
+  <script src="../js/store.js?v=6.3"></script>
+  <script src="../js/seed.js?v=6.3"></script>
+  <script src="../api/config.js?v=6.3"></script>
+  <script src="../api/service.js?v=6.3"></script>
+  <script src="../js/notifications.js?v=6.3"></script>
+  <script src="../js/rbac.js?v=6.3"></script>
+  <script src="../js/app.js?v=6.3"></script>
+  <script src="../js/auth.js?v=6.3"></script>
   <script>document.addEventListener('DOMContentLoaded', () => Auth.init());</script>
-  <script src="../js/icons.js?v=6.1"></script>
+  <script src="../js/icons.js?v=6.3"></script>
 </body>
 </html>
